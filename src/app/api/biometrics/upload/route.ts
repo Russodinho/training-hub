@@ -11,11 +11,11 @@ export async function POST(req: NextRequest) {
     skipEmptyLines: true,
   })
 
-  // Cronometer biometrics is long format: Date, Time, Measurement, Value, Unit
+  // Cronometer biometrics is long format: Day, Time, Group, Metric, Unit, Amount
   const byDate: Record<string, { weight_lbs: number | null; body_fat_pct: number | null }> = {}
 
   for (const row of result.data) {
-    const date = row['Date'] || row['date']
+    const date = row['Day'] || row['Date'] || row['day'] || row['date']
     if (!date) continue
 
     if (!byDate[date]) byDate[date] = { weight_lbs: null, body_fat_pct: null }

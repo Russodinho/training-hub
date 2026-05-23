@@ -146,34 +146,32 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* ── ROW 2: CHARTS ── */}
-      <div className="chart-row">
+      {/* ── ROW 2: Body comp (left) | Volume + Distribution stacked (right) ── */}
+      <div className="chart-row" style={{ alignItems: 'flex-start' }}>
         <div className="chart-card">
           <div className="chart-card-title">Weight & body comp</div>
           <BodyCompWidget />
         </div>
-        <div className="chart-card">
-          <div className="chart-card-title">Weekly volume (swim / bike / run)</div>
-          <VolumeChart data={volumeData} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1, minWidth: 0 }}>
+          <div className="chart-card" style={{ margin: 0 }}>
+            <div className="chart-card-title">Weekly volume (swim / bike / run)</div>
+            <VolumeChart data={volumeData} />
+          </div>
+          <div className="chart-card" style={{ margin: 0 }}>
+            <div className="chart-card-title">Training distribution</div>
+            <DistributionChart data={distributionData} />
+          </div>
         </div>
       </div>
 
-      {/* ── ROW 3: NUTRITION ── */}
-      <div className="chart-row">
-        <div className="chart-card">
-          <NutritionActualsPanel />
-        </div>
-        <div className="chart-card">
-          <MacroAccuracyPanel />
-        </div>
+      {/* ── ROW 3: Nutrition actuals (full width) ── */}
+      <div className="chart-card" style={{ marginBottom: 16 }}>
+        <NutritionActualsPanel />
       </div>
 
-      {/* ── ROW 3b: DISTRIBUTION ── */}
-      <div className="chart-row" style={{ marginBottom: 0 }}>
-        <div className="chart-card" style={{ maxWidth: 360 }}>
-          <div className="chart-card-title">Training distribution</div>
-          <DistributionChart data={distributionData} />
-        </div>
+      {/* ── ROW 4: Macro accuracy (full width) ── */}
+      <div className="chart-card" style={{ marginBottom: 16 }}>
+        <MacroAccuracyPanel />
       </div>
 
       {/* ── ROW 4: ACTIVITY FEED + QUICK STATUS ── */}
