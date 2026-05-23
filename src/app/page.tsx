@@ -25,7 +25,6 @@ export default async function DashboardPage() {
     weeklyActivities,
     nutritionActuals,
     mobilityStreak,
-    workoutsRaw,
   ] = await Promise.allSettled([
     getRecentActivities(10),
     getActivitiesForWeeks(13),
