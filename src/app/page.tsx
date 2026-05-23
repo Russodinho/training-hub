@@ -146,30 +146,30 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* ── ROW 2: Body comp (left) | Volume + Distribution stacked (right) ── */}
-      <div className="chart-row" style={{ alignItems: 'flex-start' }}>
+      {/* ── ROW 2: Volume (left) | Distribution (right) ── */}
+      <div className="chart-row">
         <div className="chart-card">
-          <div className="chart-card-title">Weight & body comp</div>
-          <BodyCompWidget />
+          <div className="chart-card-title">Weekly volume (swim / bike / run)</div>
+          <VolumeChart data={volumeData} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, flex: 1, minWidth: 0 }}>
-          <div className="chart-card" style={{ margin: 0 }}>
-            <div className="chart-card-title">Weekly volume (swim / bike / run)</div>
-            <VolumeChart data={volumeData} />
-          </div>
-          <div className="chart-card" style={{ margin: 0 }}>
-            <div className="chart-card-title">Training distribution</div>
-            <DistributionChart data={distributionData} />
-          </div>
+        <div className="chart-card">
+          <div className="chart-card-title">Training distribution</div>
+          <DistributionChart data={distributionData} />
         </div>
       </div>
 
-      {/* ── ROW 3: Nutrition actuals (full width) ── */}
+      {/* ── ROW 3: Body comp (full width) ── */}
+      <div className="chart-card" style={{ marginBottom: 16 }}>
+        <div className="chart-card-title">Weight & body comp</div>
+        <BodyCompWidget />
+      </div>
+
+      {/* ── ROW 4: Nutrition actuals (full width) ── */}
       <div className="chart-card" style={{ marginBottom: 16 }}>
         <NutritionActualsPanel />
       </div>
 
-      {/* ── ROW 4: Macro accuracy (full width) ── */}
+      {/* ── ROW 5: Macro accuracy (full width) ── */}
       <div className="chart-card" style={{ marginBottom: 16 }}>
         <MacroAccuracyPanel />
       </div>
