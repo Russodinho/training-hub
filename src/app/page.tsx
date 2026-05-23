@@ -28,7 +28,7 @@ export default async function DashboardPage() {
     mobilityStreak,
   ] = await Promise.allSettled([
     getRecentActivities(10),
-    getActivitiesForWeeks(8),
+    getActivitiesForWeeks(26),
     getNutritionActuals(30),
     fetchSheet('progress'),
     getMobilityStreak(),
