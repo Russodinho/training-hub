@@ -1,12 +1,21 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Lazy singleton — never initialised at module load time so Next.js build
+// doesn't crash when env vars aren't present during static analysis.
+let _supabase: SupabaseClient | null = null
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    )
+  }
+  return _supabase
+}
 
 // Server-side client with service role (only use in API routes / server components)
-export function createServiceClient() {
+export function createServiceClient(): SupabaseClient {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -75,7 +84,7 @@ export interface StravaToken {
 // ── Mobility helpers ──
 
 export async function getMobilityLog(date: string): Promise<MobilityLog | null> {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('mobility_log')
     .select('*')
     .eq('date', date)
@@ -85,7 +94,7 @@ export async function getMobilityLog(date: string): Promise<MobilityLog | null> 
 
 export async function upsertMobilityLog(date: string, items: string[]): Promise<void> {
   const isComplete = items.length >= 9
-  await supabase.from('mobility_log').upsert({
+  await getSupabase().from('mobility_log').upsert({
     date,
     items,
     completed_at: isComplete ? new Date().toISOString() : null,
@@ -93,7 +102,7 @@ export async function upsertMobilityLog(date: string, items: string[]): Promise<
 }
 
 export async function getMobilityStreak(): Promise<number> {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('mobility_log')
     .select('date, items')
     .order('date', { ascending: false })
@@ -129,7 +138,7 @@ export async function getMobilityStreak(): Promise<number> {
 // ── Race results helpers ──
 
 export async function getRaceResult(raceId: string): Promise<RaceResult | null> {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('race_results')
     .select('*')
     .eq('race_id', raceId)
@@ -138,13 +147,13 @@ export async function getRaceResult(raceId: string): Promise<RaceResult | null> 
 }
 
 export async function upsertRaceResult(result: Omit<RaceResult, 'id' | 'created_at'>): Promise<void> {
-  await supabase.from('race_results').upsert(result, { onConflict: 'race_id' })
+  await getSupabase().from('race_results').upsert(result, { onConflict: 'race_id' })
 }
 
 // ── Strava helpers ──
 
 export async function getStravaToken(): Promise<StravaToken | null> {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('strava_tokens')
     .select('*')
     .order('updated_at', { ascending: false })
@@ -154,7 +163,7 @@ export async function getStravaToken(): Promise<StravaToken | null> {
 }
 
 export async function getRecentActivities(limit = 10): Promise<StravaActivity[]> {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('strava_activities')
     .select('*')
     .order('start_date', { ascending: false })
@@ -165,7 +174,7 @@ export async function getRecentActivities(limit = 10): Promise<StravaActivity[]>
 export async function getActivitiesForWeeks(weeksBack = 8): Promise<StravaActivity[]> {
   const since = new Date()
   since.setDate(since.getDate() - weeksBack * 7)
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('strava_activities')
     .select('*')
     .gte('start_date', since.toISOString())
@@ -178,7 +187,7 @@ export async function getActivitiesForWeeks(weeksBack = 8): Promise<StravaActivi
 export async function getNutritionActuals(days = 30): Promise<NutritionActual[]> {
   const since = new Date()
   since.setDate(since.getDate() - days)
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('nutrition_actuals')
     .select('*')
     .gte('date', since.toISOString().split('T')[0])
@@ -196,13 +205,13 @@ export async function migrateLocalStorage(): Promise<void> {
   // Migrate mobility log
   const mobLog = JSON.parse(localStorage.getItem('mobility_log') || '{}')
   for (const [date, val] of Object.entries(mobLog as Record<string, { items: string[] }>)) {
-    await supabase.from('mobility_log').upsert({ date, items: val.items || [] }, { onConflict: 'date' })
+    await getSupabase().from('mobility_log').upsert({ date, items: val.items || [] }, { onConflict: 'date' })
   }
 
   // Migrate race results
   const raceRes = JSON.parse(localStorage.getItem('race_results') || '{}')
   for (const [race_id, val] of Object.entries(raceRes as Record<string, Record<string, string>>)) {
-    await supabase.from('race_results').upsert({ race_id, ...val }, { onConflict: 'race_id' })
+    await getSupabase().from('race_results').upsert({ race_id, ...val }, { onConflict: 'race_id' })
   }
 
   localStorage.setItem('supabase_migrated', '1')
