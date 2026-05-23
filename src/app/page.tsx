@@ -1,7 +1,5 @@
 import { getActiveRace, getDaysToRace, RACES, mobRequiredIds } from '@/lib/data'
 import { getRecentActivities, getActivitiesForWeeks, getNutritionActuals, getMobilityStreak, getMobilityLog } from '@/lib/supabase'
-import { fetchSheetRaw } from '@/lib/sheets'
-import { parseWorkoutsCSV } from '@/lib/workoutsParser'
 import StatCard from '@/components/dashboard/StatCard'
 import BodyCompWidget from '@/components/dashboard/BodyCompWidget'
 import VolumeChart from '@/components/dashboard/VolumeChart'
@@ -10,7 +8,6 @@ import MacroAccuracyPanel from '@/components/dashboard/MacroAccuracyPanel'
 import DistributionChart from '@/components/dashboard/DistributionChart'
 import ActivityFeed from '@/components/dashboard/ActivityFeed'
 import QuickStatus from '@/components/dashboard/QuickStatus'
-import LiftProgressChart from '@/components/dashboard/LiftProgressChart'
 
 function getWeekLabel(date: Date): string {
   const d = new Date(date)
@@ -34,14 +31,12 @@ export default async function DashboardPage() {
     getActivitiesForWeeks(13),
     getNutritionActuals(90),
     getMobilityStreak(),
-    fetchSheetRaw('workouts'),
   ])
 
   const activities = recentActivities.status === 'fulfilled' ? recentActivities.value : []
   const allActivities = weeklyActivities.status === 'fulfilled' ? weeklyActivities.value : []
   const nutrition = nutritionActuals.status === 'fulfilled' ? nutritionActuals.value : []
   const streak = mobilityStreak.status === 'fulfilled' ? mobilityStreak.value : 0
-  const workouts = workoutsRaw.status === 'fulfilled' ? parseWorkoutsCSV(workoutsRaw.value) : []
 
   // Compute stats
   const now = new Date()
@@ -170,12 +165,6 @@ export default async function DashboardPage() {
         <BodyCompWidget />
       </div>
 
-      {/* ── ROW 3b: Lift progress (full width) ── */}
-      {workouts.length > 0 && (
-        <div className="chart-card" style={{ marginBottom: 16 }}>
-          <LiftProgressChart workouts={workouts} />
-        </div>
-      )}
 
       {/* ── ROW 4: Nutrition actuals (full width) ── */}
       <div className="chart-card" style={{ marginBottom: 16 }}>
