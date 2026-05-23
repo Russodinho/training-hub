@@ -11,6 +11,17 @@ const SHEET_URLS = {
 
 export type SheetName = keyof typeof SHEET_URLS
 
+// Raw fetch — returns string[][] (no header row consumed). Used for non-standard CSVs.
+export async function fetchSheetRaw(name: SheetName): Promise<string[][]> {
+  const url = SHEET_URLS[name]
+  if (!url) return []
+  const res = await fetch(url, { next: { revalidate: 3600 } })
+  if (!res.ok) return []
+  const csv = await res.text()
+  const result = Papa.parse<string[]>(csv, { header: false, skipEmptyLines: false })
+  return result.data as string[][]
+}
+
 export async function fetchSheet(name: SheetName): Promise<Record<string, string>[]> {
   const url = SHEET_URLS[name]
   if (!url) return []
