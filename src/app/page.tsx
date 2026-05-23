@@ -29,7 +29,7 @@ export default async function DashboardPage() {
   ] = await Promise.allSettled([
     getRecentActivities(10),
     getActivitiesForWeeks(13),
-    getNutritionActuals(30),
+    getNutritionActuals(90),
     fetchSheet('progress'),
     getMobilityStreak(),
   ])

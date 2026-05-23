@@ -184,7 +184,7 @@ export async function getActivitiesForWeeks(weeksBack = 8): Promise<StravaActivi
 
 // ── Nutrition helpers ──
 
-export async function getNutritionActuals(days = 30): Promise<NutritionActual[]> {
+export async function getNutritionActuals(days = 90): Promise<NutritionActual[]> {
   const since = new Date()
   since.setDate(since.getDate() - days)
   const { data } = await getSupabase()
