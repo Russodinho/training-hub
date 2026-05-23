@@ -96,8 +96,8 @@ export async function syncStravaActivities(): Promise<{ synced: number; skipped:
 
   const supabase = createServiceClient()
 
-  // Fetch last 30 days
-  const after = Math.floor((Date.now() - 30 * 86400000) / 1000)
+  // Fetch last 365 days
+  const after = Math.floor((Date.now() - 365 * 86400000) / 1000)
   const res = await fetch(
     `https://www.strava.com/api/v3/athlete/activities?after=${after}&per_page=100`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
