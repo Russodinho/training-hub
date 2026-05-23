@@ -2,6 +2,15 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { fetchSheet, parseProgressSheet } from '@/lib/sheets'
+import { createClient } from '@supabase/supabase-js'
+import BodyCompWidget from '@/components/dashboard/BodyCompWidget'
+
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}
 
 interface Entry {
   date: string
@@ -79,12 +88,53 @@ export default function ProgressPage() {
   const [brickLog, saveBrickLog] = useLocalStore('bricks', [])
 
   const [sheetProgress, setSheetProgress] = useState<{ date: string; weight: number | null }[]>([])
+  const [bioUploading, setBioUploading] = useState(false)
+  const [bioMsg, setBioMsg] = useState('')
+  const [bioDragging, setBioDragging] = useState(false)
+  const [latestBio, setLatestBio] = useState<{ weight_lbs: number | null; body_fat_pct: number | null; date: string } | null>(null)
+  const [oldestBio, setOldestBio] = useState<{ weight_lbs: number | null; date: string } | null>(null)
 
   useEffect(() => {
     fetchSheet('progress').then(rows => {
       const parsed = parseProgressSheet(rows)
       setSheetProgress(parsed.map(p => ({ date: p.date, weight: p.weight })))
     }).catch(() => {})
+
+    // Fetch biometric summary
+    const since = new Date()
+    since.setDate(since.getDate() - 365)
+    getSupabase()
+      .from('biometrics')
+      .select('date, weight_lbs, body_fat_pct')
+      .gte('date', since.toISOString().split('T')[0])
+      .order('date', { ascending: false })
+      .limit(1)
+      .then(({ data }) => { if (data?.[0]) setLatestBio(data[0]) })
+
+    getSupabase()
+      .from('biometrics')
+      .select('date, weight_lbs')
+      .order('date', { ascending: true })
+      .limit(1)
+      .then(({ data }) => { if (data?.[0]) setOldestBio(data[0]) })
+  }, [])
+
+  const handleBioFile = useCallback(async (file: File) => {
+    setBioUploading(true)
+    setBioMsg('')
+    const text = await file.text()
+    try {
+      const res = await fetch('/api/biometrics/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ csv: text }),
+      })
+      const data = await res.json()
+      setBioMsg(data.message || `Imported ${data.rows} entries`)
+    } catch {
+      setBioMsg('Upload failed — try again')
+    }
+    setBioUploading(false)
   }, [])
 
   const logWeight = () => {
@@ -138,10 +188,87 @@ export default function ProgressPage() {
         </div>
       </div>
 
-      {/* Weight */}
+      {/* ── Body Comp from Cronometer ── */}
       <div className="tracker-card">
         <div className="section-hdr">
-          <span className="ptitle">Weight & Body Comp</span>
+          <span className="ptitle">Body Comp (Cronometer)</span>
+        </div>
+
+        {/* Summary stats */}
+        <div className="tracker-stats">
+          <div className="tracker-stat">
+            <div className="tracker-stat-val">{latestBio?.weight_lbs ? `${latestBio.weight_lbs} lbs` : '—'}</div>
+            <div className="tracker-stat-lbl">Latest weight</div>
+          </div>
+          <div className="tracker-stat">
+            <div className="tracker-stat-val">{oldestBio?.weight_lbs ? `${oldestBio.weight_lbs} lbs` : '—'}</div>
+            <div className="tracker-stat-lbl">Starting weight</div>
+          </div>
+          <div className="tracker-stat">
+            <div className="tracker-stat-val">
+              {latestBio?.weight_lbs && oldestBio?.weight_lbs
+                ? `${(latestBio.weight_lbs - oldestBio.weight_lbs > 0 ? '+' : '')}${(latestBio.weight_lbs - oldestBio.weight_lbs).toFixed(1)} lbs`
+                : '—'}
+            </div>
+            <div className="tracker-stat-lbl">Change</div>
+          </div>
+          <div className="tracker-stat">
+            <div className="tracker-stat-val">{latestBio?.body_fat_pct ? `${latestBio.body_fat_pct}%` : '—'}</div>
+            <div className="tracker-stat-lbl">Latest BF%</div>
+          </div>
+        </div>
+
+        {/* Chart */}
+        <div style={{ marginTop: 8, marginBottom: 16 }}>
+          <BodyCompWidget />
+        </div>
+
+        {/* Upload zone */}
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>
+            Upload Cronometer biometrics CSV
+          </div>
+          <div
+            onDrop={e => { e.preventDefault(); setBioDragging(false); const f = e.dataTransfer.files[0]; if (f) handleBioFile(f) }}
+            onDragOver={e => { e.preventDefault(); setBioDragging(true) }}
+            onDragLeave={() => setBioDragging(false)}
+            onClick={() => document.getElementById('bio-csv-input')?.click()}
+            style={{
+              border: `2px dashed ${bioDragging ? 'var(--text)' : 'var(--border)'}`,
+              borderRadius: 8,
+              padding: '16px 20px',
+              textAlign: 'center',
+              background: bioDragging ? 'var(--bg)' : 'var(--surface)',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+          >
+            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+              {bioUploading ? 'Uploading…' : 'Drag & drop · or click to select biometrics CSV'}
+            </div>
+            {bioMsg && (
+              <div style={{ marginTop: 6, fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--lift-t)' }}>
+                {bioMsg}
+              </div>
+            )}
+            <input
+              id="bio-csv-input"
+              type="file"
+              accept=".csv"
+              style={{ display: 'none' }}
+              onChange={e => { const f = e.target.files?.[0]; if (f) handleBioFile(f) }}
+            />
+          </div>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', marginTop: 6 }}>
+            Cronometer → Profile → Export Data → Measurements / Biometrics CSV
+          </div>
+        </div>
+      </div>
+
+      {/* Weight (manual log) */}
+      <div className="tracker-card">
+        <div className="section-hdr">
+          <span className="ptitle">Weight & Body Comp (manual log)</span>
         </div>
         <div className="tracker-stats">
           <div className="tracker-stat">

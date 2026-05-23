@@ -1,10 +1,10 @@
 import { getActiveRace, getDaysToRace, RACES, mobRequiredIds } from '@/lib/data'
 import { getRecentActivities, getActivitiesForWeeks, getNutritionActuals, getMobilityStreak, getMobilityLog } from '@/lib/supabase'
-import { fetchSheet, parseProgressSheet } from '@/lib/sheets'
 import StatCard from '@/components/dashboard/StatCard'
-import WeightChart from '@/components/dashboard/WeightChart'
+import BodyCompWidget from '@/components/dashboard/BodyCompWidget'
 import VolumeChart from '@/components/dashboard/VolumeChart'
-import NutritionChart from '@/components/dashboard/NutritionChart'
+import NutritionActualsPanel from '@/components/dashboard/NutritionActualsPanel'
+import MacroAccuracyPanel from '@/components/dashboard/MacroAccuracyPanel'
 import DistributionChart from '@/components/dashboard/DistributionChart'
 import ActivityFeed from '@/components/dashboard/ActivityFeed'
 import QuickStatus from '@/components/dashboard/QuickStatus'
@@ -24,20 +24,17 @@ export default async function DashboardPage() {
     recentActivities,
     weeklyActivities,
     nutritionActuals,
-    progressRows,
     mobilityStreak,
   ] = await Promise.allSettled([
     getRecentActivities(10),
     getActivitiesForWeeks(13),
     getNutritionActuals(90),
-    fetchSheet('progress'),
     getMobilityStreak(),
   ])
 
   const activities = recentActivities.status === 'fulfilled' ? recentActivities.value : []
   const allActivities = weeklyActivities.status === 'fulfilled' ? weeklyActivities.value : []
   const nutrition = nutritionActuals.status === 'fulfilled' ? nutritionActuals.value : []
-  const progressData = progressRows.status === 'fulfilled' ? parseProgressSheet(progressRows.value) : []
   const streak = mobilityStreak.status === 'fulfilled' ? mobilityStreak.value : 0
 
   // Compute stats
@@ -88,19 +85,6 @@ export default async function DashboardPage() {
     { name: 'Run', value: typeCounts.run || 0, color: 'var(--run-t)' },
     { name: 'Lift', value: typeCounts.lift || 0, color: 'var(--lift-t)' },
   ].filter(d => d.value > 0)
-
-  // Nutrition for chart
-  const nutritionChartData = nutrition.map(n => ({
-    date: n.date,
-    calories: n.calories,
-    protein: n.protein,
-  }))
-
-  // Weight for chart
-  const weightChartData = progressData.map(p => ({
-    date: p.date,
-    weight: p.weight,
-  }))
 
   // Mobility today
   const todayKey = now.toISOString().split('T')[0]
@@ -165,8 +149,8 @@ export default async function DashboardPage() {
       {/* ── ROW 2: CHARTS ── */}
       <div className="chart-row">
         <div className="chart-card">
-          <div className="chart-card-title">Weight trend</div>
-          <WeightChart data={weightChartData} />
+          <div className="chart-card-title">Weight & body comp</div>
+          <BodyCompWidget />
         </div>
         <div className="chart-card">
           <div className="chart-card-title">Weekly volume (swim / bike / run)</div>
@@ -174,13 +158,19 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* ── ROW 3: CHARTS ── */}
+      {/* ── ROW 3: NUTRITION ── */}
       <div className="chart-row">
         <div className="chart-card">
-          <div className="chart-card-title">Nutrition — calories & protein</div>
-          <NutritionChart data={nutritionChartData} />
+          <NutritionActualsPanel />
         </div>
         <div className="chart-card">
+          <MacroAccuracyPanel />
+        </div>
+      </div>
+
+      {/* ── ROW 3b: DISTRIBUTION ── */}
+      <div className="chart-row" style={{ marginBottom: 0 }}>
+        <div className="chart-card" style={{ maxWidth: 360 }}>
           <div className="chart-card-title">Training distribution</div>
           <DistributionChart data={distributionData} />
         </div>

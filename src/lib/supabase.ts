@@ -182,6 +182,29 @@ export async function getActivitiesForWeeks(weeksBack = 8): Promise<StravaActivi
   return data || []
 }
 
+// ── Biometrics helpers ──
+
+export interface BiometricEntry {
+  id: string
+  date: string
+  weight_lbs: number | null
+  body_fat_pct: number | null
+  lean_mass_lbs: number | null
+  fat_mass_lbs: number | null
+  created_at: string
+}
+
+export async function getBiometrics(days = 90): Promise<BiometricEntry[]> {
+  const since = new Date()
+  since.setDate(since.getDate() - days)
+  const { data } = await getSupabase()
+    .from('biometrics')
+    .select('*')
+    .gte('date', since.toISOString().split('T')[0])
+    .order('date', { ascending: true })
+  return data || []
+}
+
 // ── Nutrition helpers ──
 
 export async function getNutritionActuals(days = 90): Promise<NutritionActual[]> {

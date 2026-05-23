@@ -2,6 +2,8 @@
 
 import { useState, useCallback } from 'react'
 import { NUTRITION_TARGETS, NUTRITION_BASELINE } from '@/lib/data'
+import NutritionActualsPanel from '@/components/dashboard/NutritionActualsPanel'
+import MacroAccuracyPanel from '@/components/dashboard/MacroAccuracyPanel'
 
 const MEAL_PLANS: Record<string, { meal: string; foods: string; kcal: number; p: number; c: number; f: number }[]> = {
   Monday: [
@@ -140,6 +142,16 @@ export default function NutritionPage() {
         </div>
         <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>
           Export from Cronometer: Trends → Export → Daily Summary. CSV columns: Date, Energy (kcal), Protein (g), Fat (g), Carbs (g), Fiber (g)
+        </div>
+      </div>
+
+      {/* Actuals overview panels */}
+      <div className="chart-row" style={{ marginBottom: 24 }}>
+        <div className="chart-card">
+          <NutritionActualsPanel />
+        </div>
+        <div className="chart-card">
+          <MacroAccuracyPanel />
         </div>
       </div>
 
