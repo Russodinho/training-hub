@@ -177,7 +177,7 @@ export default function SeasonPlanPage() {
         </div>
         <div className="page-header-right">
           {daysOut !== null && daysOut >= 0 ? (
-            <>Abington in<br /><strong style={{ fontFamily: "'DM Mono', monospace", fontSize: 20 }}>{daysOut}</strong> days</>
+            <>{active!.race.name.split(' ')[0]} in<br /><strong style={{ fontFamily: "'DM Mono', monospace", fontSize: 20 }}>{daysOut}</strong> days</>
           ) : active ? `${active.race.name}` : 'Season in progress'}
         </div>
       </div>
@@ -210,14 +210,16 @@ export default function SeasonPlanPage() {
                 <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>days to race</div>
               </div>
               <div>
-                <div style={{ fontWeight: 500, fontSize: 18 }}>Abington Triathlon</div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>May 30, 2026 · 7:27 AM · Yellow caps · Men 30–39</div>
+                <div style={{ fontWeight: 500, fontSize: 18 }}>{active!.race.name}</div>
+                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+                  {active!.race.dateLabel} · {active!.race.location}
+                </div>
                 <div className="course-bar" style={{ marginTop: 12 }}>
-                  <div className="course-seg cs-swim">300m swim</div>
+                  <div className="course-seg cs-swim">{active!.race.distances.swim}</div>
                   <div className="course-seg cs-t1">T1</div>
-                  <div className="course-seg cs-bike">11.5 mi bike</div>
+                  <div className="course-seg cs-bike">{active!.race.distances.bike}</div>
                   <div className="course-seg cs-t2">T2</div>
-                  <div className="course-seg cs-run">5K run</div>
+                  <div className="course-seg cs-run">{active!.race.distances.run}</div>
                 </div>
               </div>
             </div>

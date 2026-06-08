@@ -82,6 +82,7 @@ const STATUS_CLS: Record<string, string> = {
 export default function InjuriesPage() {
   const [updates, setUpdates] = useState<Record<string, InjuryUpdate[]>>({})
   const [newInjuries, setNewInjuries] = useState<InjuryCard[]>([])
+  const [hiddenKeys, setHiddenKeys] = useState<string[]>([])
   const [updateForms, setUpdateForms] = useState<Record<string, { note: string; status: string; pain: string; date: string }>>({})
   const [showNewForm, setShowNewForm] = useState(false)
   const [newForm, setNewForm] = useState({
@@ -94,6 +95,8 @@ export default function InjuriesPage() {
     if (stored) setUpdates(JSON.parse(stored))
     const storedNew = localStorage.getItem('new_injuries')
     if (storedNew) setNewInjuries(JSON.parse(storedNew))
+    const storedHidden = localStorage.getItem('hidden_injuries')
+    if (storedHidden) setHiddenKeys(JSON.parse(storedHidden))
   }, [])
 
   const saveUpdates = (u: typeof updates) => {
@@ -125,7 +128,22 @@ export default function InjuriesPage() {
     setShowNewForm(false)
   }
 
-  const allInjuries = [...BUILTIN_INJURIES, ...newInjuries]
+  const removeInjury = (key: string, isBuiltin: boolean) => {
+    if (isBuiltin) {
+      const next = [...hiddenKeys, key]
+      setHiddenKeys(next)
+      localStorage.setItem('hidden_injuries', JSON.stringify(next))
+    } else {
+      const next = newInjuries.filter(i => i.key !== key)
+      setNewInjuries(next)
+      localStorage.setItem('new_injuries', JSON.stringify(next))
+    }
+  }
+
+  const allInjuries = [
+    ...BUILTIN_INJURIES.filter(i => !hiddenKeys.includes(i.key)),
+    ...newInjuries,
+  ]
 
   const renderCard = (inj: InjuryCard) => {
     const injUpdates = updates[inj.key] || []
@@ -139,6 +157,15 @@ export default function InjuriesPage() {
           <span className={`inj-badge ${STATUS_CLS[currentStatus] || 'inj-monitoring'}`}>{currentStatus}</span>
           <span className="inj-name">{inj.name}</span>
           {currentPain && <span className="inj-pain-badge">Pain: {currentPain}/10</span>}
+          <button
+            onClick={() => removeInjury(inj.key, !!inj.isBuiltin)}
+            style={{
+              marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer',
+              color: 'var(--faint)', fontSize: 14, padding: '0 2px', lineHeight: 1,
+              flexShrink: 0,
+            }}
+            title="Remove injury"
+          >✕</button>
         </div>
 
         {[
