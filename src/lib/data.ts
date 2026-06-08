@@ -298,7 +298,7 @@ export const MOB_YOGA_ONLY_IDS = ['08', '09']
 
 export function mobIsYogaNight(date?: Date): boolean {
   const dow = (date || new Date()).getDay()
-  return dow === 3 || dow === 6 // Wed or Sat
+  return dow === 0 || dow === 3 || dow === 6 // Sun, Wed, or Sat — ankle+calf only
 }
 
 export function mobRequiredIds(date?: Date): string[] {

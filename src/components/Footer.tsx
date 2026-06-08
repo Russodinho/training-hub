@@ -8,7 +8,7 @@ export default function Footer() {
       color: 'var(--faint)',
       textAlign: 'center',
     }}>
-      Built with Next.js · Data from Strava, Google Sheets, Cronometer
+      Built with Next.js · Data from Strava, Google Sheets, Cronometer · Google Health (coming soon)
     </footer>
   )
 }

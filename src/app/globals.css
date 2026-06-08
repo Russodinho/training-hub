@@ -51,6 +51,9 @@
   --wake: #f9fafb; --wake-t: #374151;
   --prep-c: #f3f4f6; --prep-t: #374151;
 
+  --mob: #e0e7ff; --mob-t: #312e81;
+  --wind: #ede9fe; --wind-t: #5b21b6; --wind-accent: #7c3aed;
+
   --swim-w: #e0f2fe; --swim-wt: #0c4a6e;
   --bike-w: #f3e8ff; --bike-wt: #581c87;
   --run-w: #fef9c3; --run-wt: #713f12;
@@ -114,6 +117,9 @@
     --sleep-c: #0c1a3d; --sleep-t: #93c5fd;
     --wake: #1f2937; --wake-t: #9ca3af;
     --prep-c: #1f2937; --prep-t: #9ca3af;
+
+    --mob: #1e1b4b; --mob-t: #a5b4fc;
+    --wind: #2e1065; --wind-t: #c4b5fd; --wind-accent: #a78bfa;
 
     --swim-w: #0c2a3d; --swim-wt: #7dd3fc;
     --bike-w: #2d1457; --bike-wt: #d8b4fe;
@@ -441,6 +447,9 @@ button.hub-btn-ghost:hover { color: var(--text); border-color: var(--muted); }
 .bl-brick   { background: var(--brick-bg); color: var(--brick-t); }
 .bl-wake    { background: var(--wake);     color: var(--wake-t); }
 .bl-prep    { background: var(--prep-c);   color: var(--prep-t); }
+.bl-mob     { background: var(--mob);      color: var(--mob-t); }
+.bl-wind    { background: var(--wind);     color: var(--wind-t); }
+.bl-clean   { background: var(--clean);    color: var(--clean-t); }
 
 /* ── NUTRITION ── */
 .nutrition-day {
@@ -790,4 +799,91 @@ td.ing-name { color: var(--text); }
   .mh-pills { display: none; }
   .mh-macro-bar { grid-template-columns: repeat(2, 1fr); }
   .mh-card-header { padding: 14px; }
+}
+
+/* ── WIND-DOWN ── */
+.wind-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+.wind-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  position: relative;
+  user-select: none;
+}
+.wind-card:hover { border-color: var(--wind-accent); }
+.wind-card.checked { background: var(--target-bg); border-color: transparent; }
+.wind-card.checked::after {
+  content: '✓';
+  position: absolute;
+  top: 12px; right: 14px;
+  font-size: 16px; font-weight: 600;
+  color: var(--target-t);
+}
+.wind-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px; font-weight: 300;
+  color: var(--faint);
+  padding-top: 2px;
+}
+.wind-card.checked .wind-num { color: var(--target-t); opacity: 0.5; }
+.wind-name { font-weight: 600; font-size: 14px; margin-bottom: 3px; color: var(--text); }
+.wind-card.checked .wind-name { color: var(--target-t); }
+.wind-focus { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.02em; margin-bottom: 8px; }
+.wind-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.wind-badge {
+  font-family: 'DM Mono', monospace; font-size: 9px;
+  letter-spacing: 0.03em;
+  padding: 2px 7px; border-radius: 4px;
+  background: var(--bg); color: var(--muted);
+  border: 1px solid var(--border-soft);
+}
+.wind-cue { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.wind-card.checked .wind-cue { color: var(--target-t); opacity: 0.85; }
+.wind-breath {
+  font-family: 'DM Mono', monospace; font-size: 10px;
+  color: var(--wind-t); background: var(--wind);
+  padding: 4px 8px; border-radius: 4px;
+  margin-top: 6px; display: inline-block;
+}
+.wind-status {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 16px; align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+.wind-status.complete { background: var(--target-bg); border-color: transparent; }
+.wind-status-icon { font-size: 24px; line-height: 1; }
+.wind-status-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.wind-status.complete .wind-status-title { color: var(--target-t); }
+.wind-status-sub { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+.wind-status.complete .wind-status-sub { color: var(--target-t); opacity: 0.85; }
+.wind-status-right { text-align: right; }
+.wind-status-progress { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; color: var(--text); }
+.wind-status.complete .wind-status-progress { color: var(--target-t); }
+.wind-rules {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px 18px;
+  font-size: 12px; color: var(--muted); line-height: 1.7;
+}
+.wind-rules-title {
+  font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--wind-t); margin-bottom: 8px;
+}
+.wind-rule-item { padding: 4px 0; border-bottom: 1px solid var(--border-soft); }
+.wind-rule-item:last-child { border-bottom: none; }
+.wind-intent {
+  background: var(--wind); color: var(--wind-t);
+  border-radius: 10px; padding: 14px 18px;
+  margin-bottom: 24px; font-size: 13px; line-height: 1.6;
 }

@@ -8,17 +8,16 @@ import { RACES, getActiveRace } from '@/lib/data'
 const NAV_LINKS = [
   { href: '/', label: 'Dashboard' },
   { href: '/race-calendar', label: 'Race Calendar' },
-  { href: '/tri-plan', label: 'Tri Plan' },
-  { href: '/schedule', label: 'Schedule' },
-  { href: '/nutrition', label: 'Nutrition' },
-  { href: '/workouts', label: 'Workouts' },
-  { href: '/supplements', label: 'Supplements' },
-  { href: '/mobility', label: 'Mobility' },
-  { href: '/stretch-goals', label: 'Stretch Goals' },
+  { href: '/season-plan', label: 'Season Plan' },
+  { href: '/training-log', label: 'Training Log' },
+  { href: '/fuel', label: 'Fuel' },
   { href: '/race-day', label: 'Race Day' },
-  { href: '/progress', label: 'Progress' },
   { href: '/injuries', label: 'Injuries' },
-  { href: '/meal-hub', label: 'Meal Hub' },
+]
+
+// Placeholder nav items — not yet functional, shown greyed out
+const NAV_PLACEHOLDERS = [
+  { label: 'Recovery', soon: true },
 ]
 
 export default function Nav() {
@@ -67,6 +66,10 @@ export default function Nav() {
           flex: 1;
           overflow-x: auto;
           min-width: 0;
+          scrollbar-width: none;
+        }
+        .nav-links-desktop::-webkit-scrollbar {
+          display: none;
         }
         .nav-hamburger {
           display: none;
@@ -155,6 +158,26 @@ export default function Nav() {
               </Link>
             )
           })}
+          {/* Placeholder nav items — coming soon */}
+          {NAV_PLACEHOLDERS.map(({ label }) => (
+            <span key={label} style={{
+              fontFamily: "'DM Mono', monospace", fontSize: 11,
+              letterSpacing: '0.04em',
+              color: 'var(--faint)',
+              padding: '0 12px', height: 44,
+              display: 'flex', alignItems: 'center', gap: 5,
+              textTransform: 'uppercase', whiteSpace: 'nowrap',
+              flexShrink: 0, cursor: 'default',
+            }}>
+              {label}
+              <span style={{
+                fontFamily: "'DM Mono', monospace", fontSize: 8,
+                background: 'var(--surface)', border: '1px solid var(--border)',
+                borderRadius: 4, padding: '1px 4px', letterSpacing: '0.06em',
+                color: 'var(--faint)', textTransform: 'uppercase',
+              }}>soon</span>
+            </span>
+          ))}
         </div>
 
         {/* Hamburger button (mobile only) */}
@@ -221,6 +244,22 @@ export default function Nav() {
                 </Link>
               )
             })}
+            {/* Placeholder items */}
+            {NAV_PLACEHOLDERS.map(({ label }) => (
+              <span key={label} style={{
+                display: 'block',
+                padding: '13px 20px',
+                fontFamily: "'DM Mono', monospace",
+                fontSize: 12,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                color: 'var(--faint)',
+                borderBottom: '1px solid var(--border-soft)',
+              }}>
+                {label}{' '}
+                <span style={{ fontSize: 9, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 3, padding: '1px 4px' }}>soon</span>
+              </span>
+            ))}
           </div>
         )}
       </nav>

@@ -1,5 +1,6 @@
 import { getActiveRace, getDaysToRace, RACES, mobRequiredIds } from '@/lib/data'
-import { getRecentActivities, getActivitiesForWeeks, getNutritionActuals, getMobilityStreak, getMobilityLog } from '@/lib/supabase'
+import { getRecentActivities, getActivitiesForWeeks, getNutritionActuals, getMobilityStreak } from '@/lib/supabase'
+import { getTodaySchedule } from '@/lib/schedule'
 import StatCard from '@/components/dashboard/StatCard'
 import BodyCompWidget from '@/components/dashboard/BodyCompWidget'
 import VolumeChart from '@/components/dashboard/VolumeChart'
@@ -8,6 +9,7 @@ import MacroAccuracyPanel from '@/components/dashboard/MacroAccuracyPanel'
 import DistributionChart from '@/components/dashboard/DistributionChart'
 import ActivityFeed from '@/components/dashboard/ActivityFeed'
 import QuickStatus from '@/components/dashboard/QuickStatus'
+import CollapsibleSchedule from '@/components/dashboard/CollapsibleSchedule'
 
 function getWeekLabel(date: Date): string {
   const d = new Date(date)
@@ -49,7 +51,7 @@ export default async function DashboardPage() {
   const currentWeek = Math.min(weeksSinceStart, 7)
   const currentPhase = currentWeek <= 2 ? 'Re-entry' : currentWeek <= 4 ? 'Build' : currentWeek <= 6 ? 'Sharpening' : 'Taper'
 
-  // Nutrition accuracy (% days hitting ≥1800 kcal)
+  // Nutrition accuracy
   const nutAccuracy = nutrition.length > 0
     ? Math.round((nutrition.filter(n => n.calories && n.calories >= 1800).length / nutrition.length) * 100)
     : null
@@ -86,10 +88,14 @@ export default async function DashboardPage() {
     { name: 'Lift', value: typeCounts.lift || 0, color: 'var(--lift-t)' },
   ].filter(d => d.value > 0)
 
-  // Mobility today
-  const todayKey = now.toISOString().split('T')[0]
+  // Today's schedule
+  const todaySchedule = getTodaySchedule()
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+  const todayName = dayNames[now.getDay()]
+
+  // Mobility
   const required = mobRequiredIds(now)
-  const mobilityTodayDone = 0 // Will be updated client-side; server shows 0
+  const mobilityTodayDone = 0 // server default; QuickStatus handles display
 
   return (
     <div className="hub-page">
@@ -117,7 +123,7 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* ── ROW 1: STAT STRIP ── */}
+      {/* ── STAT STRIP ── */}
       <div className="stat-strip" style={{ marginBottom: 16 }}>
         <StatCard
           value={daysToRace !== null && daysToRace >= 0 ? daysToRace : '—'}
@@ -146,7 +152,86 @@ export default async function DashboardPage() {
         />
       </div>
 
-      {/* ── ROW 2: Volume (left) | Distribution (right) ── */}
+      {/* ── TODAY'S SCHEDULE ── */}
+      {todaySchedule && (
+        <div style={{ marginBottom: 16 }}>
+          <div className="section-hdr">
+            <span className="ptitle">Today · {todayName}</span>
+            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', marginLeft: 8 }}>{todaySchedule.tag}</span>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {todaySchedule.blocks
+              .filter(b => b.cls !== 'bl-work' && b.cls !== 'bl-sleep')
+              .map((block, i) => (
+                <div key={i} className={`block ${block.cls}`} style={{ flex: '0 0 auto', minWidth: 0 }}>
+                  <div className="block-time">{block.time}</div>
+                  <div className="block-name">{block.name}</div>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── WIDGETS ROW: Mobility + Recovery ── */}
+      <div className="chart-row" style={{ marginBottom: 16 }}>
+        {/* Mobility widget */}
+        <div className="surface-card" style={{ flex: 1 }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+            Mobility tonight
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div>
+              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 22, fontWeight: 500 }}>
+                {mobilityTodayDone}/{required.length}
+              </span>
+              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginLeft: 8 }}>exercises</span>
+            </div>
+            {streak > 0 && (
+              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+                🔥 {streak}d streak
+              </span>
+            )}
+          </div>
+          <a href="/mobility" style={{ display: 'block', fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--text)', textDecoration: 'none', padding: '6px 12px', background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)', textAlign: 'center' }}>
+            Open mobility checklist →
+          </a>
+        </div>
+
+        {/* Recovery placeholder */}
+        <div className="surface-card" style={{ flex: 1 }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+            Recovery
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
+            <div style={{ fontSize: 28 }}>🫀</div>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 3 }}>Connect Google Health to enable</div>
+              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', lineHeight: 1.5 }}>
+                HRV · resting HR · sleep score · readiness
+              </div>
+            </div>
+          </div>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--faint)', fontStyle: 'italic' }}>
+            Coming soon
+          </div>
+        </div>
+
+        {/* Wind-down tonight */}
+        <div className="surface-card" style={{ flex: 1 }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+            Wind-down tonight
+          </div>
+          <div style={{ fontSize: 13, marginBottom: 10, lineHeight: 1.5 }}>
+            5 passive stretches · ~10 min<br />
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>Legs up wall · twist · child&apos;s pose · 90/90 · neck</span>
+          </div>
+          <a href="/wind-down" style={{ display: 'block', fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--text)', textDecoration: 'none', padding: '6px 12px', background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)', textAlign: 'center' }}>
+            Start wind-down →
+          </a>
+        </div>
+      </div>
+
+      {/* ── ROW 2: Volume + Distribution ── */}
       <div className="chart-row">
         <div className="chart-card">
           <div className="chart-card-title">Weekly volume (swim / bike / run)</div>
@@ -158,24 +243,23 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* ── ROW 3: Body comp (full width) ── */}
+      {/* ── ROW 3: Body comp ── */}
       <div className="chart-card" style={{ marginBottom: 16 }}>
         <div className="chart-card-title">Weight & body comp</div>
         <BodyCompWidget />
       </div>
 
-
-      {/* ── ROW 4: Nutrition actuals (full width) ── */}
+      {/* ── ROW 4: Nutrition actuals ── */}
       <div className="chart-card" style={{ marginBottom: 16 }}>
         <NutritionActualsPanel />
       </div>
 
-      {/* ── ROW 5: Macro accuracy (full width) ── */}
+      {/* ── ROW 5: Macro accuracy ── */}
       <div className="chart-card" style={{ marginBottom: 16 }}>
         <MacroAccuracyPanel />
       </div>
 
-      {/* ── ROW 4: ACTIVITY FEED + QUICK STATUS ── */}
+      {/* ── ROW 6: Activity feed + Quick status ── */}
       <div className="chart-row">
         <div className="chart-card">
           <div className="chart-card-title">Recent activities</div>
@@ -188,6 +272,9 @@ export default async function DashboardPage() {
           />
         </div>
       </div>
+
+      {/* ── FULL SCHEDULE (collapsible) ── */}
+      <CollapsibleSchedule />
     </div>
   )
 }
