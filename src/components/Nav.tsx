@@ -7,15 +7,14 @@ import { RACES, getActiveRace } from '@/lib/data'
 
 const NAV_LINKS = [
   { href: '/', label: 'Dashboard' },
-  { href: '/race-calendar', label: 'Race Calendar' },
-  { href: '/season-plan', label: 'Season Plan' },
-  { href: '/training-log', label: 'Training Log' },
+  { href: '/race-calendar', label: 'Calendar' },
+  { href: '/season-plan', label: 'Season' },
+  { href: '/training-log', label: 'Log' },
   { href: '/fuel', label: 'Fuel' },
   { href: '/race-day', label: 'Race Day' },
   { href: '/injuries', label: 'Injuries' },
 ]
 
-// Placeholder nav items — not yet functional, shown greyed out
 const NAV_PLACEHOLDERS = [
   { label: 'Recovery', soon: true },
 ]
@@ -40,10 +39,8 @@ export default function Nav() {
     fetch('/api/strava/status').then(r => r.json()).then(d => setStravaConnected(d.connected)).catch(() => {})
   }, [])
 
-  // Close menu when navigating
   useEffect(() => { setMenuOpen(false) }, [pathname])
 
-  // Close menu when clicking outside
   useEffect(() => {
     if (!menuOpen) return
     const handler = (e: MouseEvent) => {
@@ -62,25 +59,19 @@ export default function Nav() {
       <style>{`
         .nav-links-desktop {
           display: flex;
-          align-items: stretch;
+          align-items: center;
           flex: 1;
+          gap: 2px;
           overflow-x: auto;
           min-width: 0;
           scrollbar-width: none;
         }
-        .nav-links-desktop::-webkit-scrollbar {
-          display: none;
-        }
-        .nav-hamburger {
-          display: none;
-        }
-        .nav-mobile-menu {
-          display: none;
-        }
+        .nav-links-desktop::-webkit-scrollbar { display: none; }
+        .nav-hamburger { display: none; }
+        .nav-mobile-menu { display: none; }
+
         @media (max-width: 768px) {
-          .nav-links-desktop {
-            display: none;
-          }
+          .nav-links-desktop { display: none; }
           .nav-hamburger {
             display: flex;
             align-items: center;
@@ -90,7 +81,7 @@ export default function Nav() {
             cursor: pointer;
             padding: 0 8px;
             height: 44px;
-            color: var(--text);
+            color: var(--muted);
             flex-shrink: 0;
           }
           .nav-mobile-menu {
@@ -99,122 +90,143 @@ export default function Nav() {
             top: 44px;
             left: 0;
             right: 0;
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
+            background: var(--s1);
+            border-bottom: 0.5px solid var(--border);
             z-index: 200;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
           }
-          .nav-mobile-menu a {
+          .nav-mobile-menu a, .nav-mobile-menu span.mobile-item {
             display: block;
-            padding: 13px 20px;
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-            letter-spacing: 0.06em;
+            padding: 12px 20px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
             text-decoration: none;
-            border-bottom: 1px solid var(--border-soft);
-            transition: background 0.1s;
+            border-bottom: 0.5px solid var(--border);
           }
-          .nav-mobile-menu a:active {
-            background: var(--bg);
-          }
+          .nav-mobile-menu a:active { background: var(--s2); }
         }
       `}</style>
 
       <nav ref={menuRef} style={{
         position: 'sticky', top: 0, zIndex: 100,
-        background: 'var(--surface)', borderBottom: '1px solid var(--border)',
-        display: 'flex', alignItems: 'stretch', padding: '0 16px', gap: 0,
+        background: 'var(--s1)',
+        borderBottom: '0.5px solid var(--border)',
+        display: 'flex', alignItems: 'center',
+        padding: '0 16px', gap: 0, height: 44,
       }}>
-        {/* Logo */}
+        {/* Brand */}
         <Link href="/" style={{
-          fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 500,
-          color: 'var(--text)', letterSpacing: '0.04em',
-          display: 'flex', alignItems: 'center', paddingRight: 16,
-          borderRight: '1px solid var(--border)', marginRight: 8,
-          whiteSpace: 'nowrap', textDecoration: 'none', flexShrink: 0,
+          fontFamily: "'IBM Plex Mono', monospace",
+          fontSize: 11,
+          fontWeight: 400,
+          letterSpacing: '0.14em',
+          color: 'var(--muted)',
+          textTransform: 'uppercase',
+          display: 'flex', alignItems: 'center',
+          paddingRight: 16,
+          borderRight: '0.5px solid var(--border)',
+          marginRight: 10,
+          whiteSpace: 'nowrap',
+          textDecoration: 'none',
+          flexShrink: 0,
         }}>
-          Training Hub <span style={{ color: 'var(--muted)', fontWeight: 300, marginLeft: 6 }}>2026</span>
+          Training Hub{' '}
+          <span style={{ color: 'var(--strength)', marginLeft: 6 }}>2026</span>
         </Link>
 
-        {/* Desktop links */}
+        {/* Desktop tabs */}
         <div className="nav-links-desktop">
           {NAV_LINKS.map(({ href, label }) => {
             const isActive = href === '/' ? pathname === '/' : pathname.startsWith(href)
             return (
               <Link key={href} href={href} style={{
-                fontFamily: "'DM Mono', monospace", fontSize: 11,
-                letterSpacing: '0.04em',
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 11,
+                fontWeight: isActive ? 500 : 400,
+                letterSpacing: '0.06em',
                 color: isActive ? 'var(--text)' : 'var(--muted)',
-                padding: '0 12px', height: 44,
-                display: 'flex', alignItems: 'center',
-                borderBottom: `2px solid ${isActive ? 'var(--text)' : 'transparent'}`,
-                borderTop: 'none', borderLeft: 'none', borderRight: 'none',
-                textTransform: 'uppercase', whiteSpace: 'nowrap',
-                textDecoration: 'none', flexShrink: 0,
-                transition: 'color 0.15s, border-color 0.15s',
+                padding: '5px 12px',
+                borderRadius: 6,
+                background: isActive ? 'var(--s3)' : 'transparent',
+                textTransform: 'uppercase',
+                whiteSpace: 'nowrap',
+                textDecoration: 'none',
+                flexShrink: 0,
+                transition: 'color 0.15s, background 0.15s',
               }}>
                 {label}
               </Link>
             )
           })}
-          {/* Placeholder nav items — coming soon */}
           {NAV_PLACEHOLDERS.map(({ label }) => (
             <span key={label} style={{
-              fontFamily: "'DM Mono', monospace", fontSize: 11,
-              letterSpacing: '0.04em',
-              color: 'var(--faint)',
-              padding: '0 12px', height: 44,
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 11,
+              letterSpacing: '0.06em',
+              color: 'var(--dim)',
+              padding: '5px 12px',
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
+              flexShrink: 0,
+              cursor: 'default',
               display: 'flex', alignItems: 'center', gap: 5,
-              textTransform: 'uppercase', whiteSpace: 'nowrap',
-              flexShrink: 0, cursor: 'default',
             }}>
               {label}
               <span style={{
-                fontFamily: "'DM Mono', monospace", fontSize: 8,
-                background: 'var(--surface)', border: '1px solid var(--border)',
-                borderRadius: 4, padding: '1px 4px', letterSpacing: '0.06em',
-                color: 'var(--faint)', textTransform: 'uppercase',
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 8,
+                background: 'var(--s3)',
+                border: '0.5px solid var(--border)',
+                borderRadius: 3,
+                padding: '1px 4px',
+                letterSpacing: '0.06em',
+                color: 'var(--dim)',
               }}>soon</span>
             </span>
           ))}
         </div>
 
-        {/* Hamburger button (mobile only) */}
+        {/* Hamburger (mobile) */}
         <button
           className="nav-hamburger"
           onClick={() => setMenuOpen(o => !o)}
           aria-label="Toggle menu"
         >
           {menuOpen ? (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="4" y1="4" x2="16" y2="16" />
-              <line x1="16" y1="4" x2="4" y2="16" />
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="3" y1="3" x2="15" y2="15" />
+              <line x1="15" y1="3" x2="3" y2="15" />
             </svg>
           ) : (
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="3" y1="6" x2="17" y2="6" />
-              <line x1="3" y1="10" x2="17" y2="10" />
-              <line x1="3" y1="14" x2="17" y2="14" />
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <line x1="2" y1="5" x2="16" y2="5" />
+              <line x1="2" y1="9" x2="16" y2="9" />
+              <line x1="2" y1="13" x2="16" y2="13" />
             </svg>
           )}
         </button>
 
-        {/* Right side: Strava + countdown */}
+        {/* Right: Strava + countdown */}
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, paddingLeft: 12 }}>
           {stravaConnected ? (
             <span style={{
-              fontFamily: "'DM Mono', monospace", fontSize: 10,
-              background: 'var(--lift-bg)', color: 'var(--lift-t)',
-              borderRadius: 4, padding: '3px 8px', whiteSpace: 'nowrap',
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+              background: 'rgba(252,76,2,0.12)',
+              border: '0.5px solid rgba(252,76,2,0.3)',
+              color: '#fc4c02',
+              borderRadius: 20, padding: '3px 10px', whiteSpace: 'nowrap',
             }}>
               ● Strava
             </span>
           ) : (
             <a href="/api/strava/auth" style={{
-              fontFamily: "'DM Mono', monospace", fontSize: 10,
-              background: '#FC4C02', color: '#fff',
-              borderRadius: 4, padding: '3px 8px',
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+              background: 'rgba(252,76,2,0.12)',
+              border: '0.5px solid rgba(252,76,2,0.3)',
+              color: '#fc4c02',
+              borderRadius: 20, padding: '3px 10px',
               textDecoration: 'none', whiteSpace: 'nowrap',
             }}>
               Connect Strava
@@ -222,15 +234,14 @@ export default function Nav() {
           )}
 
           {activeRace && (
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
-              <span style={{ display: 'none' }} className="nav-race-label">{activeRace.race.name.split(' ')[0]} in </span>
-              <strong style={{ color: 'var(--text)', fontSize: 14 }}>{daysOut}</strong>{' '}
-              {typeof daysOut === 'number' ? 'd' : ''}
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+              <strong style={{ color: 'var(--strength)', fontSize: 14 }}>{daysOut}</strong>
+              {typeof daysOut === 'number' ? <span style={{ fontSize: 10 }}> d</span> : ''}
             </div>
           )}
         </div>
 
-        {/* Mobile dropdown menu */}
+        {/* Mobile dropdown */}
         {menuOpen && (
           <div className="nav-mobile-menu">
             {NAV_LINKS.map(({ href, label }) => {
@@ -238,26 +249,16 @@ export default function Nav() {
               return (
                 <Link key={href} href={href} style={{
                   color: isActive ? 'var(--text)' : 'var(--muted)',
-                  fontWeight: isActive ? 600 : 400,
+                  fontWeight: isActive ? 500 : 400,
                 }}>
                   {label}
                 </Link>
               )
             })}
-            {/* Placeholder items */}
             {NAV_PLACEHOLDERS.map(({ label }) => (
-              <span key={label} style={{
-                display: 'block',
-                padding: '13px 20px',
-                fontFamily: "'DM Mono', monospace",
-                fontSize: 12,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--faint)',
-                borderBottom: '1px solid var(--border-soft)',
-              }}>
+              <span key={label} className="mobile-item" style={{ color: 'var(--dim)' }}>
                 {label}{' '}
-                <span style={{ fontSize: 9, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 3, padding: '1px 4px' }}>soon</span>
+                <span style={{ fontSize: 8, background: 'var(--s3)', border: '0.5px solid var(--border)', borderRadius: 3, padding: '1px 4px' }}>soon</span>
               </span>
             ))}
           </div>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 
@@ -621,7 +621,7 @@ export default function MealHubPage() {
           <h2>Meal Hub</h2>
           <div className="sub">Recomp · 189g P avg · 241g C avg · 72g F avg</div>
         </div>
-        <div className="page-header-right" style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, textAlign: 'right' }}>
+        <div className="page-header-right" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, textAlign: 'right' }}>
           3 meals/day<br />
           <span style={{ color: 'var(--muted)' }}>5 options each</span>
         </div>

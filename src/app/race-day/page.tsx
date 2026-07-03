@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { RACES, KIT_CHECKLIST, getActiveRace, getDaysToRace } from '@/lib/data'
@@ -75,7 +75,7 @@ export default function RaceDayPage() {
   if (loading) {
     return (
       <div className="hub-page">
-        <div style={{ textAlign: 'center', padding: 60, fontFamily: "'DM Mono', monospace", color: 'var(--muted)' }}>Loading...</div>
+        <div style={{ textAlign: 'center', padding: 60, fontFamily: "'IBM Plex Mono', monospace", color: 'var(--muted)' }}>Loading...</div>
       </div>
     )
   }
@@ -86,8 +86,8 @@ export default function RaceDayPage() {
       <div className="hub-page">
         <div style={{ textAlign: 'center', padding: '48px 24px' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🏁</div>
-          <h2 style={{ fontFamily: "'DM Mono', monospace", fontSize: 24, marginBottom: 8 }}>Season Complete</h2>
-          <div style={{ color: 'var(--muted)', fontFamily: "'DM Mono', monospace", fontSize: 13, marginBottom: 32 }}>
+          <h2 style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 24, marginBottom: 8 }}>Season Complete</h2>
+          <div style={{ color: 'var(--muted)', fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, marginBottom: 32 }}>
             2026 triathlon season — every race in the books
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, maxWidth: 700, margin: '0 auto' }}>
@@ -178,7 +178,7 @@ export default function RaceDayPage() {
             <div className="rd-results-grid">
               {['swim', 't1', 'bike', 't2', 'run', 'total'].map(field => (
                 <div key={field}>
-                  <label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 4, textTransform: 'uppercase' }}>
+                  <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 4, textTransform: 'uppercase' }}>
                     {field}
                   </label>
                   <input
@@ -256,12 +256,12 @@ export default function RaceDayPage() {
             return (
               <div key={r.id} className="surface-card" style={isActiveRace ? { borderColor: 'var(--text)' } : {}}>
                 <div style={{ fontWeight: 500, fontSize: 13, marginBottom: 2 }}>{r.name.split(' ').slice(0, 2).join(' ')}</div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', marginBottom: 6 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', marginBottom: 6 }}>
                   {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </div>
                 {res?.total
-                  ? <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 18, fontWeight: 500 }}>{res.total}</div>
-                  : <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--faint)' }}>No time yet</div>}
+                  ? <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, fontWeight: 500 }}>{res.total}</div>
+                  : <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--faint)' }}>No time yet</div>}
               </div>
             )
           })}

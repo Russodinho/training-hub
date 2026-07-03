@@ -1,4 +1,4 @@
-import { getActiveRace, getDaysToRace } from '@/lib/data'
+﻿import { getActiveRace, getDaysToRace } from '@/lib/data'
 
 interface Phase {
   num: number
@@ -171,7 +171,7 @@ export default function TriPlanPage() {
         </div>
         <div className="page-header-right">
           {daysOut !== null && daysOut >= 0 ? (
-            <>Abington in<br /><strong style={{ fontFamily: "'DM Mono', monospace", fontSize: 20 }}>{daysOut}</strong> days</>
+            <>Abington in<br /><strong style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20 }}>{daysOut}</strong> days</>
           ) : active ? `${active.race.name}` : 'Season in progress'}
         </div>
       </div>
@@ -184,12 +184,12 @@ export default function TriPlanPage() {
           display: 'flex', alignItems: 'center', gap: 24,
         }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 64, fontWeight: 500, lineHeight: 1 }}>{daysOut}</div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>days to race</div>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 64, fontWeight: 500, lineHeight: 1 }}>{daysOut}</div>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>days to race</div>
           </div>
           <div>
             <div style={{ fontWeight: 500, fontSize: 18 }}>Abington Triathlon</div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>May 30, 2026 · 7:27 AM · Yellow caps · Men 30–39</div>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>May 30, 2026 · 7:27 AM · Yellow caps · Men 30–39</div>
             <div className="course-bar" style={{ marginTop: 12 }}>
               <div className="course-seg cs-swim">300m swim</div>
               <div className="course-seg cs-t1">T1</div>
@@ -254,8 +254,8 @@ export default function TriPlanPage() {
             { seg: '⏱ Total', target: '~1:15–1:30', note: 'Including T1 + T2 · estimated 1:30 for first race' },
           ].map((item, i) => (
             <div key={i} className="surface-card">
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 500, marginBottom: 4 }}>{item.seg}</div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 18, fontWeight: 500, marginBottom: 6 }}>{item.target}</div>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, fontWeight: 500, marginBottom: 4 }}>{item.seg}</div>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, fontWeight: 500, marginBottom: 6 }}>{item.target}</div>
               <div style={{ fontSize: 12, color: 'var(--muted)' }}>{item.note}</div>
             </div>
           ))}

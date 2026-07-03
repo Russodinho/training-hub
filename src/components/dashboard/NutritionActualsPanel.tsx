@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
@@ -24,7 +24,7 @@ function getSupabase() {
 }
 
 const SELECTOR_BTN: React.CSSProperties = {
-  fontFamily: "'DM Mono', monospace",
+  fontFamily: "'IBM Plex Mono', monospace",
   fontSize: 11,
   padding: '3px 10px',
   borderRadius: 6,
@@ -98,17 +98,17 @@ export default function NutritionActualsPanel() {
             border: '1px solid var(--border-soft)',
           }}>
             <div style={{
-              fontFamily: "'DM Mono', monospace",
+              fontFamily: "'IBM Plex Mono', monospace",
               fontSize: 20,
               fontWeight: 600,
               color: m.color,
             }}>
               {loading ? '…' : (avg(m.key) ?? '—')}
             </div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: 'var(--muted)', marginTop: 3 }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--muted)', marginTop: 3 }}>
               {m.label}
             </div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: 'var(--muted)' }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--muted)' }}>
               {m.unit}
             </div>
           </div>
@@ -128,30 +128,30 @@ export default function NutritionActualsPanel() {
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border-soft)" vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+              tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
               tickLine={false} axisLine={false}
               tickFormatter={d => { const p = d.split('-'); return `${p[1]}/${p[2]}` }}
               interval="preserveStartEnd"
             />
             <YAxis
               yAxisId="cal"
-              tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+              tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
               tickLine={false} axisLine={false} width={40}
               tickFormatter={v => `${(v / 1000).toFixed(1)}k`}
             />
             <YAxis
               yAxisId="g" orientation="right"
-              tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+              tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
               tickLine={false} axisLine={false} width={28}
               tickFormatter={v => `${v}g`}
             />
             <Tooltip
               contentStyle={{
                 background: 'var(--surface)', border: '1px solid var(--border)',
-                borderRadius: 8, fontFamily: 'DM Mono', fontSize: 11,
+                borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 11,
               }}
             />
-            <Legend wrapperStyle={{ fontFamily: 'DM Mono', fontSize: 10, color: 'var(--muted)' }} />
+            <Legend wrapperStyle={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--muted)' }} />
             <Line yAxisId="cal" type="monotone" dataKey="calories" name="Calories" stroke="var(--run-t)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
             <Line yAxisId="g" type="monotone" dataKey="protein" name="Protein (g)" stroke="var(--swim-t)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
             <Line yAxisId="g" type="monotone" dataKey="carbs" name="Carbs (g)" stroke="var(--bike-t)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />

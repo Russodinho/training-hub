@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid,
@@ -33,12 +33,12 @@ export default function VolumeChart({ data }: VolumeChartProps) {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-soft)" vertical={false} />
         <XAxis
           dataKey="week"
-          tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+          tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
-          tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+          tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
           tickLine={false}
           axisLine={false}
           width={32}
@@ -47,12 +47,12 @@ export default function VolumeChart({ data }: VolumeChartProps) {
         <Tooltip
           contentStyle={{
             background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 8, fontFamily: 'DM Mono', fontSize: 11,
+            borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 11,
           }}
           formatter={(v: number, name: string) => [`${v.toFixed(1)} mi`, name]}
         />
         <Legend
-          wrapperStyle={{ fontFamily: 'DM Mono', fontSize: 10, color: 'var(--muted)' }}
+          wrapperStyle={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--muted)' }}
           iconType="square"
         />
         <Bar dataKey="swim" name="Swim" fill="var(--swim-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { getActiveRace, getDaysToRace } from '@/lib/data'
@@ -177,7 +177,7 @@ export default function SeasonPlanPage() {
         </div>
         <div className="page-header-right">
           {daysOut !== null && daysOut >= 0 ? (
-            <>{active!.race.name.split(' ')[0]} in<br /><strong style={{ fontFamily: "'DM Mono', monospace", fontSize: 20 }}>{daysOut}</strong> days</>
+            <>{active!.race.name.split(' ')[0]} in<br /><strong style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20 }}>{daysOut}</strong> days</>
           ) : active ? `${active.race.name}` : 'Season in progress'}
         </div>
       </div>
@@ -206,12 +206,12 @@ export default function SeasonPlanPage() {
               display: 'flex', alignItems: 'center', gap: 24,
             }}>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 64, fontWeight: 500, lineHeight: 1 }}>{daysOut}</div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>days to race</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 64, fontWeight: 500, lineHeight: 1 }}>{daysOut}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>days to race</div>
               </div>
               <div>
                 <div style={{ fontWeight: 500, fontSize: 18 }}>{active!.race.name}</div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
                   {active!.race.dateLabel} · {active!.race.location}
                 </div>
                 <div className="course-bar" style={{ marginTop: 12 }}>
@@ -276,8 +276,8 @@ export default function SeasonPlanPage() {
                 { seg: '⏱ Total', target: '~1:15–1:30', note: 'Including T1 + T2 · estimated 1:30 for first race' },
               ].map((item, i) => (
                 <div key={i} className="surface-card">
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 500, marginBottom: 4 }}>{item.seg}</div>
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 18, fontWeight: 500, marginBottom: 6 }}>{item.target}</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, fontWeight: 500, marginBottom: 4 }}>{item.seg}</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, fontWeight: 500, marginBottom: 6 }}>{item.target}</div>
                   <div style={{ fontSize: 12, color: 'var(--muted)' }}>{item.note}</div>
                 </div>
               ))}
@@ -334,7 +334,7 @@ export default function SeasonPlanPage() {
                   <span className="stretch-date">{row.date}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 500, fontSize: 13, marginBottom: 2 }}>{row.label}</div>
-                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>{row.target}</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>{row.target}</div>
                     <div style={{ fontSize: 12, color: 'var(--faint)', marginTop: 2 }}>{row.note}</div>
                   </div>
                 </div>

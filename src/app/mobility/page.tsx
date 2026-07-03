@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { MOBILITY_EXERCISES, MOB_ALL_IDS, MOB_YOGA_ONLY_IDS, mobIsYogaNight, mobRequiredIds } from '@/lib/data'
@@ -54,7 +54,7 @@ export default function MobilityPage() {
   if (loading) {
     return (
       <div className="hub-page">
-        <div style={{ textAlign: 'center', padding: 60, fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
+        <div style={{ textAlign: 'center', padding: 60, fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
           Loading...
         </div>
       </div>
@@ -132,12 +132,12 @@ export default function MobilityPage() {
                 </div>
               )}
               {ex.massageGun && (
-                <div style={{ marginTop: 6, fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--faint)' }}>
+                <div style={{ marginTop: 6, fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)' }}>
                   🔫 {ex.massageGun}
                 </div>
               )}
               {isOptional && (
-                <div style={{ marginTop: 6, fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--faint)' }}>
+                <div style={{ marginTop: 6, fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)' }}>
                   Optional tonight (yoga night)
                 </div>
               )}

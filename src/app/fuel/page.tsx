@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useCallback } from 'react'
 import { NUTRITION_TARGETS, NUTRITION_BASELINE } from '@/lib/data'
@@ -719,8 +719,8 @@ export default function FuelPage() {
           <div className="sub">Nutrition targets · meal plans · supplement stack</div>
         </div>
         <div className="page-header-right">
-          Baseline: {NUTRITION_BASELINE.calories} kcal<br />
-          ~{NUTRITION_BASELINE.deficit} kcal/day deficit · ~{NUTRITION_BASELINE.lossPerWeek} lbs/wk
+          TDEE ~{NUTRITION_BASELINE.tdee} · avg {NUTRITION_BASELINE.calories} kcal<br />
+          ~{NUTRITION_BASELINE.deficit} kcal deficit · ~{NUTRITION_BASELINE.lossPerWeek} lb/wk · {NUTRITION_BASELINE.weight} lbs
         </div>
       </div>
 
@@ -755,18 +755,18 @@ export default function FuelPage() {
               }}
               onClick={() => document.getElementById('csv-input-fuel')?.click()}
             >
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
                 {uploading ? 'Uploading...' : 'Drag & drop Cronometer daily summary CSV · or click to select'}
               </div>
               {uploadMsg && (
-                <div style={{ marginTop: 8, fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--lift-t)' }}>
+                <div style={{ marginTop: 8, fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--lift-t)' }}>
                   {uploadMsg}
                 </div>
               )}
               <input id="csv-input-fuel" type="file" accept=".csv" style={{ display: 'none' }}
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
             </div>
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>
               Export from Cronometer: Trends → Export → Daily Summary. CSV columns: Date, Energy (kcal), Protein (g), Fat (g), Carbs (g), Fiber (g)
             </div>
           </div>
@@ -777,60 +777,122 @@ export default function FuelPage() {
             <div className="chart-card"><MacroAccuracyPanel /></div>
           </div>
 
+          {/* Lever system */}
+          <div style={{ marginBottom: 24 }}>
+            <div className="section-hdr"><span className="ptitle">Daily lever system</span></div>
+            <div className="surface-card" style={{ marginBottom: 10 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+                {[
+                  { label: 'LOW days', color: 'var(--swim)', desc: 'Tue / Wed / Fri / Sun', rule: 'Baseline − banana at breakfast', delta: '−125 cal · −28C', days: '2,100 cal' },
+                  { label: 'HIGH days', color: 'var(--strength)', desc: 'Mon / Thu', rule: 'Baseline + rice cakes at lunch', delta: '+70 cal · +18C', days: '2,290 cal' },
+                  { label: 'Saturday', color: 'var(--bike)', desc: 'Bike / Surf day', rule: 'Breakfast + lunch on plan. One cheat meal (dinner/going out). No cheat snacking before or after. No tracking.', delta: 'Flex', days: 'Flex' },
+                ].map(lever => (
+                  <div key={lever.label} style={{ borderLeft: `3px solid ${lever.color}`, paddingLeft: 14 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: lever.color, marginBottom: 3 }}>{lever.label}</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', marginBottom: 4 }}>{lever.desc}</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 3 }}>{lever.days}</div>
+                    <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 4 }}>{lever.rule}</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: lever.color }}>{lever.delta}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', lineHeight: 1.6 }}>
+              Weekly avg ~{NUTRITION_BASELINE.calories} kcal · ~{NUTRITION_BASELINE.deficit} kcal/day deficit from TDEE {NUTRITION_BASELINE.tdee} · projected ~{NUTRITION_BASELINE.lossPerWeek} lb/week fat loss.
+              As tri training volume increases Jul–Aug, TDEE rises naturally — deficit widens without changing food.
+            </div>
+          </div>
+
+          {/* Base foods */}
+          <div style={{ marginBottom: 24 }}>
+            <div className="section-hdr"><span className="ptitle">Base foods (unchanged daily)</span></div>
+            <div className="surface-card">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '4px 24px' }}>
+                {[
+                  { time: 'Pre-workout (fasted)', foods: 'Coffee · collagen peptides · stim-free preworkout · electrolytes · creatine 5g' },
+                  { time: 'Breakfast (post-workout)', foods: 'Fairlife 2% milk 2 cup · eggs 3 large · honey 31g (never cut) · Fage 0% Greek yogurt 170g · Quaker oats + flax/chia · blueberries 100g · egg whites 92g · ketchup 1 tbsp' },
+                  { time: 'Breakfast — HIGH days only', foods: '+ Banana (adds ~125 cal / 28C)' },
+                  { time: 'Lunch', foods: 'Stuffed peppers — 1 full recipe serving · 562 cal / 55g P / 39g C / 21g F' },
+                  { time: 'Lunch — HIGH days only', foods: '+ Rice cakes (adds ~70 cal / 18C)' },
+                  { time: 'Dinner', foods: 'Chicken breast 5 oz · cabbage 100g · Goya cannellini beans 100g' },
+                  { time: 'Supplements', foods: 'As logged in Cronometer — see Supplements tab' },
+                ].map((row, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 10, padding: '7px 0', borderBottom: '0.5px solid var(--border)', fontSize: 12 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.04em', minWidth: 120, paddingTop: 1, flexShrink: 0 }}>{row.time}</div>
+                    <div style={{ color: 'var(--text)', lineHeight: 1.5 }}>{row.foods}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {/* Daily targets by day */}
           <div style={{ marginBottom: 24 }}>
             <div className="section-hdr"><span className="ptitle">Daily targets by day</span></div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 10 }}>
-              {NUTRITION_TARGETS.map(day => (
-                <div key={day.day} className="nutrition-day">
-                  <div className="nutrition-day-header">
-                    <div>
-                      <div className="nutrition-day-name">{day.day}</div>
-                      <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>{day.activity}</div>
+              {NUTRITION_TARGETS.map(day => {
+                const isFlex = day.calories === 0
+                return (
+                  <div key={day.day} className="nutrition-day">
+                    <div className="nutrition-day-header">
+                      <div>
+                        <div className="nutrition-day-name">{day.day}</div>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>{day.activity}</div>
+                      </div>
+                      {isFlex ? (
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--bike)', fontWeight: 500 }}>Flex</div>
+                      ) : (
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20, fontWeight: 500 }}>{day.calories.toLocaleString()}</div>
+                      )}
                     </div>
-                    <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 20, fontWeight: 500 }}>{day.calories.toLocaleString()}</div>
-                  </div>
-                  <div className="macro-strip" style={{ marginBottom: 8 }}>
-                    <div className="macro-chip"><span>P</span>{day.protein}g</div>
-                    <div className="macro-chip"><span>C</span>{day.carbs}g</div>
-                    <div className="macro-chip"><span>F</span>{day.fat}g</div>
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>{day.notes}</div>
-                  <button className="hub-btn-ghost" style={{ marginTop: 10, fontSize: 10 }}
-                    onClick={() => setExpanded(expanded === day.day ? null : day.day)}>
-                    {expanded === day.day ? '▲ Hide meal plan' : '▼ Show meal plan'}
-                  </button>
-                  {expanded === day.day && MEAL_PLANS[day.day] && (
-                    <div style={{ marginTop: 10 }}>
-                      {MEAL_PLANS[day.day].map((meal, i) => (
-                        <div key={i} style={{ padding: '7px 0', borderBottom: '1px solid var(--border-soft)', fontSize: 13 }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>{meal.meal}</span>
-                            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11 }}>{meal.kcal} kcal</span>
+                    {!isFlex && (
+                      <div className="macro-strip" style={{ marginBottom: 8 }}>
+                        <div className="macro-chip"><span>P</span>{day.protein}g</div>
+                        <div className="macro-chip"><span>C</span>{day.carbs}g</div>
+                        <div className="macro-chip"><span>F</span>{day.fat}g</div>
+                      </div>
+                    )}
+                    <div style={{ fontSize: 12, color: 'var(--muted)' }}>{day.notes}</div>
+                    {!isFlex && (
+                      <>
+                        <button className="hub-btn-ghost" style={{ marginTop: 10, fontSize: 10 }}
+                          onClick={() => setExpanded(expanded === day.day ? null : day.day)}>
+                          {expanded === day.day ? '▲ Hide meal plan' : '▼ Show meal plan'}
+                        </button>
+                        {expanded === day.day && MEAL_PLANS[day.day] && (
+                          <div style={{ marginTop: 10 }}>
+                            {MEAL_PLANS[day.day].map((meal, i) => (
+                              <div key={i} style={{ padding: '7px 0', borderBottom: '0.5px solid var(--border)', fontSize: 12 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
+                                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>{meal.meal}</span>
+                                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11 }}>{meal.kcal} kcal</span>
+                                </div>
+                                <div style={{ marginBottom: 4 }}>{meal.foods}</div>
+                                <div style={{ display: 'flex', gap: 10, fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>
+                                  <span>P {meal.p}g</span><span>C {meal.c}g</span><span>F {meal.f}g</span>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                          <div style={{ marginBottom: 4 }}>{meal.foods}</div>
-                          <div style={{ display: 'flex', gap: 10, fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>
-                            <span>P {meal.p}g</span><span>C {meal.c}g</span><span>F {meal.f}g</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
+                        )}
+                      </>
+                    )}
+                  </div>
+                )
+              })}
             </div>
           </div>
 
-          {/* Nutrition strategy notes */}
-          <div className="section-hdr"><span className="ptitle">Nutrition strategy</span></div>
+          {/* Strategy notes */}
+          <div className="section-hdr"><span className="ptitle">Strategy notes</span></div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
             {[
-              { title: '🥩 Protein target: 185–190g/day', body: 'Prioritize protein at every meal — minimum 40g per sitting. Whey + collagen post-workout. Cottage cheese before bed. Never skip the protein shake.' },
-              { title: '🍚 Carb cycling', body: 'Highest carbs on Monday (310g, soccer + Upper A) and lowest on Wednesday (205g, swim only). Carbs track activity load — not arbitrary.' },
-              { title: '⚡ Pre-workout nutrition', body: 'Banana + coffee 45–60 min before gym. Collagen 20g first thing every morning. Full meal 90 min+ before any tri session.' },
-              { title: '💊 Supplements timing', body: 'Creatine daily (5g with breakfast). Vitamin D3 with breakfast. Magnesium glycinate before bed. Zinc at dinner. See Supplements tab for full stack.' },
-              { title: '🏊 Race-day fueling', body: 'Oats + banana 2–2.5 hrs before race. Nothing heavy within 90 min. Electrolytes throughout. Gel if race > 1.5 hrs (Stone Harbor+).' },
-              { title: '📊 Tracking method', body: 'Cronometer daily summary export. Upload CSV here for tracking actuals vs targets. Progress chart shows 7-day rolling average for each macro.' },
+              { title: '🥩 Protein: 195–200g every day', body: 'Non-negotiable regardless of day type. Eggs + egg whites + Greek yogurt at breakfast. Chicken at dinner. Stuffed peppers at lunch. This number doesn\'t change.' },
+              { title: '🍚 High/low carb lever', body: 'High days (Mon/Thu): add banana to breakfast + rice cakes at lunch. Low days: skip both. Everything else stays identical. One switch, not a full meal change.' },
+              { title: '🍯 Honey stays — always', body: '31g honey in breakfast is untouched. It\'s pre/intra workout carbs that matter for performance and compliance. Not where to cut.' },
+              { title: '🚴 As training ramps up', body: 'TDEE rises naturally Jul–Aug as volume increases. Food stays the same. Deficit widens automatically. No need to adjust targets — just log and watch the trend.' },
+              { title: '🏊 Race-day fueling', body: 'Oats + banana 2–2.5 hrs pre-race. Nothing heavy within 90 min. Electrolytes throughout. Gel if race > 1.5 hrs (Stone Harbor+). Breakfast is already the race-day template.' },
+              { title: '📊 Tracking', body: 'Cronometer daily summary CSV. Upload above for actuals vs targets. Goal is 14–16% body fat, sustainable year-round — not a crash cut.' },
             ].map((note, i) => (
               <div key={i} className="note">
                 <div style={{ fontWeight: 500, marginBottom: 6 }}>{note.title}</div>
@@ -844,7 +906,7 @@ export default function FuelPage() {
       {/* ── MEALS TAB ── */}
       {tab === 'meals' && (
         <>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 12 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 12 }}>
             Recomp · 189g P avg · 241g C avg · 72g F avg · 5 options per meal
           </div>
 
@@ -880,7 +942,7 @@ export default function FuelPage() {
       {tab === 'supplements' && (
         <>
           <div style={{ marginBottom: 8 }}>
-            <div className="page-header-right" style={{ marginBottom: 16, fontFamily: "'DM Mono', monospace", fontSize: 11 }}>
+            <div className="page-header-right" style={{ marginBottom: 16, fontFamily: "'IBM Plex Mono', monospace", fontSize: 11 }}>
               6 daily supplements · + race-day additions
             </div>
           </div>

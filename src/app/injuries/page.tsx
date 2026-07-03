@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -290,7 +290,7 @@ export default function InjuriesPage() {
       <div className="inj-grid">
         {activeInjuries.map(renderCard)}
         {activeInjuries.length === 0 && (
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)', padding: '20px 0' }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)', padding: '20px 0' }}>
             No active injuries — all clear 🟢
           </div>
         )}
@@ -318,12 +318,12 @@ export default function InjuriesPage() {
                 { label: 'Treatment', val: newForm.treatment, set: (v: string) => setNewForm(f => ({ ...f, treatment: v })), placeholder: 'e.g. Ice, stretching' },
               ].map(field => (
                 <div key={field.label}>
-                  <label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>{field.label}</label>
+                  <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>{field.label}</label>
                   <input type={field.type || 'text'} placeholder={field.placeholder} value={field.val} onChange={e => field.set(e.target.value)} />
                 </div>
               ))}
               <div>
-                <label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Initial status</label>
+                <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Initial status</label>
                 <select value={newForm.status} onChange={e => setNewForm(f => ({ ...f, status: e.target.value }))}>
                   <option value="monitoring">Monitoring</option>
                   <option value="improving">Improving</option>
@@ -333,7 +333,7 @@ export default function InjuriesPage() {
               </div>
             </div>
             <div style={{ marginBottom: 10 }}>
-              <label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes</label>
+              <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes</label>
               <input type="text" placeholder="Additional context..." value={newForm.notes} onChange={e => setNewForm(f => ({ ...f, notes: e.target.value }))} />
             </div>
             <button className="hub-btn" onClick={addInjury}>Log Injury</button>
@@ -346,10 +346,10 @@ export default function InjuriesPage() {
         <div style={{ marginTop: 32 }}>
           <div className="section-hdr" style={{ cursor: 'pointer' }} onClick={() => setArchivedOpen(o => !o)}>
             <span className="ptitle">Past Injuries</span>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', marginLeft: 8 }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', marginLeft: 8 }}>
               {archivedInjuries.length} archived
             </span>
-            <span style={{ marginLeft: 'auto', fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
+            <span style={{ marginLeft: 'auto', fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
               {archivedOpen ? '▲ collapse' : '▼ expand'}
             </span>
           </div>
@@ -380,12 +380,12 @@ export default function InjuriesPage() {
                       </span>
                       <span style={{ fontWeight: 500, fontSize: 14, flex: 1 }}>{a.name}</span>
                       {a.since && (
-                        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', flexShrink: 0 }}>
+                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', flexShrink: 0 }}>
                           {formatDate(a.since)} → {formatDate(a.archivedAt)}
                         </span>
                       )}
                       <span style={{
-                        fontFamily: "'DM Mono', monospace", fontSize: 11, fontWeight: 500,
+                        fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, fontWeight: 500,
                         color: 'var(--text)', background: 'var(--bg)', border: '1px solid var(--border)',
                         borderRadius: 6, padding: '2px 8px', flexShrink: 0,
                       }}>
@@ -413,7 +413,7 @@ export default function InjuriesPage() {
 
                         {a.injuryUpdates.length > 0 && (
                           <div style={{ marginTop: 10 }}>
-                            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>
                               Recovery Log ({a.injuryUpdates.length} entries)
                             </div>
                             {a.injuryUpdates.map((u, i) => (

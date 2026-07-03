@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { SCHEDULE } from '@/lib/schedule'
@@ -28,7 +28,7 @@ export default function CollapsibleSchedule() {
           display: 'flex', alignItems: 'center', gap: 8, width: '100%',
           background: 'var(--surface)', border: '1px solid var(--border)',
           borderRadius: open ? '10px 10px 0 0' : 10, padding: '12px 16px',
-          fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--text)',
+          fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--text)',
           cursor: 'pointer', textAlign: 'left',
         }}
       >

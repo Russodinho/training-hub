@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
@@ -61,7 +61,7 @@ export default function BodyCompWidget() {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-soft)" vertical={false} />
         <XAxis
           dataKey="date"
-          tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+          tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
           tickLine={false} axisLine={false}
           tickFormatter={d => { const p = d.split('-'); return `${p[1]}/${p[2]}` }}
           interval="preserveStartEnd"
@@ -69,14 +69,14 @@ export default function BodyCompWidget() {
         <YAxis
           yAxisId="w"
           domain={[wMin, wMax]}
-          tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+          tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
           tickLine={false} axisLine={false} width={36}
         />
         {hasBf && (
           <YAxis
             yAxisId="bf"
             orientation="right"
-            tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+            tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
             tickLine={false} axisLine={false} width={32}
             tickFormatter={v => `${v}%`}
           />
@@ -84,13 +84,13 @@ export default function BodyCompWidget() {
         <Tooltip
           contentStyle={{
             background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 8, fontFamily: 'DM Mono', fontSize: 11,
+            borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 11,
           }}
           formatter={(v: number, name: string) =>
             name === 'Weight (lbs)' ? [`${v} lbs`, name] : [`${v}%`, name]
           }
         />
-        <Legend wrapperStyle={{ fontFamily: 'DM Mono', fontSize: 10, color: 'var(--muted)' }} />
+        <Legend wrapperStyle={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--muted)' }} />
         <Line
           yAxisId="w" type="monotone" dataKey="weight_lbs" name="Weight (lbs)"
           stroke="var(--run-t)" strokeWidth={2} dot={false} activeDot={{ r: 4 }}

@@ -316,20 +316,24 @@ export interface NutritionDay {
 }
 
 export const NUTRITION_TARGETS: NutritionDay[] = [
-  { day: 'Monday', activity: 'Upper A + Soccer', calories: 2900, protein: 190, carbs: 310, fat: 75, notes: 'Biggest day — most activity' },
-  { day: 'Tuesday', activity: 'Lower A', calories: 2400, protein: 190, carbs: 220, fat: 72, notes: 'Lower body only' },
-  { day: 'Wednesday', activity: 'Swim', calories: 2300, protein: 188, carbs: 205, fat: 70, notes: 'Smallest gap day' },
-  { day: 'Thursday', activity: 'Upper B + Run', calories: 2700, protein: 190, carbs: 280, fat: 73, notes: 'Upper + evening run' },
-  { day: 'Friday', activity: 'Lower B', calories: 2500, protein: 186, carbs: 260, fat: 75, notes: 'Lower B (minimal cardio)' },
-  { day: 'Saturday', activity: 'Bike / Brick', calories: 2500, protein: 185, carbs: 250, fat: 76, notes: 'Bike or brick session' },
-  { day: 'Sunday', activity: 'Soccer + Recovery', calories: 2400, protein: 187, carbs: 245, fat: 71, notes: 'Soccer + recovery run' },
+  { day: 'Monday',    activity: 'Upper A + Soccer',   calories: 2290, protein: 200, carbs: 230, fat: 65, notes: 'HIGH — Baseline + rice cakes at lunch' },
+  { day: 'Tuesday',   activity: 'Lower A',            calories: 2100, protein: 200, carbs: 150, fat: 60, notes: 'LOW — Baseline minus banana' },
+  { day: 'Wednesday', activity: 'Swim',               calories: 2100, protein: 195, carbs: 150, fat: 58, notes: 'LOW — Baseline minus banana' },
+  { day: 'Thursday',  activity: 'Upper B + Run',      calories: 2290, protein: 200, carbs: 210, fat: 62, notes: 'HIGH — Baseline + rice cakes at lunch' },
+  { day: 'Friday',    activity: 'Lower B',            calories: 2100, protein: 200, carbs: 150, fat: 60, notes: 'LOW — Baseline minus banana' },
+  { day: 'Saturday',  activity: 'Bike / Surf',        calories: 0,    protein: 0,   carbs: 0,   fat: 0,  notes: 'Breakfast + lunch on plan. One cheat meal (dinner/going out). No tracking cheat meal. No cheat snacking before or after.' },
+  { day: 'Sunday',    activity: 'Rest / Hike / Garden', calories: 2100, protein: 195, carbs: 150, fat: 58, notes: 'LOW — Baseline minus banana. Soccer returns ~Aug 15 — same targets.' },
 ]
 
 export const NUTRITION_BASELINE = {
-  calories: 2299,
-  protein: 185,
-  carbs: 224,
-  fat: 77,
-  deficit: 456,
+  calories: 2130,
+  baseCalories: 2222,
+  protein: 198,
+  carbs: 165,
+  fat: 60,
+  tdee: 2600,
+  deficit: 470,
   lossPerWeek: 0.9,
+  weight: 198,
+  goalBf: '14–16%',
 }

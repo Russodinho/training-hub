@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
@@ -37,7 +37,7 @@ function getSupabase() {
 }
 
 const SELECTOR_BTN: React.CSSProperties = {
-  fontFamily: "'DM Mono', monospace",
+  fontFamily: "'IBM Plex Mono', monospace",
   fontSize: 11,
   padding: '3px 10px',
   borderRadius: 6,
@@ -116,7 +116,7 @@ export default function MacroAccuracyPanel() {
       </div>
 
       {loading ? (
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)', padding: '20px 0' }}>Loading…</div>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)', padding: '20px 0' }}>Loading…</div>
       ) : data.length === 0 ? (
         <div className="empty-state" style={{ padding: '24px 16px' }}>
           <div className="empty-icon">🎯</div>
@@ -132,12 +132,12 @@ export default function MacroAccuracyPanel() {
             return (
               <div key={m.key}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, fontWeight: 500 }}>{m.label}</span>
-                  <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, fontWeight: 500 }}>{m.label}</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
                     {s.avgActual} / {s.avgTarget} {m.unit} avg
                   </span>
                   <span style={{
-                    fontFamily: "'DM Mono', monospace",
+                    fontFamily: "'IBM Plex Mono', monospace",
                     fontSize: 14,
                     fontWeight: 700,
                     color: overTarget ? 'var(--lift-t)' : m.color,
@@ -156,7 +156,7 @@ export default function MacroAccuracyPanel() {
                     transition: 'width 0.5s ease',
                   }} />
                 </div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>
                   {s.daysHit} / {s.total} days ≥ 90% of target
                 </div>
               </div>

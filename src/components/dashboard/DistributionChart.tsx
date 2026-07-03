@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 
@@ -36,7 +36,7 @@ export default function DistributionChart({ data }: DistributionChartProps) {
         <Tooltip
           contentStyle={{
             background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 8, fontFamily: 'DM Mono', fontSize: 11,
+            borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 11,
           }}
           formatter={(v: number) => [`${v} sessions`, '']}
         />
@@ -44,7 +44,7 @@ export default function DistributionChart({ data }: DistributionChartProps) {
           layout="vertical"
           align="right"
           verticalAlign="middle"
-          wrapperStyle={{ fontFamily: 'DM Mono', fontSize: 10, color: 'var(--muted)' }}
+          wrapperStyle={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--muted)' }}
           iconType="circle"
           iconSize={8}
         />

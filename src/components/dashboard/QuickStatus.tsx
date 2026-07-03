@@ -1,4 +1,4 @@
-import { getActiveRace, getDaysToRace, RACES } from '@/lib/data'
+﻿import { getActiveRace, getDaysToRace, RACES } from '@/lib/data'
 
 interface QuickStatusProps {
   mobilityStreak: number
@@ -25,7 +25,7 @@ export default function QuickStatus({ mobilityStreak, mobilityToday }: QuickStat
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {/* Today's schedule */}
       <div className="surface-card">
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
           Today · {todaySchedule.label}
         </div>
         {todaySchedule.workouts.map((w, i) => (
@@ -37,23 +37,23 @@ export default function QuickStatus({ mobilityStreak, mobilityToday }: QuickStat
 
       {/* Mobility status */}
       <div className="surface-card">
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
           Mobility tonight
         </div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 22, fontWeight: 500 }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 22, fontWeight: 500 }}>
               {mobilityToday.done}/{mobilityToday.total}
             </span>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginLeft: 8 }}>exercises</span>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginLeft: 8 }}>exercises</span>
           </div>
           {mobilityStreak > 0 && (
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
               🔥 {mobilityStreak}d streak
             </span>
           )}
         </div>
-        <a href="/mobility" style={{ display: 'block', marginTop: 8, fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', textDecoration: 'underline' }}>
+        <a href="/mobility" style={{ display: 'block', marginTop: 8, fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', textDecoration: 'underline' }}>
           Open checklist →
         </a>
       </div>
@@ -61,12 +61,12 @@ export default function QuickStatus({ mobilityStreak, mobilityToday }: QuickStat
       {/* Next race */}
       {active && (
         <div className="surface-card">
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Next race
           </div>
           <div style={{ fontWeight: 500, fontSize: 14, marginBottom: 4 }}>{active.race.name}</div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>{active.race.dateLabel}</div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>{active.race.dateLabel}</div>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
             {active.race.distances.swim} swim · {active.race.distances.bike} bike · {active.race.distances.run} run
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function QuickStatus({ mobilityStreak, mobilityToday }: QuickStat
 
       {/* Upcoming races */}
       <div className="surface-card">
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
           Season at a glance
         </div>
         {RACES.map(race => {
@@ -82,11 +82,11 @@ export default function QuickStatus({ mobilityStreak, mobilityToday }: QuickStat
           const isPast = d < -5
           return (
             <div key={race.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0', borderBottom: '1px solid var(--border-soft)', opacity: isPast ? 0.4 : 1 }}>
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', minWidth: 55, textAlign: 'right' }}>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', minWidth: 55, textAlign: 'right' }}>
                 {isPast ? 'Done' : d === 0 ? 'Today' : d > 0 ? `${d}d` : ''}
               </span>
               <span style={{ fontSize: 12 }}>{race.name.split(' ').slice(0, 2).join(' ')}</span>
-              <span style={{ marginLeft: 'auto', fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>
+              <span style={{ marginLeft: 'auto', fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>
                 {new Date(race.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </span>
             </div>

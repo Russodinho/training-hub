@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { RACES, getDaysToRace } from '@/lib/data'
@@ -126,7 +126,7 @@ export default function RaceCalendarPage() {
       {/* Add race form */}
       {showForm && (
         <div className="surface-card" style={{ marginBottom: 20 }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             Add race
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10, marginBottom: 10 }}>
@@ -139,7 +139,7 @@ export default function RaceCalendarPage() {
               { label: 'Run distance', key: 'run', placeholder: '5K' },
             ].map(field => (
               <div key={field.key}>
-                <label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>{field.label}</label>
+                <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>{field.label}</label>
                 <input
                   type={field.type || 'text'}
                   placeholder={field.placeholder}
@@ -149,7 +149,7 @@ export default function RaceCalendarPage() {
               </div>
             ))}
             <div>
-              <label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Race type</label>
+              <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Race type</label>
               <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as Race['type'] }))}>
                 <option value="sprint">Sprint</option>
                 <option value="olympic">Olympic</option>
@@ -158,7 +158,7 @@ export default function RaceCalendarPage() {
             </div>
           </div>
           <div style={{ marginBottom: 10 }}>
-            <label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes / wave info</label>
+            <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes / wave info</label>
             <input
               type="text"
               placeholder="e.g. Wave 7:30am · Blue caps · Men 30-39"
@@ -227,7 +227,7 @@ export default function RaceCalendarPage() {
               </div>
 
               {!isPast && daysOut >= 0 && (
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
                   {daysOut === 0 ? 'Race day!' : `${daysOut} days out`}
                 </div>
               )}

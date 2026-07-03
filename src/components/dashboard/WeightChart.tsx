@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -35,7 +35,7 @@ export default function WeightChart({ data }: WeightChartProps) {
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-soft)" vertical={false} />
         <XAxis
           dataKey="date"
-          tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+          tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
           tickLine={false}
           axisLine={false}
           tickFormatter={d => {
@@ -46,7 +46,7 @@ export default function WeightChart({ data }: WeightChartProps) {
         />
         <YAxis
           domain={[min, max]}
-          tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+          tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
           tickLine={false}
           axisLine={false}
           tickFormatter={v => `${v}`}
@@ -55,7 +55,7 @@ export default function WeightChart({ data }: WeightChartProps) {
         <Tooltip
           contentStyle={{
             background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 8, fontFamily: 'DM Mono', fontSize: 11,
+            borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 11,
           }}
           formatter={(v: number) => [`${v} lbs`, 'Weight']}
           labelFormatter={l => l}

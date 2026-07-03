@@ -1,4 +1,4 @@
-export default function StretchGoalsPage() {
+﻿export default function StretchGoalsPage() {
   return (
     <div className="hub-page">
       <div className="page-header">
@@ -53,7 +53,7 @@ export default function StretchGoalsPage() {
               <span className="stretch-date">{row.date}</span>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 500, fontSize: 13, marginBottom: 2 }}>{row.label}</div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>{row.target}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>{row.target}</div>
                 <div style={{ fontSize: 12, color: 'var(--faint)', marginTop: 2 }}>{row.note}</div>
               </div>
             </div>

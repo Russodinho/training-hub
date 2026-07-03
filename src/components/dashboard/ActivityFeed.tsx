@@ -1,4 +1,4 @@
-import { StravaActivity } from '@/lib/supabase'
+﻿import { StravaActivity } from '@/lib/supabase'
 import { activityTypeIcon, formatDistance, formatTime } from '@/lib/strava'
 
 interface ActivityFeedProps {
@@ -31,7 +31,7 @@ export default function ActivityFeed({ activities }: ActivityFeedProps) {
             <div className="activity-type-icon">{activityTypeIcon(act.activity_type)}</div>
             <div>
               <div className="activity-name">{act.name || act.activity_type}</div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>
                 {date}
               </div>
             </div>

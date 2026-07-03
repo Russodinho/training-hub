@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import type { WorkoutSet } from '@/lib/workoutsParser'
@@ -48,23 +48,23 @@ function ExerciseRow({ ex }: { ex: WorkoutSet }) {
         <div>
           <span style={{ fontSize: 13, fontWeight: 500 }}>{ex.exercise}</span>
           {ex.section && (
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: 'var(--muted)', marginLeft: 6, textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--muted)', marginLeft: 6, textTransform: 'uppercase' }}>
               {ex.section}
             </span>
           )}
         </div>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
+        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
           {ex.working_sets ? `${ex.working_sets}×` : ''}{ex.reps_hit || ex.target_reps || ''}
         </span>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 600, color: 'var(--lift-t)', minWidth: 56, textAlign: 'right' }}>
+        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 600, color: 'var(--lift-t)', minWidth: 56, textAlign: 'right' }}>
           {ex.load ? `${ex.load} lbs` : '—'}
         </span>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: rpeColor(ex.rpe), minWidth: 38, textAlign: 'right' }}>
+        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: rpeColor(ex.rpe), minWidth: 38, textAlign: 'right' }}>
           {ex.rpe ? `RPE ${ex.rpe}` : ''}
         </span>
       </div>
       {open && hasDetails && (
-        <div style={{ marginTop: 5, fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', lineHeight: 1.5 }}>
+        <div style={{ marginTop: 5, fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', lineHeight: 1.5 }}>
           {ex.reps_hit && <div>Reps hit: {ex.reps_hit}</div>}
           {ex.target_reps && <div>Target: {ex.target_reps}</div>}
           {ex.notes && <div style={{ marginTop: 3, color: 'var(--text)', opacity: 0.7 }}>{ex.notes}</div>}
@@ -86,19 +86,19 @@ function DayCard({ day, exercises }: { day: string; exercises: WorkoutSet[] }) {
     <div className="tracker-card" style={{ marginBottom: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
         <div>
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, fontWeight: 600 }}>{day}</span>
-          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: DAY_SESSION_COLOR[day] ?? 'var(--muted)', marginLeft: 8 }}>
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 600 }}>{day}</span>
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: DAY_SESSION_COLOR[day] ?? 'var(--muted)', marginLeft: 8 }}>
             {session}
           </span>
         </div>
         <div style={{ display: 'flex', gap: 14 }}>
           {totalLoad > 0 && (
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textAlign: 'right' }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', textAlign: 'right' }}>
               <span style={{ color: 'var(--lift-t)', fontWeight: 600 }}>{totalLoad.toLocaleString()}</span> total lbs
             </div>
           )}
           {avgRpe && (
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textAlign: 'right' }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', textAlign: 'right' }}>
               <span style={{ color: rpeColor(avgRpe), fontWeight: 600 }}>RPE {avgRpe}</span> avg
             </div>
           )}
@@ -113,7 +113,7 @@ export default function SessionBrowser({ byWeekDay, weeks }: Props) {
   const [activeWeek, setActiveWeek] = useState(weeks[weeks.length - 1] ?? 1)
 
   const TAB: React.CSSProperties = {
-    fontFamily: "'DM Mono', monospace",
+    fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 11,
     padding: '5px 12px',
     borderRadius: 6,

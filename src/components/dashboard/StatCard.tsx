@@ -8,10 +8,10 @@ interface StatCardProps {
 export default function StatCard({ value, label, sub, accent }: StatCardProps) {
   return (
     <div className="stat-card">
+      <div className="stat-card-lbl">{label}</div>
       <div className="stat-card-val" style={accent ? { color: accent } : {}}>
         {value}
       </div>
-      <div className="stat-card-lbl">{label}</div>
       {sub && <div className="stat-card-sub">{sub}</div>}
     </div>
   )

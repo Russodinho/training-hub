@@ -1,4 +1,4 @@
-import { getActiveRace, getDaysToRace, RACES, mobRequiredIds } from '@/lib/data'
+﻿import { getActiveRace, getDaysToRace, RACES, mobRequiredIds } from '@/lib/data'
 import { getRecentActivities, getActivitiesForWeeks, getNutritionActuals, getMobilityStreak } from '@/lib/supabase'
 import { getTodaySchedule } from '@/lib/schedule'
 import StatCard from '@/components/dashboard/StatCard'
@@ -157,7 +157,7 @@ export default async function DashboardPage() {
         <div style={{ marginBottom: 16 }}>
           <div className="section-hdr">
             <span className="ptitle">Today · {todayName}</span>
-            <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', marginLeft: 8 }}>{todaySchedule.tag}</span>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', marginLeft: 8 }}>{todaySchedule.tag}</span>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {todaySchedule.blocks
@@ -176,56 +176,56 @@ export default async function DashboardPage() {
       <div className="chart-row" style={{ marginBottom: 16 }}>
         {/* Mobility widget */}
         <div className="surface-card" style={{ flex: 1 }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Mobility tonight
           </div>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
             <div>
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 22, fontWeight: 500 }}>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 22, fontWeight: 500 }}>
                 {mobilityTodayDone}/{required.length}
               </span>
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginLeft: 8 }}>exercises</span>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginLeft: 8 }}>exercises</span>
             </div>
             {streak > 0 && (
-              <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
                 🔥 {streak}d streak
               </span>
             )}
           </div>
-          <a href="/mobility" style={{ display: 'block', fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--text)', textDecoration: 'none', padding: '6px 12px', background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)', textAlign: 'center' }}>
+          <a href="/mobility" style={{ display: 'block', fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--text)', textDecoration: 'none', padding: '6px 12px', background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)', textAlign: 'center' }}>
             Open mobility checklist →
           </a>
         </div>
 
         {/* Recovery placeholder */}
         <div className="surface-card" style={{ flex: 1 }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Recovery
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
             <div style={{ fontSize: 28 }}>🫀</div>
             <div>
               <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 3 }}>Connect Google Health to enable</div>
-              <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', lineHeight: 1.5 }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', lineHeight: 1.5 }}>
                 HRV · resting HR · sleep score · readiness
               </div>
             </div>
           </div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--faint)', fontStyle: 'italic' }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)', fontStyle: 'italic' }}>
             Coming soon
           </div>
         </div>
 
         {/* Wind-down tonight */}
         <div className="surface-card" style={{ flex: 1 }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
             Wind-down tonight
           </div>
           <div style={{ fontSize: 13, marginBottom: 10, lineHeight: 1.5 }}>
             5 passive stretches · ~10 min<br />
             <span style={{ fontSize: 12, color: 'var(--muted)' }}>Legs up wall · twist · child&apos;s pose · 90/90 · neck</span>
           </div>
-          <a href="/wind-down" style={{ display: 'block', fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--text)', textDecoration: 'none', padding: '6px 12px', background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)', textAlign: 'center' }}>
+          <a href="/wind-down" style={{ display: 'block', fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--text)', textDecoration: 'none', padding: '6px 12px', background: 'var(--bg)', borderRadius: 6, border: '1px solid var(--border)', textAlign: 'center' }}>
             Start wind-down →
           </a>
         </div>

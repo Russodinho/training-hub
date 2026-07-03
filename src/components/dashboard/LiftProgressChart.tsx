@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo } from 'react'
 import {
@@ -12,7 +12,7 @@ interface Props {
 }
 
 const SELECTOR: React.CSSProperties = {
-  fontFamily: "'DM Mono', monospace",
+  fontFamily: "'IBM Plex Mono', monospace",
   fontSize: 12,
   padding: '5px 10px',
   borderRadius: 6,
@@ -29,7 +29,7 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: { payl
   return (
     <div style={{
       background: 'var(--surface)', border: '1px solid var(--border)',
-      borderRadius: 8, padding: '10px 14px', fontFamily: 'DM Mono', fontSize: 11,
+      borderRadius: 8, padding: '10px 14px', fontFamily: 'IBM Plex Mono', fontSize: 11,
     }}>
       <div style={{ fontWeight: 600, marginBottom: 4 }}>Week {d.week}</div>
       <div style={{ color: 'var(--lift-t)', fontSize: 14, fontWeight: 700 }}>{d.load} lbs</div>
@@ -64,7 +64,7 @@ export default function LiftProgressChart({ workouts }: Props) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {change !== null && (
             <span style={{
-              fontFamily: "'DM Mono', monospace", fontSize: 11,
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
               color: change > 0 ? 'var(--lift-t)' : change < 0 ? 'var(--race-t)' : 'var(--muted)',
               fontWeight: 600,
             }}>
@@ -103,11 +103,11 @@ export default function LiftProgressChart({ workouts }: Props) {
                 textAlign: 'center', padding: '8px 4px',
                 background: 'var(--bg)', borderRadius: 8, border: '1px solid var(--border-soft)',
               }}>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 18, fontWeight: 600, color: s.color ?? 'var(--lift-t)' }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, fontWeight: 600, color: s.color ?? 'var(--lift-t)' }}>
                   {s.value}
                 </div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: 'var(--muted)', marginTop: 2 }}>{s.label}</div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 9, color: 'var(--muted)' }}>{s.sub}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--muted)', marginTop: 2 }}>{s.label}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--muted)' }}>{s.sub}</div>
               </div>
             ))}
           </div>
@@ -117,13 +117,13 @@ export default function LiftProgressChart({ workouts }: Props) {
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border-soft)" vertical={false} />
               <XAxis
                 dataKey="week"
-                tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+                tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
                 tickLine={false} axisLine={false}
                 tickFormatter={v => `Wk ${v}`}
               />
               <YAxis
                 domain={[yMin, yMax]}
-                tick={{ fontFamily: 'DM Mono', fontSize: 10, fill: 'var(--muted)' }}
+                tick={{ fontFamily: 'IBM Plex Mono', fontSize: 10, fill: 'var(--muted)' }}
                 tickLine={false} axisLine={false} width={40}
                 tickFormatter={v => `${v}`}
               />

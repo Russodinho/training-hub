@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useCallback } from 'react'
 import { NUTRITION_TARGETS, NUTRITION_BASELINE } from '@/lib/data'
@@ -124,11 +124,11 @@ export default function NutritionPage() {
           }}
           onClick={() => document.getElementById('csv-input')?.click()}
         >
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
             {uploading ? 'Uploading...' : 'Drag & drop Cronometer daily summary CSV · or click to select'}
           </div>
           {uploadMsg && (
-            <div style={{ marginTop: 8, fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--lift-t)' }}>
+            <div style={{ marginTop: 8, fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--lift-t)' }}>
               {uploadMsg}
             </div>
           )}
@@ -140,7 +140,7 @@ export default function NutritionPage() {
             onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }}
           />
         </div>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>
           Export from Cronometer: Trends → Export → Daily Summary. CSV columns: Date, Energy (kcal), Protein (g), Fat (g), Carbs (g), Fiber (g)
         </div>
       </div>
@@ -166,9 +166,9 @@ export default function NutritionPage() {
               <div className="nutrition-day-header">
                 <div>
                   <div className="nutrition-day-name">{day.day}</div>
-                  <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>{day.activity}</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>{day.activity}</div>
                 </div>
-                <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 20, fontWeight: 500 }}>{day.calories.toLocaleString()}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20, fontWeight: 500 }}>{day.calories.toLocaleString()}</div>
               </div>
               <div className="macro-strip" style={{ marginBottom: 8 }}>
                 <div className="macro-chip"><span>P</span>{day.protein}g</div>
@@ -191,11 +191,11 @@ export default function NutritionPage() {
                   {MEAL_PLANS[day.day].map((meal, i) => (
                     <div key={i} style={{ padding: '7px 0', borderBottom: '1px solid var(--border-soft)', fontSize: 13 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>{meal.meal}</span>
-                        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: 11 }}>{meal.kcal} kcal</span>
+                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>{meal.meal}</span>
+                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11 }}>{meal.kcal} kcal</span>
                       </div>
                       <div style={{ marginBottom: 4 }}>{meal.foods}</div>
-                      <div style={{ display: 'flex', gap: 10, fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>
+                      <div style={{ display: 'flex', gap: 10, fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>
                         <span>P {meal.p}g</span>
                         <span>C {meal.c}g</span>
                         <span>F {meal.f}g</span>

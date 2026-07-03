@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { fetchSheet, parseProgressSheet } from '@/lib/sheets'
@@ -225,7 +225,7 @@ export default function ProgressPage() {
 
         {/* Upload zone */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 14 }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>
             Upload Cronometer biometrics CSV
           </div>
           <div
@@ -243,11 +243,11 @@ export default function ProgressPage() {
               transition: 'all 0.15s',
             }}
           >
-            <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
               {bioUploading ? 'Uploading…' : 'Drag & drop · or click to select biometrics CSV'}
             </div>
             {bioMsg && (
-              <div style={{ marginTop: 6, fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--lift-t)' }}>
+              <div style={{ marginTop: 6, fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--lift-t)' }}>
                 {bioMsg}
               </div>
             )}
@@ -259,7 +259,7 @@ export default function ProgressPage() {
               onChange={e => { const f = e.target.files?.[0]; if (f) handleBioFile(f) }}
             />
           </div>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', marginTop: 6 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', marginTop: 6 }}>
             Cronometer → Profile → Export Data → Measurements / Biometrics CSV
           </div>
         </div>
@@ -291,10 +291,10 @@ export default function ProgressPage() {
           </div>
         </div>
         <div className="tracker-form">
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Date</label><input type="date" value={wDate} onChange={e => setWDate(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Weight (lbs)</label><input type="number" placeholder="195.5" value={wWeight} onChange={e => setWWeight(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Body Fat %</label><input type="number" placeholder="18.5" value={wBf} onChange={e => setWBf(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes</label><input type="text" placeholder="Morning fasted" value={wNotes} onChange={e => setWNotes(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Date</label><input type="date" value={wDate} onChange={e => setWDate(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Weight (lbs)</label><input type="number" placeholder="195.5" value={wWeight} onChange={e => setWWeight(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Body Fat %</label><input type="number" placeholder="18.5" value={wBf} onChange={e => setWBf(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes</label><input type="text" placeholder="Morning fasted" value={wNotes} onChange={e => setWNotes(e.target.value)} /></div>
           <div style={{ display: 'flex', alignItems: 'flex-end' }}><button className="hub-btn" onClick={logWeight}>Log</button></div>
         </div>
         <div style={{ maxHeight: 150, overflowY: 'auto' }}>
@@ -323,10 +323,10 @@ export default function ProgressPage() {
           <div className="tracker-stat"><div className="tracker-stat-val">—</div><div className="tracker-stat-lbl">Best pace</div></div>
         </div>
         <div className="tracker-form">
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Date</label><input type="date" value={sDate} onChange={e => setSDate(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Distance (m)</label><input type="number" placeholder="200" value={sDist} onChange={e => setSDist(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Time (min)</label><input type="number" placeholder="8.5" value={sTime} onChange={e => setSTime(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes</label><input type="text" placeholder="Easy pace" value={sNotes} onChange={e => setSNotes(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Date</label><input type="date" value={sDate} onChange={e => setSDate(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Distance (m)</label><input type="number" placeholder="200" value={sDist} onChange={e => setSDist(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Time (min)</label><input type="number" placeholder="8.5" value={sTime} onChange={e => setSTime(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes</label><input type="text" placeholder="Easy pace" value={sNotes} onChange={e => setSNotes(e.target.value)} /></div>
           <div style={{ display: 'flex', alignItems: 'flex-end' }}><button className="hub-btn" onClick={logSwim}>Log</button></div>
         </div>
         <div style={{ maxHeight: 120, overflowY: 'auto' }}>
@@ -362,11 +362,11 @@ export default function ProgressPage() {
           </div>
         </div>
         <div className="tracker-form">
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Date</label><input type="date" value={bDate} onChange={e => setBDate(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Distance (mi)</label><input type="number" placeholder="11.5" value={bDist} onChange={e => setBDist(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Time (min)</label><input type="number" placeholder="48" value={bTime} onChange={e => setBTime(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Avg RPM</label><input type="number" placeholder="82" value={bRpm} onChange={e => setBRpm(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Type</label><select value={bType} onChange={e => setBType(e.target.value)}><option value="stationary">Stationary</option><option value="outdoor">Outdoor</option></select></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Date</label><input type="date" value={bDate} onChange={e => setBDate(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Distance (mi)</label><input type="number" placeholder="11.5" value={bDist} onChange={e => setBDist(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Time (min)</label><input type="number" placeholder="48" value={bTime} onChange={e => setBTime(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Avg RPM</label><input type="number" placeholder="82" value={bRpm} onChange={e => setBRpm(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Type</label><select value={bType} onChange={e => setBType(e.target.value)}><option value="stationary">Stationary</option><option value="outdoor">Outdoor</option></select></div>
           <div style={{ display: 'flex', alignItems: 'flex-end' }}><button className="hub-btn" onClick={logBike}>Log</button></div>
         </div>
       </div>
@@ -383,10 +383,10 @@ export default function ProgressPage() {
           <div className="tracker-stat"><div className="tracker-stat-val">—</div><div className="tracker-stat-lbl">Best pace</div></div>
         </div>
         <div className="tracker-form">
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Date</label><input type="date" value={rDate} onChange={e => setRDate(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Distance (km)</label><input type="number" placeholder="5" value={rDist} onChange={e => setRDist(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Time (min)</label><input type="number" placeholder="29" value={rTime} onChange={e => setRTime(e.target.value)} /></div>
-          <div><label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Type</label><select value={rType} onChange={e => setRType(e.target.value)}><option value="easy">Easy</option><option value="tempo">Tempo</option><option value="race">Race pace</option><option value="off-bike">Off bike</option></select></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Date</label><input type="date" value={rDate} onChange={e => setRDate(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Distance (km)</label><input type="number" placeholder="5" value={rDist} onChange={e => setRDist(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Time (min)</label><input type="number" placeholder="29" value={rTime} onChange={e => setRTime(e.target.value)} /></div>
+          <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Type</label><select value={rType} onChange={e => setRType(e.target.value)}><option value="easy">Easy</option><option value="tempo">Tempo</option><option value="race">Race pace</option><option value="off-bike">Off bike</option></select></div>
           <div style={{ display: 'flex', alignItems: 'flex-end' }}><button className="hub-btn" onClick={logRun}>Log</button></div>
         </div>
       </div>
@@ -435,7 +435,7 @@ export default function ProgressPage() {
 
         {/* Log new brick */}
         <div style={{ marginTop: 16, borderTop: '1px solid var(--border)', paddingTop: 14 }}>
-          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 10 }}>Log new brick session</div>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 10 }}>Log new brick session</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 8, marginBottom: 10 }}>
             {[
               { label: 'Date', val: brDate, set: setBrDate, type: 'date' },
@@ -448,7 +448,7 @@ export default function ProgressPage() {
               { label: 'Run time (min)', val: brRunTime, set: setBrRunTime, placeholder: '29' },
             ].map(field => (
               <div key={field.label}>
-                <label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>{field.label}</label>
+                <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>{field.label}</label>
                 <input
                   type={field.type || 'number'}
                   placeholder={field.placeholder}
@@ -458,7 +458,7 @@ export default function ProgressPage() {
               </div>
             ))}
             <div>
-              <label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Location</label>
+              <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Location</label>
               <select value={brLoc} onChange={e => setBrLoc(e.target.value)}>
                 <option value="stationary">Stationary</option>
                 <option value="outdoor">Outdoor</option>
@@ -466,7 +466,7 @@ export default function ProgressPage() {
             </div>
           </div>
           <div style={{ marginBottom: 10 }}>
-            <label style={{ fontFamily: "'DM Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes</label>
+            <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes</label>
             <input type="text" placeholder="How did it feel?" value={brNotes} onChange={e => setBrNotes(e.target.value)} />
           </div>
           <button className="hub-btn" onClick={logBrick}>Log Brick Session</button>
