@@ -10,14 +10,15 @@ const NAV_LINKS = [
   { href: '/race-calendar', label: 'Calendar' },
   { href: '/season-plan', label: 'Season' },
   { href: '/training-log', label: 'Log' },
+  { href: '/log', label: 'Workout' },
   { href: '/fuel', label: 'Fuel' },
+  { href: '/mobility', label: 'Mobility' },
+  { href: '/sleep', label: 'Sleep' },
   { href: '/race-day', label: 'Race Day' },
   { href: '/injuries', label: 'Injuries' },
 ]
 
-const NAV_PLACEHOLDERS = [
-  { label: 'Recovery', soon: true },
-]
+const NAV_PLACEHOLDERS: { label: string; soon: boolean }[] = []
 
 export default function Nav() {
   const pathname = usePathname()

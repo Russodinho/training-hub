@@ -14,6 +14,9 @@ function getSupabase(): SupabaseClient {
   return _supabase
 }
 
+// For use in 'use client' components — called inside useEffect/handlers, never at module load
+export const getSupabaseClient = getSupabase
+
 // Server-side client with service role (only use in API routes / server components)
 export function createServiceClient(): SupabaseClient {
   return createClient(
