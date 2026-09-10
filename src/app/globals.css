@@ -898,10 +898,12 @@ td.ing-name { color: var(--text); }
 }
 
 .sidebar-link {
-  display: block;
-  padding: 7px 20px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 16px 7px 14px;
   font-family: 'Figtree', sans-serif;
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 400;
   color: var(--muted);
   text-decoration: none;
@@ -1004,6 +1006,24 @@ td.ing-name { color: var(--text); }
   transition: color 0.15s;
 }
 .mobile-tab.active { color: var(--strength); }
+
+/* ── Dashboard main grid ── */
+.dash-main-grid {
+  grid-template-columns: 1fr 320px;
+}
+@media (max-width: 900px) {
+  .dash-main-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Timeline row color passthrough ── */
+.timeline-row { color: inherit; }
+.timeline-row.bl-gym    { color: var(--gym-t); }
+.timeline-row.bl-swim   { color: var(--swim-t); }
+.timeline-row.bl-bike   { color: var(--bike-t); }
+.timeline-row.bl-run    { color: var(--run-t); }
+.timeline-row.bl-mob    { color: var(--mob-t); }
+.timeline-row.bl-wind   { color: var(--wind-t); }
+.timeline-row.bl-soccer { color: var(--soccer-t); }
 
 /* ── Responsive breakpoints ── */
 @media (max-width: 768px) {
