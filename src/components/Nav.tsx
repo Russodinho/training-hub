@@ -14,6 +14,7 @@ const NAV_LINKS = [
   { href: '/fuel', label: 'Fuel' },
   { href: '/mobility', label: 'Mobility' },
   { href: '/sleep', label: 'Sleep' },
+  { href: '/cardio', label: 'Cardio' },
   { href: '/race-day', label: 'Race Day' },
   { href: '/injuries', label: 'Injuries' },
 ]
