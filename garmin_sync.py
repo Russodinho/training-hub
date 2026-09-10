@@ -142,6 +142,17 @@ def _pace_from_speed(speed_ms) -> str | None:
     except (TypeError, ValueError, ZeroDivisionError):
         return None
 
+def _to_int(val):
+    """GarminDB often stores whole-number metrics (HR, steps, scores) as SQLite
+    REAL (e.g. 52.0). Postgres' integer input rejects a literal decimal point
+    even when the value is a whole number, so normalize before sending."""
+    if val is None:
+        return None
+    try:
+        return int(round(float(val)))
+    except (TypeError, ValueError):
+        return None
+
 def _get(d: dict, *keys):
     for k in keys:
         v = d.get(k)
@@ -271,12 +282,12 @@ def sync_daily_stats(since: date, sb) -> int:
 
             records.append({
                 'date':             str(day)[:10],
-                'resting_hr':       _get(d, 'resting_hr', 'hr_min'),
-                'steps':            d.get('steps'),
-                'stress_avg':       d.get('stress_avg'),
-                'body_battery_min': d.get('body_battery_min'),
-                'body_battery_max': d.get('body_battery_max'),
-                'sleep_score':      d.get('sleep_score'),
+                'resting_hr':       _to_int(_get(d, 'resting_hr', 'hr_min')),
+                'steps':            _to_int(d.get('steps')),
+                'stress_avg':       _to_int(d.get('stress_avg')),
+                'body_battery_min': _to_int(d.get('body_battery_min')),
+                'body_battery_max': _to_int(d.get('body_battery_max')),
+                'sleep_score':      _to_int(d.get('sleep_score')),
                 'weight_kg':        weight_kg,
             })
 
