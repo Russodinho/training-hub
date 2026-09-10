@@ -12,5 +12,5 @@ Add-Content $logFile "`n=== $timestamp ==="
 # Step 1: download + import + analyze latest from Garmin Connect
 & $python $cli --all --latest --download --import --analyze 2>&1 | Tee-Object -Append -FilePath $logFile
 
-# Step 2: push last 7 days to Supabase
-& $python $sync --days 7 2>&1 | Tee-Object -Append -FilePath $logFile
+# Step 2: push all data to Supabase (upsert is idempotent — safe to run daily)
+& $python $sync --all 2>&1 | Tee-Object -Append -FilePath $logFile
