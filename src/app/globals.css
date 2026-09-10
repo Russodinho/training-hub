@@ -813,3 +813,202 @@ td.ing-name { color: var(--text); }
 .mh-reheat-method.toaster   { color: var(--meal-dinner);   border-color: rgba(136,152,232,0.3); background: rgba(136,152,232,0.08); }
 .mh-reheat-method.airfryer  { color: var(--meal-breakfast);border-color: rgba(240,144,48,0.3);  background: rgba(240,144,48,0.08); }
 .mh-reheat-desc { color: var(--muted); line-height: 1.5; flex: 1; }
+
+/* ══════════════════════════════════════════
+   PHASE 1 — SIDEBAR LAYOUT & DESIGN SYSTEM
+   ══════════════════════════════════════════ */
+
+/* ── New accent tokens ── */
+:root {
+  --amber:    #f59e0b;
+  --amber-bg: rgba(245,158,11,0.10);
+  --amber-bd: rgba(245,158,11,0.25);
+  --violet:    #8b5cf6;
+  --violet-bg: rgba(139,92,246,0.10);
+  --violet-bd: rgba(139,92,246,0.25);
+  --sidebar-w: 220px;
+}
+
+/* ── App shell ── */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.app-content {
+  flex: 1;
+  margin-left: var(--sidebar-w);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-content main { flex: 1; }
+
+/* ── Sidebar ── */
+.app-sidebar {
+  width: var(--sidebar-w);
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--s1);
+  border-right: 0.5px solid var(--border);
+  z-index: 100;
+  scrollbar-width: none;
+}
+.app-sidebar::-webkit-scrollbar { display: none; }
+
+.sidebar-brand {
+  padding: 20px 20px 16px;
+  border-bottom: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-brand-link {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+}
+.sidebar-brand-year { color: var(--strength); }
+
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.sidebar-nav::-webkit-scrollbar { display: none; }
+
+.sidebar-group { margin-bottom: 2px; }
+
+.sidebar-group-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  padding: 12px 20px 4px;
+}
+
+.sidebar-link {
+  display: block;
+  padding: 7px 20px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--muted);
+  text-decoration: none;
+  position: relative;
+  transition: color 0.15s, background 0.15s;
+}
+.sidebar-link:hover {
+  color: var(--text);
+  background: var(--s2);
+}
+.sidebar-link.active {
+  color: var(--text);
+  font-weight: 500;
+  background: var(--s2);
+}
+.sidebar-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  bottom: 5px;
+  width: 2px;
+  background: var(--strength);
+  border-radius: 0 2px 2px 0;
+}
+
+.sidebar-race {
+  padding: 16px 20px;
+  border-top: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-race-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sidebar-race-days { display: flex; align-items: baseline; gap: 4px; }
+.sidebar-race-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--strength);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.sidebar-race-unit {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* ── Mobile top bar ── */
+.mobile-topbar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: var(--s1);
+  border-bottom: 0.5px solid var(--border);
+  padding: 0 16px;
+  align-items: center;
+  z-index: 100;
+}
+
+/* ── Mobile bottom nav ── */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  background: var(--s1);
+  border-top: 0.5px solid var(--border);
+  z-index: 100;
+  padding: 0 4px;
+}
+
+.mobile-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  height: 100%;
+  font-family: 'Figtree', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: color 0.15s;
+}
+.mobile-tab.active { color: var(--strength); }
+
+/* ── Responsive breakpoints ── */
+@media (max-width: 768px) {
+  .app-sidebar      { display: none; }
+  .app-content      { margin-left: 0; padding-top: 48px; padding-bottom: 56px; }
+  .mobile-topbar    { display: flex; }
+  .mobile-bottom-nav{ display: flex; }
+}
