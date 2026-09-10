@@ -18,6 +18,14 @@ import argparse
 import json
 import os
 import sqlite3
+import sys
+
+# Windows' default console codepage (cp1252) can't encode the emoji used in
+# the status messages below, which crashes the script before anything runs
+# (both interactively and under Task Scheduler). Force UTF-8 stdout/stderr.
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, 'reconfigure'):
+        _stream.reconfigure(encoding='utf-8', errors='replace')
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
