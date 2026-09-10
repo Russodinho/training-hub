@@ -1,0 +1,8 @@
+chrome-audit-profile/
+
+# Contains screenshots and measured DOM data of the live app with real
+# personal health/training data — this repo is public, keep these local.
+screenshots/
+detail-observations.json
+meal-probe.json
+observations.json

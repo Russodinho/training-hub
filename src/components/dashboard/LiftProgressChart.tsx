@@ -20,7 +20,8 @@ const SELECTOR: React.CSSProperties = {
   background: 'var(--surface)',
   color: 'var(--text)',
   cursor: 'pointer',
-  minWidth: 240,
+  width: 'auto',
+  maxWidth: '100%',
 }
 
 function CustomTooltip({ active, payload }: { active?: boolean; payload?: { payload: { week: number; load: number; reps_hit: string | null; rpe: string | null; notes: string | null } }[] }) {
@@ -61,7 +62,7 @@ export default function LiftProgressChart({ workouts }: Props) {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
         <div className="chart-card-title" style={{ marginBottom: 0 }}>Lift progress</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="lift-controls" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           {change !== null && (
             <span style={{
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
@@ -92,7 +93,7 @@ export default function LiftProgressChart({ workouts }: Props) {
       ) : (
         <>
           {/* Quick stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 14 }}>
+          <div className="lift-quick-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 14 }}>
             {[
               { label: 'Starting', value: data[0] ? `${data[0].load} lbs` : '—', sub: `Week ${data[0]?.week}` },
               { label: 'Latest', value: data[data.length - 1] ? `${data[data.length - 1].load} lbs` : '—', sub: `Week ${data[data.length - 1]?.week}` },

@@ -45,7 +45,7 @@ const SELECTOR_BTN: React.CSSProperties = {
   cursor: 'pointer',
 }
 
-export default function MacroAccuracyPanel() {
+export default function MacroAccuracyPanel({ onFuelPage = false }: { onFuelPage?: boolean } = {}) {
   const [days, setDays] = useState<DayRange>(30)
   const [data, setData] = useState<NutritionRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -121,7 +121,11 @@ export default function MacroAccuracyPanel() {
         <div className="empty-state" style={{ padding: '24px 16px' }}>
           <div className="empty-icon">🎯</div>
           <div className="empty-title">No data in this range</div>
-          <div>Upload Cronometer CSV on the <a href="/nutrition" className="empty-cta" style={{ display: 'inline' }}>Nutrition page</a>.</div>
+          <div>
+            {onFuelPage
+              ? 'Upload a Cronometer CSV above to see your macro accuracy.'
+              : <>Upload Cronometer CSV on the <a href="/fuel" className="empty-cta" style={{ display: 'inline' }}>Fuel page</a>.</>}
+          </div>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>

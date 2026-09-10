@@ -83,7 +83,7 @@ export default function SleepPage() {
   const totalSteps = PROTOCOL_STEPS.length
 
   return (
-    <div className="hub-page" style={{ maxWidth: 560 }}>
+    <div className="hub-page">
       <div className="page-header">
         <div>
           <h2>Sleep Protocol</h2>

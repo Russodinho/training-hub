@@ -264,7 +264,7 @@ export default function RaceCalendarPage() {
           <span className="ptitle">Open Water Safety Checklist</span>
         </div>
         <div className="surface-card">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '4px 24px' }}>
+          <div className="oa-checklist-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '4px 24px' }}>
             {[
               'Practice sighting before open water races (every 6–8 strokes)',
               'Start wide to avoid washing machine effect',

@@ -1,8 +1,8 @@
 # Training Hub — design handoff for Claude
 
-**Latest review:** [Implementation review and resolved design targets](IMPLEMENTATION_REVIEW.md). Read this first when correcting Claude's implementation. It resolves conflicts between the earlier prose and numbered page boards for the user's request to match those boards.
+**Latest review:** [Live app review with screenshots](review-2/REVIEW.md). This verifies Claude's second pass in the running app and identifies remaining defects. The earlier [implementation review and resolved design targets](IMPLEMENTATION_REVIEW.md) remains the geometry contract; items marked fixed in the live review should not be redone.
 
-**Latest review:** [Implementation review and resolved design targets](IMPLEMENTATION_REVIEW.md). Read this first when correcting Claude's implementation. It resolves conflicts between the earlier prose and numbered page boards for the user's request to match those boards.
+**Latest review:** [Live app review with screenshots](review-2/REVIEW.md). This verifies Claude's second pass in the running app and identifies remaining defects. The earlier [implementation review and resolved design targets](IMPLEMENTATION_REVIEW.md) remains the geometry contract; items marked fixed in the live review should not be redone.
 
 Prepared 2026-09-10. User request: design every page in the visual style of the two supplied Training Hub images, generate the visual assets, and hand the work to Claude to implement the redesign.
 

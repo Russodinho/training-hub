@@ -335,7 +335,7 @@ export default function LogWorkoutPage() {
   }
 
   return (
-    <div className="hub-page" style={{ maxWidth: 600 }}>
+    <div className="hub-page">
       <style>{`
         .log-input:focus { border-color: var(--accent) !important; }
       `}</style>

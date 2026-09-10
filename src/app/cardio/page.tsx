@@ -249,7 +249,7 @@ export default function CardioPage() {
                 {/* Week header */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 14px', background: 'var(--s2)', borderRadius: '6px 6px 0 0', borderBottom: '0.5px solid var(--border)' }}>
                   <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', letterSpacing: '0.06em' }}>
-                    {weekLabel(wk + 'T00:00:00').toUpperCase()}
+                    {weekLabel(wk).toUpperCase()}
                   </span>
                   <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)' }}>
                     {acts.length} session{acts.length !== 1 ? 's' : ''} · {fmt_dur(Math.round(weekMins))}

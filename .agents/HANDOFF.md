@@ -198,3 +198,50 @@ redesign "complete":**
 - Build one shared segmented-control component/class and apply it everywhere finding #6 lists.
 - Enable browser tools and do the actual desktop-1100/mobile-390(+320/768/1440 overflow) comparison against each board — this still hasn't happened.
 - `supabase/migrations/0001_manual_logs.sql` remains outstanding, unrelated to this design work.
+
+---
+
+## 2026-09-10 — Live visual review after correction pass
+**Agent:** Codex
+**Completed:**
+- Read Claude's latest implementation entry, then successfully inspected the live app at localhost:3000 using a separate headless Chrome session after the standard browser/computer-use runtimes failed.
+- Saved 42 screenshots covering all 14 routes at 1100/390/320px, plus 10 focused tab/detail screenshots in `design/training-hub-reference-v1/review-2/screenshots/`. No record submissions or application-source changes.
+- Created `design/training-hub-reference-v1/review-2/REVIEW.md`, with screenshot evidence, precise browser measurements, completed fixes, new defects and remaining board-fidelity work. README points to this latest review.
+- Confirmed dashboard responsive restructuring/background, sidebar order/width and mobile icons, Wind-Down styling, Recovery 2x2 summary, and outer mobile grid fixes are now present.
+- New verified defects: actual rendered font is Arial (Figtree import is ignored after emitted CSS rules); mobile Meals title/subtitle have 0px width; Cardio group headers show INVALID DATE from a doubled time suffix; date/select controls squeeze headings; nested Calendar/Fuel grids still overflow at 320px; new Wind-Down disclosures are not keyboard accessible and check targets are only 26px.
+- Recorded further UX/fidelity misses: Fuel empty-state link loops to itself, Race Day's result form displaces preparation, Injuries/Mobility/Season remain detail-heavy, selected tabs and remaining imagery are still unfinished. Sticky sibling navigation still occupies a persistent second row.
+
+**Next agent needs to:**
+- Claude: read `design/training-hub-reference-v1/review-2/REVIEW.md` first. Fix newly measured defects before continuing the remaining per-page rebuild. Keep fixes already confirmed.
+- Verify real platform font after fixing font loading, restore meal-title width, correct Cardio's date-only argument, wrap header/form controls, remove nested mobile grid minima, and make disclosures accessible.
+- Complete remaining shared segments/assets/page structures against the numbered boards. Recheck affected 1100/390/320 screenshots, then 768/1440 and populated/empty/expanded/saving states.
+- No persistence, saving or migration execution was tested by this visual review. The outstanding Supabase migration remains separate.
+
+---
+
+## 2026-09-10 — Fixing review-2/REVIEW.md's real defects
+**Agent:** Claude
+**Completed (in the review's stated priority order — real defects before further structural work):**
+- **#1 [P1] Figtree font**: the `@import` in `globals.css` was *after* the `@tailwind` directives, which expand to real CSS rules at build time — an `@import` in that position is invalid CSS and browsers silently ignore it. That's why the whole app was rendering in Arial despite `getComputedStyle()` claiming Figtree. Moved the import to the literal first line of the file.
+- **#2 [P1] Mobile Meals cards**: `.mh-info`/`.mh-name` were measuring 0px wide because the non-shrinking macro pills (`flex-shrink:0`) ate all remaining width in the same flex row. Split the header into two rows: icon+title+chevron on row 1, pills wrapping on row 2. Also wired `oats-blueberries.png` into the matching breakfast recipe's icon tile (`meal.photo`), which was sitting unused in `public/`.
+- **#3 [P1] Cardio "INVALID DATE – INVALID DATE"**: `weekLabel()` appends `T00:00:00` internally, but its caller appended it *again* before calling. Fixed the call site.
+- **#4 [P2] Header/date-control squeeze**: `.page-header` now wraps instead of forcing a date input to compete with the title in one flex row; added `.page-header > input[type=date/time] { flex:none; width:auto }` since the global `width:100%` input rule was the culprit. Removed the old 600px (Workout Log) / 560px (Sleep, Exercises) page-width caps per the resolved contract. Fixed `LiftProgressChart`'s 240px-min select the same way, and made its 4-stat row collapse to 2×2 on mobile.
+- **#5 [P2] Nested grid overflow**: Race Calendar's Open Water checklist and 3 more 280–300px-minimum grids on Fuel (base foods, daily targets, strategy notes) still overflowed at 320px even after the outer-grid fix from the previous pass. Added `.fuel-nested-grid`/`.oa-checklist-grid` mobile overrides.
+- **#6 [P2] Wind-Down accessibility**: `.wind-row`/`.wind-rules-title` were `onClick` `div`s with no keyboard path. Converted to real `<button>`s with `aria-expanded`, kept the completion toggle as a separate sibling button (not nested inside the disclosure button), and gave it a 44px hit area (visual circle stays the smaller board size, centered inside via `.wind-check-dot`). Also removed the placeholder "Passive · Follow existing cues" subtitle — collapsed cards now show the real per-stretch focus text.
+- **#7 [P2] Fuel empty-state self-link**: `NutritionActualsPanel`/`MacroAccuracyPanel`'s empty states linked to `/nutrition`, which redirects back to `/fuel` — a dead circular link when viewed on Fuel itself (still wrong on Dashboard too, since `/nutrition` doesn't exist as a real destination there either). Added an `onFuelPage` prop: shows a plain "upload above" message on Fuel, links to `/fuel` from Dashboard.
+- **Navigation**: rebuilt the mobile group sub-nav as a closed-by-default toggle+dropdown (`MobileSubnav.tsx`) instead of an always-visible bar. The review correctly caught that my previous `position:sticky` fix still rendered as a permanent second header row at initial scroll position — sticky doesn't mean "scrolls away," it means "stays put once you'd scroll past it." My comment claiming otherwise was wrong; removed.
+- Excluded `design/training-hub-reference-v1/review-2/screenshots/` and its 3 JSON observation files from git — **this repo is public**, and those captures contain real personal health/training data straight off the live app (the review file itself flags this explicitly). Added them to that folder's `.gitignore`. Kept `REVIEW.md` (prose, no embedded personal numbers) and the capture script.
+- `npm run build` passes clean.
+
+**Not done — still real work left, per the review's own table:**
+- Mobility's cards still don't use the Wind-Down disclosure pattern (review explicitly asked to port it there).
+- Shared tab/segment unification (Fuel/Season Plan/Training Log/Log/Exercises/Recovery each still styled independently) — untouched this pass.
+- Race Calendar (scenic row thumbnails), Season Plan (compact phase strip), Race Day/Injuries/Mobility mobile-first restructuring (summary-then-detail instead of detail-first) — all still open per the review's finding #8 and the fidelity table.
+- Dashboard race tile proportions (263px vs board's 174px — countdown boxes/pill link need a lighter touch) and timeline rows (need individual card shells, not tinted strips inside one big card) — not addressed.
+- `body-silhouette.png` (Injuries) still unwired.
+- No new screenshot pass was taken to confirm these fixes visually — verified via build + reading source only, same limitation as before (browser tools not enabled this session).
+
+**Next agent needs to:**
+- If Codex does another visual pass, it needs fresh screenshots taken after this commit to be accurate — the ones in `review-2/` predate these fixes and are also gitignored now (regenerate locally, don't rely on git history for them).
+- Work the remaining items above, prioritizing per-route structure (finding #8/#9's table) now that the cross-cutting defects are fixed.
+- `supabase/migrations/0001_manual_logs.sql` was actually run this session (confirmed via direct Supabase queries) along with `0002`/`0003` — the outstanding-migration note in earlier entries is now resolved.

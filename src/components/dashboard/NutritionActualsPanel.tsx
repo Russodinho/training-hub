@@ -32,7 +32,7 @@ const SELECTOR_BTN: React.CSSProperties = {
   cursor: 'pointer',
 }
 
-export default function NutritionActualsPanel() {
+export default function NutritionActualsPanel({ onFuelPage = false }: { onFuelPage?: boolean } = {}) {
   const [days, setDays] = useState<DayRange>(30)
   const [data, setData] = useState<NutritionRow[]>([])
   const [loading, setLoading] = useState(true)
@@ -120,7 +120,11 @@ export default function NutritionActualsPanel() {
         <div className="empty-state" style={{ padding: '24px 16px' }}>
           <div className="empty-icon">🥗</div>
           <div className="empty-title">No data in this range</div>
-          <div>Upload your Cronometer daily summary CSV on the <a href="/nutrition" className="empty-cta" style={{ display: 'inline' }}>Nutrition page</a>.</div>
+          <div>
+            {onFuelPage
+              ? 'Upload a Cronometer daily summary CSV above to see your actuals.'
+              : <>Upload a Cronometer daily summary CSV on the <a href="/fuel" className="empty-cta" style={{ display: 'inline' }}>Fuel page</a>.</>}
+          </div>
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={170}>

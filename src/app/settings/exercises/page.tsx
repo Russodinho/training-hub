@@ -91,7 +91,7 @@ export default function ExercisesPage() {
   const tabExercises = exercises.filter(ex => ex.category === activeTab)
 
   return (
-    <div className="hub-page" style={{ maxWidth: 560 }}>
+    <div className="hub-page">
       <div className="page-header">
         <h2>Exercises</h2>
         <button onClick={() => { setShowAdd(!showAdd); setForm({ ...DEFAULT_FORM, category: activeTab }) }} style={{

@@ -144,18 +144,26 @@ export default function WindDownPage() {
           const isOpen = expanded === stretch.id
           return (
             <div key={stretch.id} className={`wind-card${isChecked ? ' checked' : ''}`}>
-              <div className="wind-row" onClick={() => setExpanded(isOpen ? null : stretch.id)}>
-                <div className="wind-icon-tile"><MoonIcon /></div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="wind-name">{stretch.name}</div>
-                  <div className="wind-focus">{isOpen ? stretch.focus : 'Passive · Follow existing cues'}</div>
-                </div>
+              <div className="wind-row">
                 <button
+                  type="button"
+                  className="wind-disclosure"
+                  aria-expanded={isOpen}
+                  onClick={() => setExpanded(isOpen ? null : stretch.id)}
+                >
+                  <span className="wind-icon-tile"><MoonIcon /></span>
+                  <span style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+                    <span className="wind-name">{stretch.name}</span>
+                    <span className="wind-focus">{stretch.focus}</span>
+                  </span>
+                </button>
+                <button
+                  type="button"
                   className={`wind-check${isChecked ? ' checked' : ''}`}
-                  onClick={e => { e.stopPropagation(); toggle(stretch.id) }}
+                  onClick={() => toggle(stretch.id)}
                   aria-label={isChecked ? `Mark ${stretch.name} not done` : `Mark ${stretch.name} done`}
                 >
-                  {isChecked && '✓'}
+                  <span className="wind-check-dot">{isChecked && '✓'}</span>
                 </button>
               </div>
               {isOpen && (
@@ -174,10 +182,10 @@ export default function WindDownPage() {
 
       {/* Ground rules */}
       <div className="wind-rules">
-        <div className="wind-rules-title" onClick={() => setRulesOpen(o => !o)}>
+        <button type="button" className="wind-rules-title" aria-expanded={rulesOpen} onClick={() => setRulesOpen(o => !o)}>
           Ground rules
           <span className="wind-rules-toggle">{rulesOpen ? '▲ collapse' : '▼ expand'}</span>
-        </div>
+        </button>
         {rulesOpen && RULES.map((rule, i) => (
           <div key={i} className="wind-rule-item">
             <strong>{rule.title}</strong> {rule.body}

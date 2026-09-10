@@ -15,7 +15,7 @@ interface Ingredient { name: string; state: IngState; full: string; per: string 
 interface Step { title: string; desc: string }
 interface Reheat { method: ReheatMethod; desc: string }
 interface Meal {
-  name: string; subtitle: string; icon: string; tag: string
+  name: string; subtitle: string; icon: string; photo?: string; tag: string
   kcal: number; p: number; c: number; f: number
   ingredients: Ingredient[]; steps: Step[]; note: string; reheat: Reheat[]
 }
@@ -25,7 +25,7 @@ const MEALS: Record<MealTab, Meal[]> = {
     {
       name: "Current Breakfast — Egg White Oat Scramble",
       subtitle: "Fairlife milk · oats · 3 eggs + egg whites · Greek yogurt · honey · blueberries",
-      icon: "⭐", tag: "Your current breakfast · Benchmark",
+      icon: "⭐", photo: "/training-hub-design/oats-blueberries.png", tag: "Your current breakfast · Benchmark",
       kcal: 1080, p: 91, c: 108, f: 16,
       ingredients: [
         { name: "Fairlife 2% milk", state: "raw", full: "2 cups", per: "2 cups" },
@@ -593,21 +593,25 @@ function MealCard({ meal, tab, defaultOpen }: { meal: Meal; tab: MealTab; defaul
   return (
     <div className={`mh-card${open ? ' open' : ''}`}>
       <div className="mh-card-header" onClick={() => setOpen(o => !o)}>
-        <div className="mh-icon" style={{ background: meta.bg }}>{meal.icon}</div>
-        <div className="mh-info">
-          <div className="mh-name">{meal.name}</div>
-          <div className="mh-subtitle">{meal.subtitle}</div>
+        <div className="mh-card-top">
+          <div className="mh-icon" style={{ background: meta.bg }}>
+            {meal.photo ? <img src={meal.photo} alt="" /> : meal.icon}
+          </div>
+          <div className="mh-info">
+            <div className="mh-name">{meal.name}</div>
+            <div className="mh-subtitle">{meal.subtitle}</div>
+          </div>
+          <div className="mh-chevron">
+            <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="1,1 5,5 9,1" />
+            </svg>
+          </div>
         </div>
         <div className="mh-pills">
           <span className="mh-pill pill-kcal">{meal.kcal} kcal</span>
           <span className="mh-pill pill-p">{meal.p}g P</span>
           <span className="mh-pill pill-c">{meal.c}g C</span>
           <span className="mh-pill pill-f">{meal.f}g F</span>
-        </div>
-        <div className="mh-chevron">
-          <svg viewBox="0 0 10 6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="1,1 5,5 9,1" />
-          </svg>
         </div>
       </div>
 
@@ -773,8 +777,8 @@ export default function FuelPage() {
 
           {/* Actuals panels */}
           <div className="chart-row" style={{ marginBottom: 24 }}>
-            <div className="chart-card"><NutritionActualsPanel /></div>
-            <div className="chart-card"><MacroAccuracyPanel /></div>
+            <div className="chart-card"><NutritionActualsPanel onFuelPage /></div>
+            <div className="chart-card"><MacroAccuracyPanel onFuelPage /></div>
           </div>
 
           {/* Lever system */}
@@ -807,7 +811,7 @@ export default function FuelPage() {
           <div style={{ marginBottom: 24 }}>
             <div className="section-hdr"><span className="ptitle">Base foods (unchanged daily)</span></div>
             <div className="surface-card">
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '4px 24px' }}>
+              <div className="fuel-nested-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '4px 24px' }}>
                 {[
                   { time: 'Pre-workout (fasted)', foods: 'Coffee · collagen peptides · stim-free preworkout · electrolytes · creatine 5g' },
                   { time: 'Breakfast (post-workout)', foods: 'Fairlife 2% milk 2 cup · eggs 3 large · honey 31g (never cut) · Fage 0% Greek yogurt 170g · Quaker oats + flax/chia · blueberries 100g · egg whites 92g · ketchup 1 tbsp' },
@@ -817,7 +821,7 @@ export default function FuelPage() {
                   { time: 'Dinner', foods: 'Chicken breast 5 oz · cabbage 100g · Goya cannellini beans 100g' },
                   { time: 'Supplements', foods: 'As logged in Cronometer — see Supplements tab' },
                 ].map((row, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 10, padding: '7px 0', borderBottom: '0.5px solid var(--border)', fontSize: 12 }}>
+                  <div key={i} className="base-foods-row" style={{ display: 'flex', gap: 10, padding: '7px 0', borderBottom: '0.5px solid var(--border)', fontSize: 12 }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.04em', minWidth: 120, paddingTop: 1, flexShrink: 0 }}>{row.time}</div>
                     <div style={{ color: 'var(--text)', lineHeight: 1.5 }}>{row.foods}</div>
                   </div>
@@ -829,7 +833,7 @@ export default function FuelPage() {
           {/* Daily targets by day */}
           <div style={{ marginBottom: 24 }}>
             <div className="section-hdr"><span className="ptitle">Daily targets by day</span></div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 10 }}>
+            <div className="fuel-nested-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 10 }}>
               {NUTRITION_TARGETS.map(day => {
                 const isFlex = day.calories === 0
                 return (
@@ -885,7 +889,7 @@ export default function FuelPage() {
 
           {/* Strategy notes */}
           <div className="section-hdr"><span className="ptitle">Strategy notes</span></div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
+          <div className="fuel-nested-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
             {[
               { title: '🥩 Protein: 195–200g every day', body: 'Non-negotiable regardless of day type. Eggs + egg whites + Greek yogurt at breakfast. Chicken at dinner. Stuffed peppers at lunch. This number doesn\'t change.' },
               { title: '🍚 High/low carb lever', body: 'High days (Mon/Thu): add banana to breakfast + rice cakes at lunch. Low days: skip both. Everything else stays identical. One switch, not a full meal change.' },
@@ -966,7 +970,7 @@ export default function FuelPage() {
 
           <div style={{ marginTop: 8 }}>
             <div className="section-hdr"><span className="ptitle">Key principles</span></div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
+            <div className="fuel-nested-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
               {[
                 { title: '🦴 Collagen + Vitamin C', body: `Collagen only works with Vitamin C present — it's required for collagen synthesis. Always pair them. Take 30–45 min before training for tendons, joints, and connective tissue.` },
                 { title: '☀️ D3 + K2 synergy', body: "D3 increases calcium absorption. K2 directs that calcium into bones (not arteries). They're always taken together. Winter: consider 5000 IU D3." },
