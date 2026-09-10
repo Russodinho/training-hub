@@ -71,11 +71,6 @@ function useSupaWeightLog() {
   return [data, add] as const
 }
 
-const INITIAL_BRICKS: Entry[] = [
-  { date: '2026-04-03', num: '1', loc: 'stationary', swim: '400', bike: '5', bikeTime: '22', rpm: '82', run: '1.6', runTime: '10', notes: 'Pre-plan warmup brick. Swim in pool, bike stationary, treadmill run.' },
-  { date: '2026-05-07', num: '2', loc: 'outdoor', swim: '400', bike: '11.5', bikeTime: '48', rpm: '82', run: '1.4', runTime: '9', notes: 'First outdoor bike brick. Legs felt heavy off the bike for first 2 min then cleared.' },
-]
-
 type Tab = 'lifts' | 'tri' | 'bodycomp' | 'history'
 
 interface LoggedSet {
@@ -259,7 +254,7 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
     setBrNum(''); setBrSwim(''); setBrBike(''); setBrBikeTime(''); setBrRpm(''); setBrRun(''); setBrRunTime(''); setBrNotes('')
   }
 
-  const allBricks = [...INITIAL_BRICKS, ...brickLog]
+  const allBricks = [...brickLog]
   const weights = weightLog.filter(e => e.weight).map(e => parseFloat(e.weight))
   const swims = swimLog.filter(e => e.dist).map(e => parseFloat(e.dist))
   const bikes = bikeLog.filter(e => e.dist).map(e => parseFloat(e.dist))
