@@ -1,7 +1,26 @@
 'use client'
 import { getSupabaseClient } from '@/lib/supabase'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import type { CSSProperties } from 'react'
+
+// Maps each lift day onto the categories used by the Settings → Exercises
+// page, so custom exercises added/enabled there actually show up here.
+const CATEGORY_MAP: Record<string, string[]> = {
+  upper_a: ['upper_push', 'core'],
+  lower_a: ['lower_quad'],
+  upper_b: ['upper_pull', 'core'],
+  lower_b: ['lower_glute'],
+}
+
+interface DbExercise {
+  name: string
+  category: string
+  default_sets: number | null
+  default_reps: string | null
+  default_rpe: string | null
+  rest_seconds: number | null
+  is_active: boolean
+}
 
 const DAY_WORKOUT: Record<number, string> = { 1: 'upper_a', 3: 'lower_a', 4: 'upper_b', 5: 'lower_b' }
 
@@ -194,7 +213,33 @@ export default function LogWorkoutPage() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
 
-  const plan = PLAN[workoutType]
+  const [dbExercises, setDbExercises] = useState<DbExercise[]>([])
+
+  useEffect(() => {
+    async function fetchCustomExercises() {
+      const sb = getSupabaseClient()
+      const { data } = await sb.from('exercises').select('*').eq('is_active', true)
+      if (data) setDbExercises(data)
+    }
+    fetchCustomExercises()
+  }, [])
+
+  const plan = useMemo(() => {
+    const base = PLAN[workoutType]
+    const categories = CATEGORY_MAP[workoutType] ?? []
+    const builtinNames = new Set(base.exercises.map(e => e.name.toLowerCase()))
+    const extra: Exercise[] = dbExercises
+      .filter(ex => categories.includes(ex.category) && !builtinNames.has(ex.name.toLowerCase()))
+      .map(ex => ({
+        name: ex.name,
+        sets: ex.default_sets ?? 3,
+        reps: ex.default_reps ?? '10-12',
+        rpe: ex.default_rpe ?? '8-9',
+        rest: ex.rest_seconds ?? 60,
+        isCore: ex.category === 'core',
+      }))
+    return extra.length ? { ...base, exercises: [...base.exercises, ...extra] } : base
+  }, [workoutType, dbExercises])
 
   useEffect(() => {
     const init: Record<number, ExData> = {}
@@ -202,7 +247,7 @@ export default function LogWorkoutPage() {
     setExerciseData(init)
     setSaved(false)
     setError('')
-  }, [workoutType])
+  }, [plan])
 
   useEffect(() => {
     async function fetchPrev() {
@@ -292,7 +337,7 @@ export default function LogWorkoutPage() {
   return (
     <div className="hub-page" style={{ maxWidth: 600 }}>
       <style>{`
-        .log-input:focus { border-color: var(--strength) !important; }
+        .log-input:focus { border-color: var(--accent) !important; }
       `}</style>
 
       <div className="page-header">
@@ -308,11 +353,11 @@ export default function LogWorkoutPage() {
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, overflowX: 'auto', paddingBottom: 2 }}>
         {Object.entries(PLAN).map(([type, w]) => (
           <button key={type} onClick={() => setWorkoutType(type)} style={{
-            flexShrink: 0, padding: '5px 14px', borderRadius: 20,
-            fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, fontWeight: workoutType === type ? 600 : 400,
-            background: workoutType === type ? 'var(--strength)' : 'transparent',
-            color: workoutType === type ? '#000' : 'var(--muted)',
-            border: `0.5px solid ${workoutType === type ? 'var(--strength)' : 'var(--border)'}`,
+            flexShrink: 0, padding: '6px 16px', borderRadius: 20,
+            fontFamily: "'Figtree', sans-serif", fontSize: 12, fontWeight: workoutType === type ? 600 : 400,
+            background: workoutType === type ? 'var(--accent-bg)' : 'transparent',
+            color: workoutType === type ? 'var(--accent)' : 'var(--muted)',
+            border: `1px solid ${workoutType === type ? 'var(--accent)' : 'var(--border)'}`,
             cursor: 'pointer', transition: 'all 0.15s',
           }}>
             {w.label}
@@ -331,19 +376,19 @@ export default function LogWorkoutPage() {
       <textarea placeholder="Session notes (optional)…" value={notes} onChange={e => setNotes(e.target.value)} rows={2}
         style={{ width: '100%', background: 'var(--s1)', border: '0.5px solid var(--border)', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: 'var(--text)', fontFamily: "'Figtree', sans-serif", marginBottom: 12, resize: 'none', outline: 'none', boxSizing: 'border-box' }} />
 
-      {error && <p style={{ color: 'var(--run)', fontSize: 13, marginBottom: 10 }}>{error}</p>}
+      {error && <p style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 10 }}>{error}</p>}
 
       {saved ? (
         <div style={{ textAlign: 'center', padding: '16px 0' }}>
-          <p style={{ color: 'var(--strength)', fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 600 }}>✓ Workout saved</p>
-          <button onClick={() => setSaved(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginTop: 8 }}>
+          <p style={{ color: 'var(--mobility)', fontFamily: "'Figtree', sans-serif", fontSize: 14, fontWeight: 600 }}>✓ Workout saved</p>
+          <button onClick={() => setSaved(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'Figtree', sans-serif", fontSize: 12, color: 'var(--muted)', marginTop: 8 }}>
             Edit / re-save
           </button>
         </div>
       ) : (
         <button onClick={handleSave} disabled={saving} style={{
-          width: '100%', background: saving ? 'var(--s3)' : 'var(--strength)', color: saving ? 'var(--muted)' : '#000',
-          border: 'none', borderRadius: 8, padding: '12px', fontFamily: "'Figtree', sans-serif",
+          width: '100%', background: saving ? 'var(--s3)' : 'linear-gradient(180deg, #65f3ec, #22dcd4)', color: saving ? 'var(--muted)' : '#07171c',
+          border: 'none', borderRadius: 8, padding: '12px', minHeight: 44, fontFamily: "'Figtree', sans-serif",
           fontSize: 14, fontWeight: 700, cursor: saving ? 'default' : 'pointer', transition: 'all 0.15s',
         }}>
           {saving ? 'Saving…' : 'Save Workout'}

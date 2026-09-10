@@ -199,7 +199,7 @@ export default function RaceDayPage() {
       </div>
 
       {/* Timeline + Strategy + Kit */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+      <div className="race-day-cols" style={{ display: 'grid', gap: 20 }}>
         <div>
           <div className="section-hdr"><span className="pbadge p1b">Morning Timeline</span></div>
           <div className="rd-timeline">

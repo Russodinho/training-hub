@@ -113,12 +113,13 @@ export default function MobilityPage() {
           return (
             <div
               key={ex.id}
-              className={`mob-card${isChecked ? ' checked' : ''}${isOptional && !isChecked ? ' dimmed' : ''}`}
+              className={`mob-card${isChecked ? ' checked' : ''}`}
               onClick={() => toggle(ex.id)}
             >
               <div className="mob-card-header">
                 <span className="mob-id">{ex.id}</span>
                 <span className="mob-name">{ex.name}</span>
+                {isOptional && !isChecked && <span className="mob-optional-badge">Optional tonight</span>}
                 <span className="mob-check">{isChecked ? '✓' : '○'}</span>
               </div>
               <div className="mob-focus">{ex.focus}</div>
@@ -132,13 +133,8 @@ export default function MobilityPage() {
                 </div>
               )}
               {ex.massageGun && (
-                <div style={{ marginTop: 6, fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)' }}>
+                <div style={{ marginTop: 6, fontFamily: "'Figtree', sans-serif", fontSize: 11, color: 'var(--faint)' }}>
                   🔫 {ex.massageGun}
-                </div>
-              )}
-              {isOptional && (
-                <div style={{ marginTop: 6, fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)' }}>
-                  Optional tonight (yoga night)
                 </div>
               )}
             </div>

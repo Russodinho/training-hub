@@ -1,0 +1,55 @@
+/* Implementation reference only: deliberately not imported into the live app. */
+:root {
+  --hub-bg: #091319;
+  --hub-surface: #14232d;
+  --hub-surface-raised: #1b2d38;
+  --hub-border: #304653;
+  --hub-text: #f3f7fa;
+  --hub-muted: #afbec8;
+  --hub-accent: #28e5dc;
+  --hub-run: #28e5dc;
+  --hub-swim: #56c8ee;
+  --hub-bike: #ffc45a;
+  --hub-strength: #b18afa;
+  --hub-mobility: #75e888;
+  --hub-sleep: #b18afa;
+  --hub-danger: #ff7877;
+  --hub-card-gradient: linear-gradient(135deg, #1a2a35, #13212a);
+  --hub-button-gradient: linear-gradient(180deg, #65f3ec, #22dcd4);
+  --hub-card-radius: 10px;
+  --hub-control-radius: 8px;
+  --hub-gap: 16px;
+  --hub-shadow: 0 8px 24px rgb(0 0 0 / 12%);
+}
+.hub-reference-surface {
+  font-family: Figtree, 'Segoe UI', sans-serif;
+  color: var(--hub-text);
+  background: linear-gradient(135deg, #0b171e, #071116);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.45;
+}
+.hub-reference-card {
+  border: 1px solid var(--hub-border);
+  border-radius: var(--hub-card-radius);
+  background: var(--hub-card-gradient);
+  padding: 18px;
+}
+.hub-reference-button {
+  min-height: 44px;
+  border: 1px solid #70ece8;
+  border-radius: var(--hub-control-radius);
+  background: var(--hub-button-gradient);
+  color: #07171c;
+  padding: 10px 16px;
+  font: 600 14px Figtree, 'Segoe UI', sans-serif;
+}
+.hub-reference-button:focus-visible,
+.hub-reference-surface :is(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid #8ffff7;
+  outline-offset: 3px;
+}
+.hub-reference-button:disabled { background: #263e49; color: #afbec8; border-color: #48616e; }
+.hub-reference-icon { width: 24px; height: 24px; stroke-width: 1.7; }
+@media (prefers-reduced-motion: reduce) {
+  .hub-reference-surface * { transition: none !important; animation: none !important; }
+}

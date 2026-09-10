@@ -784,7 +784,7 @@ export default function FuelPage() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
                 {[
                   { label: 'LOW days', color: 'var(--swim)', desc: 'Tue / Wed / Fri / Sun', rule: 'Baseline − banana at breakfast', delta: '−125 cal · −28C', days: '2,100 cal' },
-                  { label: 'HIGH days', color: 'var(--strength)', desc: 'Mon / Thu', rule: 'Baseline + rice cakes at lunch', delta: '+70 cal · +18C', days: '2,290 cal' },
+                  { label: 'HIGH days', color: 'var(--accent)', desc: 'Mon / Thu', rule: 'Baseline + rice cakes at lunch', delta: '+70 cal · +18C', days: '2,290 cal' },
                   { label: 'Saturday', color: 'var(--bike)', desc: 'Bike / Surf day', rule: 'Breakfast + lunch on plan. One cheat meal (dinner/going out). No cheat snacking before or after. No tracking.', delta: 'Flex', days: 'Flex' },
                 ].map(lever => (
                   <div key={lever.label} style={{ borderLeft: `3px solid ${lever.color}`, paddingLeft: 14 }}>

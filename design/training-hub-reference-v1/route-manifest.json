@@ -1,0 +1,126 @@
+[
+  {
+    "route": "/",
+    "title": "Dashboard",
+    "board": "boards/01-dashboard.svg",
+    "mobile_group": "Home",
+    "tabs": []
+  },
+  {
+    "route": "/race-calendar",
+    "title": "Race Calendar",
+    "board": "boards/02-race-calendar.svg",
+    "mobile_group": "Plan",
+    "tabs": []
+  },
+  {
+    "route": "/season-plan",
+    "title": "Season Plan",
+    "board": "boards/03-season-plan.svg",
+    "mobile_group": "Plan",
+    "tabs": [
+      "Tri Plan",
+      "Stretch Goals"
+    ]
+  },
+  {
+    "route": "/log",
+    "title": "Workout Log",
+    "board": "boards/04-log.svg",
+    "mobile_group": "Train",
+    "tabs": [
+      "Upper A",
+      "Lower A",
+      "Upper B",
+      "Lower B"
+    ]
+  },
+  {
+    "route": "/training-log",
+    "title": "Training Log",
+    "board": "boards/05-training-log.svg",
+    "mobile_group": "Train",
+    "tabs": [
+      "Lifts",
+      "Tri Sessions",
+      "Body Comp",
+      "History"
+    ]
+  },
+  {
+    "route": "/cardio",
+    "title": "Cardio",
+    "board": "boards/06-cardio.svg",
+    "mobile_group": "Train",
+    "tabs": []
+  },
+  {
+    "route": "/fuel",
+    "title": "Fuel",
+    "board": "boards/07-fuel.svg",
+    "mobile_group": "Fuel",
+    "tabs": [
+      "Targets",
+      "Meals",
+      "Supplements"
+    ]
+  },
+  {
+    "route": "/mobility",
+    "title": "Mobility",
+    "board": "boards/08-mobility.svg",
+    "mobile_group": "Recover",
+    "tabs": []
+  },
+  {
+    "route": "/sleep",
+    "title": "Sleep Protocol",
+    "board": "boards/09-sleep.svg",
+    "mobile_group": "Recover",
+    "tabs": []
+  },
+  {
+    "route": "/recovery",
+    "title": "Recovery",
+    "board": "boards/10-recovery.svg",
+    "mobile_group": "Recover",
+    "tabs": [
+      "7 days",
+      "14 days",
+      "30 days"
+    ]
+  },
+  {
+    "route": "/wind-down",
+    "title": "Wind-Down",
+    "board": "boards/11-wind-down.svg",
+    "mobile_group": "Recover",
+    "tabs": []
+  },
+  {
+    "route": "/injuries",
+    "title": "Injuries",
+    "board": "boards/12-injuries.svg",
+    "mobile_group": "Recover",
+    "tabs": []
+  },
+  {
+    "route": "/race-day",
+    "title": "Race Day",
+    "board": "boards/13-race-day.svg",
+    "mobile_group": "Plan",
+    "tabs": []
+  },
+  {
+    "route": "/settings/exercises",
+    "title": "Exercises",
+    "board": "boards/14-exercises.svg",
+    "mobile_group": "Train",
+    "tabs": [
+      "Upper Push",
+      "Upper Pull",
+      "Lower Quad",
+      "More"
+    ]
+  }
+]

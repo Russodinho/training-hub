@@ -197,7 +197,7 @@ export default function CardioPage() {
       {/* Weekly summary tiles */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
         {[
-          { label: 'This week', value: fmt_dur(Math.round(thisWeekMins)), sub: `${thisWeekCount} session${thisWeekCount !== 1 ? 's' : ''}`, accent: 'var(--strength)' },
+          { label: 'This week', value: fmt_dur(Math.round(thisWeekMins)), sub: `${thisWeekCount} session${thisWeekCount !== 1 ? 's' : ''}`, accent: 'var(--accent)' },
           { label: 'Activities', value: String(filtered.length), sub: `last ${daysBack} days`, accent: 'var(--text)' },
           { label: 'Total time', value: fmt_dur(Math.round(filtered.reduce((s, a) => s + (a.duration_min ?? 0), 0))), sub: `last ${daysBack} days`, accent: 'var(--swim)' },
         ].map(tile => (

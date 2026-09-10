@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Sidebar from '@/components/Sidebar'
+import MobileSubnav from '@/components/MobileSubnav'
 import Footer from '@/components/Footer'
 
 export const metadata: Metadata = {
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="app-shell">
           <Sidebar />
           <div className="app-content">
+            <MobileSubnav />
             <main>{children}</main>
             <Footer />
           </div>

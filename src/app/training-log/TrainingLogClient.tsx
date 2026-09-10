@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { migrateLocalStorage } from '@/lib/supabase'
 import type { WorkoutSet } from '@/lib/workoutsParser'
 import LiftProgressChart from '@/components/dashboard/LiftProgressChart'
 import SessionBrowser from '@/components/workouts/SessionBrowser'
@@ -23,17 +24,51 @@ function todayStr() {
   return new Date().toISOString().split('T')[0]
 }
 
-function useLocalStore(key: string, initial: Entry[]) {
-  const [data, setData] = useState<Entry[]>(initial)
+type TriKind = 'swim' | 'bike' | 'run' | 'brick'
+
+// Tri session logs (swim/bike/run/brick) persisted in Supabase (tri_log_entries)
+// instead of localStorage, so they survive a cleared cache / show up cross-device.
+function useSupaTriLog(kind: TriKind) {
+  const [data, setData] = useState<Entry[]>([])
   useEffect(() => {
-    const stored = localStorage.getItem(`track_${key}`)
-    if (stored) setData(JSON.parse(stored))
-  }, [key])
-  const save = useCallback((entries: Entry[]) => {
-    setData(entries)
-    localStorage.setItem(`track_${key}`, JSON.stringify(entries))
-  }, [key])
-  return [data, save] as const
+    const sb = getSupabase()
+    sb.from('tri_log_entries').select('date, data').eq('kind', kind).order('date', { ascending: true })
+      .then(({ data: rows }) => {
+        setData((rows || []).map((r: { date: string; data: Record<string, string> }) => ({ date: r.date, ...r.data })))
+      })
+  }, [kind])
+  const add = useCallback(async (entry: Entry) => {
+    const { date, ...rest } = entry
+    const sb = getSupabase()
+    await sb.from('tri_log_entries').insert({ kind, date, data: rest })
+    setData(prev => [...prev, entry])
+  }, [kind])
+  return [data, add] as const
+}
+
+// Manual weight/body-fat log persisted in Supabase (manual_weight_log).
+function useSupaWeightLog() {
+  const [data, setData] = useState<Entry[]>([])
+  useEffect(() => {
+    const sb = getSupabase()
+    sb.from('manual_weight_log').select('date, weight, bf, notes').order('date', { ascending: true })
+      .then(({ data: rows }) => {
+        setData((rows || []).map((r: { date: string; weight: number; bf: number | null; notes: string | null }) => ({
+          date: r.date, weight: String(r.weight), bf: r.bf != null ? String(r.bf) : '', notes: r.notes || '',
+        })))
+      })
+  }, [])
+  const add = useCallback(async (entry: Entry) => {
+    const sb = getSupabase()
+    await sb.from('manual_weight_log').insert({
+      date: entry.date,
+      weight: parseFloat(entry.weight),
+      bf: entry.bf ? parseFloat(entry.bf) : null,
+      notes: entry.notes || null,
+    })
+    setData(prev => [...prev, entry])
+  }, [])
+  return [data, add] as const
 }
 
 const INITIAL_BRICKS: Entry[] = [
@@ -41,7 +76,23 @@ const INITIAL_BRICKS: Entry[] = [
   { date: '2026-05-07', num: '2', loc: 'outdoor', swim: '400', bike: '11.5', bikeTime: '48', rpm: '82', run: '1.4', runTime: '9', notes: 'First outdoor bike brick. Legs felt heavy off the bike for first 2 min then cleared.' },
 ]
 
-type Tab = 'lifts' | 'tri' | 'bodycomp'
+type Tab = 'lifts' | 'tri' | 'bodycomp' | 'history'
+
+interface LoggedSet {
+  exercise_name: string
+  set_number: number
+  weight: number | null
+  reps: number | null
+  rpe: number | null
+}
+
+interface LoggedSession {
+  id: string
+  date: string
+  type: string
+  notes: string | null
+  sets: LoggedSet[]
+}
 
 interface Props {
   workouts: WorkoutSet[]
@@ -55,18 +106,60 @@ interface Props {
 export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSets, sessions, latestWeek }: Props) {
   const [tab, setTab] = useState<Tab>('lifts')
 
+  // One-time carry-over of any pre-Supabase localStorage tri-log/injury data.
+  useEffect(() => { migrateLocalStorage() }, [])
+
+  // ── Logged sessions history (from the /log page's own workout_sessions/workout_sets) ──
+  const [loggedSessions, setLoggedSessions] = useState<LoggedSession[]>([])
+  const [historyLoading, setHistoryLoading] = useState(true)
+  const [historyLoaded, setHistoryLoaded] = useState(false)
+
+  useEffect(() => {
+    if (tab !== 'history' || historyLoaded) return
+    async function loadHistory() {
+      setHistoryLoading(true)
+      const sb = getSupabase()
+      const { data: sessions } = await sb.from('workout_sessions')
+        .select('id, date, type, notes')
+        .order('date', { ascending: false })
+        .limit(20)
+      if (!sessions || sessions.length === 0) {
+        setLoggedSessions([])
+        setHistoryLoading(false)
+        setHistoryLoaded(true)
+        return
+      }
+      const ids = sessions.map((s: { id: string }) => s.id)
+      const { data: sets } = await sb.from('workout_sets')
+        .select('session_id, exercise_name, set_number, weight, reps, rpe')
+        .in('session_id', ids)
+      const bySession: Record<string, LoggedSet[]> = {}
+      for (const s of sets || []) {
+        const key = (s as { session_id: string }).session_id
+        if (!bySession[key]) bySession[key] = []
+        bySession[key].push(s)
+      }
+      setLoggedSessions(sessions.map((s: { id: string; date: string; type: string; notes: string | null }) => ({
+        ...s, sets: (bySession[s.id] || []).sort((a, b) => a.exercise_name.localeCompare(b.exercise_name) || a.set_number - b.set_number),
+      })))
+      setHistoryLoading(false)
+      setHistoryLoaded(true)
+    }
+    loadHistory()
+  }, [tab, historyLoaded])
+
   // ── Tri session log state ──
   const [wDate, setWDate] = useState(todayStr())
   const [wWeight, setWWeight] = useState('')
   const [wBf, setWBf] = useState('')
   const [wNotes, setWNotes] = useState('')
-  const [weightLog, saveWeightLog] = useLocalStore('weight', [])
+  const [weightLog, addWeightEntry] = useSupaWeightLog()
 
   const [sDate, setSDate] = useState(todayStr())
   const [sDist, setSDist] = useState('')
   const [sTime, setSTime] = useState('')
   const [sNotes, setSNotes] = useState('')
-  const [swimLog, saveSwimLog] = useLocalStore('swim', [])
+  const [swimLog, addSwimEntry] = useSupaTriLog('swim')
 
   const [bDate, setBDate] = useState(todayStr())
   const [bDist, setBDist] = useState('')
@@ -74,14 +167,14 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
   const [bRpm, setBRpm] = useState('')
   const [bType, setBType] = useState('stationary')
   const [bNotes, setBNotes] = useState('')
-  const [bikeLog, saveBikeLog] = useLocalStore('bike', [])
+  const [bikeLog, addBikeEntry] = useSupaTriLog('bike')
 
   const [rDate, setRDate] = useState(todayStr())
   const [rDist, setRDist] = useState('')
   const [rTime, setRTime] = useState('')
   const [rType, setRType] = useState('easy')
   const [rNotes, setRNotes] = useState('')
-  const [runLog, saveRunLog] = useLocalStore('run', [])
+  const [runLog, addRunEntry] = useSupaTriLog('run')
 
   const [brDate, setBrDate] = useState(todayStr())
   const [brNum, setBrNum] = useState('')
@@ -93,7 +186,7 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
   const [brRun, setBrRun] = useState('')
   const [brRunTime, setBrRunTime] = useState('')
   const [brNotes, setBrNotes] = useState('')
-  const [brickLog, saveBrickLog] = useLocalStore('bricks', [])
+  const [brickLog, addBrickEntry] = useSupaTriLog('brick')
 
   // ── Body comp state ──
   const [bioUploading, setBioUploading] = useState(false)
@@ -140,29 +233,29 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
   }, [])
 
   // ── Tri log actions ──
-  const logWeight = () => {
+  const logWeight = async () => {
     if (!wWeight) return
-    saveWeightLog([...weightLog, { date: wDate, weight: wWeight, bf: wBf, notes: wNotes }])
+    await addWeightEntry({ date: wDate, weight: wWeight, bf: wBf, notes: wNotes })
     setWWeight(''); setWBf(''); setWNotes('')
   }
-  const logSwim = () => {
+  const logSwim = async () => {
     if (!sDist) return
-    saveSwimLog([...swimLog, { date: sDate, dist: sDist, time: sTime, notes: sNotes }])
+    await addSwimEntry({ date: sDate, dist: sDist, time: sTime, notes: sNotes })
     setSDist(''); setSTime(''); setSNotes('')
   }
-  const logBike = () => {
+  const logBike = async () => {
     if (!bDist) return
-    saveBikeLog([...bikeLog, { date: bDate, dist: bDist, time: bTime, rpm: bRpm, type: bType, notes: bNotes }])
+    await addBikeEntry({ date: bDate, dist: bDist, time: bTime, rpm: bRpm, type: bType, notes: bNotes })
     setBDist(''); setBTime(''); setBRpm(''); setBNotes('')
   }
-  const logRun = () => {
+  const logRun = async () => {
     if (!rDist) return
-    saveRunLog([...runLog, { date: rDate, dist: rDist, time: rTime, type: rType, notes: rNotes }])
+    await addRunEntry({ date: rDate, dist: rDist, time: rTime, type: rType, notes: rNotes })
     setRDist(''); setRTime(''); setRNotes('')
   }
-  const logBrick = () => {
+  const logBrick = async () => {
     if (!brSwim && !brBike && !brRun) return
-    saveBrickLog([...brickLog, { date: brDate, num: brNum, loc: brLoc, swim: brSwim, bike: brBike, bikeTime: brBikeTime, rpm: brRpm, run: brRun, runTime: brRunTime, notes: brNotes }])
+    await addBrickEntry({ date: brDate, num: brNum, loc: brLoc, swim: brSwim, bike: brBike, bikeTime: brBikeTime, rpm: brRpm, run: brRun, runTime: brRunTime, notes: brNotes })
     setBrNum(''); setBrSwim(''); setBrBike(''); setBrBikeTime(''); setBrRpm(''); setBrRun(''); setBrRunTime(''); setBrNotes('')
   }
 
@@ -187,13 +280,13 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
 
       {/* Tab bar */}
       <div className="mh-tab-bar">
-        {(['lifts', 'tri', 'bodycomp'] as Tab[]).map(t => (
+        {(['lifts', 'tri', 'bodycomp', 'history'] as Tab[]).map(t => (
           <button
             key={t}
             className={`mh-tab-btn${tab === t ? ' active' : ''}`}
             onClick={() => setTab(t)}
           >
-            {t === 'lifts' ? 'Lifts' : t === 'tri' ? 'Tri Sessions' : 'Body Comp'}
+            {t === 'lifts' ? 'Lifts' : t === 'tri' ? 'Tri Sessions' : t === 'bodycomp' ? 'Body Comp' : 'History'}
           </button>
         ))}
       </div>
@@ -476,6 +569,41 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
             </div>
           </div>
         </>
+      )}
+
+      {/* ── HISTORY TAB — sessions logged via /log ── */}
+      {tab === 'history' && (
+        <div className="tracker-card">
+          <div className="section-hdr"><span className="ptitle">Logged workout sessions</span></div>
+          {historyLoading ? (
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)', padding: '16px 0' }}>Loading…</div>
+          ) : loggedSessions.length === 0 ? (
+            <div className="tracker-log-empty">No sessions logged yet — use the <a href="/log">Workout Log</a> page to record one.</div>
+          ) : (
+            loggedSessions.map(session => (
+              <div key={session.id} style={{ borderBottom: '1px solid var(--border)', padding: '12px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, fontWeight: 600 }}>{session.date}</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>{session.type}</span>
+                </div>
+                {session.sets.length === 0 ? (
+                  <div className="tracker-log-empty">No sets recorded</div>
+                ) : (
+                  session.sets.map((s, i) => (
+                    <div key={i} className="tracker-log-entry">
+                      <span className="tl-date">{s.exercise_name}</span>
+                      <span className="tl-val">set {s.set_number}</span>
+                      <span className="tl-val">{s.weight ? `${s.weight} lbs` : '—'}</span>
+                      <span className="tl-val">{s.reps ? `${s.reps} reps` : '—'}</span>
+                      <span style={{ color: 'var(--muted)', fontSize: 12 }}>{s.rpe ? `RPE ${s.rpe}` : ''}</span>
+                    </div>
+                  ))
+                )}
+                {session.notes && <div className="brick-note">{session.notes}</div>}
+              </div>
+            ))
+          )}
+        </div>
       )}
     </div>
   )

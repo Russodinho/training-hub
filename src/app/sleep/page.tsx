@@ -98,16 +98,16 @@ export default function SleepPage() {
           <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>Protocol streak</span>
           <span style={{
             fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, fontWeight: 600, padding: '2px 10px', borderRadius: 20,
-            background: streak >= 14 ? 'var(--strength-bg)' : streak >= 7 ? 'var(--swim-bg)' : streak >= 3 ? 'var(--bike-bg)' : 'var(--s3)',
-            color: streak >= 14 ? 'var(--strength)' : streak >= 7 ? 'var(--swim)' : streak >= 3 ? 'var(--bike)' : 'var(--muted)',
-            border: `0.5px solid ${streak >= 14 ? 'var(--strength-bd)' : streak >= 7 ? 'var(--swim-bd)' : streak >= 3 ? 'var(--bike-bd)' : 'var(--border)'}`,
+            background: streak >= 14 ? 'var(--mobility-bg)' : streak >= 7 ? 'var(--swim-bg)' : streak >= 3 ? 'var(--bike-bg)' : 'var(--s3)',
+            color: streak >= 14 ? 'var(--mobility)' : streak >= 7 ? 'var(--swim)' : streak >= 3 ? 'var(--bike)' : 'var(--muted)',
+            border: `0.5px solid ${streak >= 14 ? 'var(--mobility-bd)' : streak >= 7 ? 'var(--swim-bd)' : streak >= 3 ? 'var(--bike-bd)' : 'var(--border)'}`,
           }}>{streak} nights</span>
         </div>
       )}
 
       {/* Progress bar */}
       <div style={{ height: 3, background: 'var(--s3)', borderRadius: 2, marginBottom: 20, overflow: 'hidden' }}>
-        <div style={{ height: '100%', background: 'var(--swim)', borderRadius: 2, width: `${(completedSteps / totalSteps) * 100}%`, transition: 'width 0.3s' }} />
+        <div style={{ height: '100%', background: 'var(--strength)', borderRadius: 2, width: `${(completedSteps / totalSteps) * 100}%`, transition: 'width 0.3s' }} />
       </div>
 
       {/* Protocol steps */}
@@ -115,16 +115,16 @@ export default function SleepPage() {
         {PROTOCOL_STEPS.map(step => (
           <button key={step.key} onClick={() => toggle(step.key)} style={{
             width: '100%', textAlign: 'left', borderRadius: 8, padding: '12px 14px', cursor: 'pointer', transition: 'all 0.15s',
-            background: checks[step.key] ? 'var(--swim-bg)' : 'var(--s1)',
-            border: `0.5px solid ${checks[step.key] ? 'var(--swim-bd)' : 'var(--border)'}`,
+            background: checks[step.key] ? 'var(--strength-bg)' : 'var(--s1)',
+            border: `0.5px solid ${checks[step.key] ? 'var(--strength-bd)' : 'var(--border)'}`,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{
                 width: 22, height: 22, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s',
-                background: checks[step.key] ? 'var(--swim)' : 'transparent',
-                border: `2px solid ${checks[step.key] ? 'var(--swim)' : 'var(--border2)'}`,
+                background: checks[step.key] ? 'var(--mobility)' : 'transparent',
+                border: `2px solid ${checks[step.key] ? 'var(--mobility)' : 'var(--border2)'}`,
               }}>
-                {checks[step.key] && <span style={{ color: '#fff', fontSize: 11, fontWeight: 700 }}>✓</span>}
+                {checks[step.key] && <span style={{ color: '#07171c', fontSize: 11, fontWeight: 700 }}>✓</span>}
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -155,9 +155,9 @@ export default function SleepPage() {
             <button key={n} onClick={() => { setQuality(n); setSaved(false) }} style={{
               flex: 1, padding: '8px 0', borderRadius: 6, cursor: 'pointer', transition: 'all 0.15s',
               fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: quality === n ? 700 : 400,
-              background: quality === n ? 'var(--swim-bg)' : 'var(--s1)',
-              color: quality === n ? 'var(--swim)' : 'var(--muted)',
-              border: `0.5px solid ${quality === n ? 'var(--swim-bd)' : 'var(--border)'}`,
+              background: quality === n ? 'var(--strength-bg)' : 'var(--s1)',
+              color: quality === n ? 'var(--strength)' : 'var(--muted)',
+              border: `0.5px solid ${quality === n ? 'var(--strength-bd)' : 'var(--border)'}`,
             }}>{n}</button>
           ))}
         </div>
@@ -169,14 +169,14 @@ export default function SleepPage() {
       <textarea placeholder="Notes (fell asleep fast, woke at 3am, etc.)…" value={notes} onChange={e => { setNotes(e.target.value); setSaved(false) }} rows={2}
         style={{ width: '100%', background: 'var(--s1)', border: '0.5px solid var(--border)', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: 'var(--text)', fontFamily: "'Figtree', sans-serif", marginBottom: 12, resize: 'none', outline: 'none', boxSizing: 'border-box' }} />
 
-      {error && <p style={{ color: 'var(--run)', fontSize: 13, marginBottom: 10 }}>{error}</p>}
+      {error && <p style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 10 }}>{error}</p>}
 
       <button onClick={handleSave} disabled={saving} style={{
-        width: '100%', border: 'none', borderRadius: 8, padding: '12px',
+        width: '100%', border: 'none', borderRadius: 8, padding: '12px', minHeight: 44,
         fontFamily: "'Figtree', sans-serif", fontSize: 14, fontWeight: 700, cursor: saving ? 'default' : 'pointer', transition: 'all 0.15s',
-        background: saved ? 'var(--swim-bg)' : 'var(--swim)',
-        color: saved ? 'var(--swim)' : '#fff',
-        outline: saved ? `1px solid var(--swim-bd)` : 'none',
+        background: saved ? 'var(--mobility-bg)' : 'linear-gradient(180deg, #65f3ec, #22dcd4)',
+        color: saved ? 'var(--mobility)' : '#07171c',
+        outline: saved ? `1px solid var(--mobility-bd)` : 'none',
       }}>
         {saving ? 'Saving…' : saved ? '✓ Saved' : 'Save Log'}
       </button>

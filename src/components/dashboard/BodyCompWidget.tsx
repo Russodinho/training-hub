@@ -26,15 +26,32 @@ export default function BodyCompWidget() {
   useEffect(() => {
     const since = new Date()
     since.setDate(since.getDate() - 90)
-    getSupabase()
-      .from('biometrics')
-      .select('date, weight_lbs, body_fat_pct')
-      .gte('date', since.toISOString().split('T')[0])
-      .order('date', { ascending: true })
-      .then(({ data: rows }) => {
-        setData(rows || [])
-        setLoading(false)
-      })
+    const sinceStr = since.toISOString().split('T')[0]
+    const sb = getSupabase()
+
+    Promise.all([
+      sb.from('biometrics').select('date, weight_lbs, body_fat_pct').gte('date', sinceStr),
+      sb.from('garmin_daily_stats').select('date, weight_kg').gte('date', sinceStr),
+    ]).then(([bio, garmin]) => {
+      // Cronometer (manual upload) is the primary source; fall back to the
+      // Garmin Connect scale sync for any date without a Cronometer entry,
+      // so the automated garmin_sync.py weight data isn't captured for nothing.
+      const byDate = new Map<string, BiometricRow>()
+      for (const row of garmin.data || []) {
+        if (!row.weight_kg) continue
+        byDate.set(row.date, {
+          date: row.date,
+          weight_lbs: Math.round(row.weight_kg * 2.20462 * 10) / 10,
+          body_fat_pct: null,
+        })
+      }
+      for (const row of bio.data || []) {
+        byDate.set(row.date, row)
+      }
+      const merged = Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date))
+      setData(merged)
+      setLoading(false)
+    })
   }, [])
 
   const filtered = data.filter(d => d.weight_lbs !== null)

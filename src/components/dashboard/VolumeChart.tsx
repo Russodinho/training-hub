@@ -20,9 +20,8 @@ export default function VolumeChart({ data }: VolumeChartProps) {
     return (
       <div className="empty-state" style={{ padding: '32px 16px' }}>
         <div className="empty-icon">📊</div>
-        <div className="empty-title">No Strava data yet</div>
-        <div>Connect Strava to see your weekly volume.</div>
-        <a href="/api/strava/auth" className="empty-cta">Connect Strava</a>
+        <div className="empty-title">No activity data yet</div>
+        <div>Run <code>garmin_sync.py --all</code> to see your weekly volume.</div>
       </div>
     )
   }

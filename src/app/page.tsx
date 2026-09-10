@@ -1,5 +1,5 @@
-import { getActiveRace, getDaysToRace, mobRequiredIds } from '@/lib/data'
-import { getActivitiesForWeeks, getMobilityStreak } from '@/lib/supabase'
+import { getActiveRace, getDaysToRace } from '@/lib/data'
+import { getGarminActivitiesForWeeks, getMobilityStreak, garminBucket } from '@/lib/supabase'
 import { getTodaySchedule } from '@/lib/schedule'
 import VolumeChart from '@/components/dashboard/VolumeChart'
 import NutritionActualsPanel from '@/components/dashboard/NutritionActualsPanel'
@@ -9,6 +9,10 @@ import ActivityFeed from '@/components/dashboard/ActivityFeed'
 import BodyCompWidget from '@/components/dashboard/BodyCompWidget'
 import RaceCountdown from '@/components/dashboard/RaceCountdown'
 import RecoveryCard from '@/components/dashboard/RecoveryCard'
+import ActivityIcon, { iconForBlockClass } from '@/components/dashboard/ActivityIcon'
+
+const WORKOUT_CLASSES = ['bl-gym', 'bl-swim', 'bl-bike', 'bl-run', 'bl-brick', 'bl-soccer']
+const TIMELINE_CLASSES = [...WORKOUT_CLASSES, 'bl-mob', 'bl-wind']
 
 function getGreeting(): string {
   const h = new Date().getHours()
@@ -31,7 +35,7 @@ export default async function DashboardPage() {
   const daysToRace = activeRace ? getDaysToRace(activeRace.race) : null
 
   const [weeklyActivities, mobilityStreak] = await Promise.allSettled([
-    getActivitiesForWeeks(13),
+    getGarminActivitiesForWeeks(13),
     getMobilityStreak(),
   ])
 
@@ -45,8 +49,8 @@ export default async function DashboardPage() {
   weekStart.setHours(0, 0, 0, 0)
   const activeDays = Array(7).fill(false) as boolean[]
   for (const act of allActivities) {
-    if (!act.start_date) continue
-    const d = new Date(act.start_date)
+    if (!act.date) continue
+    const d = new Date(act.date + 'T00:00:00')
     if (d >= weekStart) activeDays[toMonIdx(d.getDay())] = true
   }
   const thisWeekCount = activeDays.filter(Boolean).length
@@ -55,13 +59,14 @@ export default async function DashboardPage() {
   // Volume chart data
   const weekBuckets: Record<string, { swim: number; bike: number; run: number }> = {}
   for (const act of allActivities) {
-    if (!act.start_date) continue
-    const wk = getWeekLabel(new Date(act.start_date))
+    if (!act.date) continue
+    const wk = getWeekLabel(new Date(act.date + 'T00:00:00'))
     if (!weekBuckets[wk]) weekBuckets[wk] = { swim: 0, bike: 0, run: 0 }
-    const mi = (act.distance ?? 0) / 1609.34
-    if (act.activity_type === 'swim') weekBuckets[wk].swim += mi
-    else if (act.activity_type === 'bike') weekBuckets[wk].bike += mi
-    else if (act.activity_type === 'run') weekBuckets[wk].run += mi
+    const mi = (act.distance_km ?? 0) * 0.621371
+    const bucket = garminBucket(act.activity_type)
+    if (bucket === 'swim') weekBuckets[wk].swim += mi
+    else if (bucket === 'bike') weekBuckets[wk].bike += mi
+    else if (bucket === 'run') weekBuckets[wk].run += mi
   }
   const volumeData = Object.entries(weekBuckets)
     .sort(([a], [b]) => a.localeCompare(b))
@@ -73,7 +78,8 @@ export default async function DashboardPage() {
     }))
 
   const typeCounts = allActivities.reduce<Record<string, number>>((acc, a) => {
-    acc[a.activity_type] = (acc[a.activity_type] || 0) + 1; return acc
+    const bucket = garminBucket(a.activity_type)
+    acc[bucket] = (acc[bucket] || 0) + 1; return acc
   }, {})
   const distributionData = [
     { name: 'Swim', value: typeCounts.swim || 0, color: 'var(--swim-t)' },
@@ -88,212 +94,179 @@ export default async function DashboardPage() {
   const todaySchedule = getTodaySchedule()
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const todayName = dayNames[now.getDay()]
-  const required = mobRequiredIds(now)
+  const timelineBlocks = todaySchedule?.blocks.filter(b => TIMELINE_CLASSES.includes(b.cls)) ?? []
+  const primaryBlock = timelineBlocks.find(b => WORKOUT_CLASSES.includes(b.cls)) ?? null
 
-  // Training week
+  // Training week (the 7-week block starting 2026-04-10 — once it's over, show
+  // "Off-season" instead of freezing on "Wk 7 · Taper" forever)
   const planStart = new Date('2026-04-10')
   const weeksSince = Math.max(1, Math.ceil((now.getTime() - planStart.getTime()) / (7 * 86400000)))
+  const isOffSeason = weeksSince > 7
   const currentWeek = Math.min(weeksSince, 7)
-  const currentPhase = currentWeek <= 2 ? 'Re-entry' : currentWeek <= 4 ? 'Build' : currentWeek <= 6 ? 'Sharpening' : 'Taper'
+  const currentPhase = isOffSeason ? 'Off-season'
+    : currentWeek <= 2 ? 'Re-entry' : currentWeek <= 4 ? 'Build' : currentWeek <= 6 ? 'Sharpening' : 'Taper'
 
   const race = activeRace?.race
 
-  const cardStyle: React.CSSProperties = {
-    background: 'var(--s2)',
-    border: '0.5px solid var(--border)',
-    borderRadius: 14,
-    padding: '22px 24px',
-  }
-
   return (
-    <div style={{ padding: '32px 28px 64px', maxWidth: 1160, margin: '0 auto' }}>
-
-      {/* ── Greeting ── */}
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontFamily: 'Figtree, sans-serif', fontSize: 26, fontWeight: 700,
-          color: 'var(--text)', letterSpacing: '-0.02em', margin: 0 }}>
-          {getGreeting()}, Matt
-        </h1>
-        <p style={{ fontFamily: 'Figtree, sans-serif', fontSize: 14, color: 'var(--muted)',
-          marginTop: 4 }}>
-          Consistent training builds extraordinary days.
-        </p>
+    <div className="hub-page">
+      <div className="page-header">
+        <div>
+          <h2>Dashboard</h2>
+          <div className="sub">{getGreeting()}, Matt</div>
+        </div>
       </div>
 
-      {/* ── Main two-column area ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: 16, marginBottom: 24 }}
-        className="dash-main-grid">
-
-        {/* Left column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-          {/* Race hero card */}
-          <div style={{ ...cardStyle }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--strength)',
-              marginBottom: 8 }}>
-              {race ? 'Next race' : '2026 season'}
-            </div>
-            <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 22, fontWeight: 700,
-              color: 'var(--text)', letterSpacing: '-0.01em', lineHeight: 1.2 }}>
-              {race ? race.name : 'Season complete'}
-            </div>
-            {race && (
-              <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 13, color: 'var(--muted)',
-                marginTop: 4 }}>
-                {race.dateLabel} · {race.location.split('·')[0].trim()}
-              </div>
-            )}
-            {race && daysToRace !== null && daysToRace >= 0 && (
-              <RaceCountdown targetDate={race.date} />
-            )}
-            <div style={{ display: 'flex', gap: 10 }}>
-              <a href="/log" style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                fontFamily: 'Figtree, sans-serif', fontSize: 13, fontWeight: 600,
-                background: 'var(--strength)', color: '#0d0f11',
-                borderRadius: 8, padding: '9px 18px', textDecoration: 'none',
-                transition: 'opacity 0.15s',
-              }}>
-                ▶ Start Workout
-              </a>
-              {race && (
-                <a href="/race-day" style={{
-                  display: 'inline-flex', alignItems: 'center',
-                  fontFamily: 'Figtree, sans-serif', fontSize: 13, fontWeight: 500,
-                  background: 'var(--s3)', color: 'var(--muted)',
-                  borderRadius: 8, padding: '9px 18px', textDecoration: 'none',
-                }}>
-                  Race plan
-                </a>
-              )}
-            </div>
-          </div>
-
-          {/* Today's Timeline */}
-          {todaySchedule && (
-            <div style={{ ...cardStyle }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                marginBottom: 16 }}>
-                <span style={{ fontFamily: 'Figtree, sans-serif', fontSize: 15, fontWeight: 600,
-                  color: 'var(--text)' }}>
-                  Today's Timeline
-                </span>
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                  color: 'var(--muted)' }}>
-                  {todayName} · {todaySchedule.tag}
-                </span>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {todaySchedule.blocks
-                  .filter(b => ['bl-gym','bl-swim','bl-bike','bl-run','bl-brick','bl-mob','bl-wind','bl-soccer'].includes(b.cls))
-                  .map((block, i) => (
-                    <div key={i} style={{
-                      display: 'flex', alignItems: 'center', gap: 12,
-                      padding: '7px 10px', borderRadius: 7,
-                    }} className={`timeline-row ${block.cls}`}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                        color: 'var(--muted)', minWidth: 52, flexShrink: 0 }}>
-                        {block.time}
-                      </div>
-                      <div style={{ flex: 1, fontFamily: 'Figtree, sans-serif', fontSize: 13,
-                        fontWeight: 500 }}>
-                        {block.name}
-                      </div>
-                    </div>
-                  ))}
-              </div>
-              <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-                <a href="/mobility" style={{
-                  fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--muted)',
-                  textDecoration: 'none', padding: '6px 14px', background: 'var(--s3)',
-                  borderRadius: 7, display: 'flex', alignItems: 'center', gap: 6,
-                }}>
-                  Open mobility
-                </a>
-                <a href="/sleep" style={{
-                  fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--muted)',
-                  textDecoration: 'none', padding: '6px 14px', background: 'var(--s3)',
-                  borderRadius: 7,
-                }}>
-                  Log sleep
-                </a>
-              </div>
-            </div>
+      {/* ── Row 1: race + today's workout, equal columns ── */}
+      <div className="dash-2col">
+        <div
+          className="dash-race-card"
+          style={{ backgroundImage: 'linear-gradient(180deg, rgba(9,19,25,0.25), rgba(9,19,25,0.9)), url(/training-hub-design/race-landscape.png)' }}
+        >
+          <div className="dash-race-eyebrow">{race ? 'Next race' : '2026 season'}</div>
+          <div className="dash-race-name">{race ? race.name : 'Season complete'}</div>
+          {race ? (
+            <div className="dash-race-sub">{race.dateLabel} · {race.location.split('·')[0].trim()}</div>
+          ) : (
+            <div className="dash-race-sub">No upcoming race on the calendar</div>
           )}
+          {race && daysToRace !== null && daysToRace >= 0 && (
+            <RaceCountdown targetDate={race.date} />
+          )}
+          <a href={race ? '/race-day' : '/race-calendar'} className="dash-race-link">
+            {race ? 'Race plan →' : 'View calendar →'}
+          </a>
         </div>
 
-        {/* Right column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <RecoveryCard />
+        <div className="dash-workout-col">
+          <div className="dash-col-heading">Today&apos;s Workout</div>
+          {primaryBlock ? (
+            <a href="/log" className={`dash-workout-row ${primaryBlock.cls}`}>
+              <span className="dash-icon-tile"><ActivityIcon kind={iconForBlockClass(primaryBlock.cls)} /></span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <div className="dash-workout-name">{primaryBlock.name}</div>
+                <div className="dash-workout-sub">{primaryBlock.time}</div>
+              </span>
+              <span className="dash-chevron">›</span>
+            </a>
+          ) : (
+            <div className="dash-workout-row rest">
+              <span style={{ color: 'var(--muted)', fontSize: 13 }}>No workout scheduled today</span>
+            </div>
+          )}
+          <a href="/log" className="dash-start-btn">▶ Start Workout</a>
+        </div>
+      </div>
 
-          {/* Weekly progress */}
-          <div style={{ ...cardStyle }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-              letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--dim)',
-              marginBottom: 12 }}>
-              Weekly Progress
+      {/* ── Row 2: today's timeline + recovery ── */}
+      <div className="dash-2col">
+        {todaySchedule && (
+          <div className="card">
+            <div className="card-title">
+              <span>Today&apos;s Timeline</span>
+              <span style={{ fontWeight: 400, color: 'var(--faint)', fontSize: 12 }}>{todayName} · {todaySchedule.tag}</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 14 }}>
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 22,
-                fontWeight: 700, color: 'var(--text)' }}>
-                {thisWeekCount}
-              </span>
-              <span style={{ fontFamily: 'Figtree, sans-serif', fontSize: 13,
-                color: 'var(--muted)' }}>
-                / 5 workouts
-              </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {timelineBlocks.map((block, i) => (
+                <div key={i} className={`dash-timeline-row ${block.cls}`}>
+                  <span className="dash-icon-tile small"><ActivityIcon kind={iconForBlockClass(block.cls)} size={16} /></span>
+                  <span style={{ flex: 1, minWidth: 0 }}>
+                    <div className="dash-workout-name" style={{ fontSize: 13 }}>{block.name}</div>
+                    <div className="dash-workout-sub">{block.time}</div>
+                  </span>
+                </div>
+              ))}
+              {timelineBlocks.length === 0 && (
+                <div style={{ color: 'var(--faint)', fontSize: 12, padding: '8px 0' }}>Nothing scheduled today.</div>
+              )}
             </div>
-            <div style={{ display: 'flex', gap: 6, justifyContent: 'space-between' }}>
-              {DAY_LETTERS.map((ltr, i) => {
-                const active = activeDays[i]
-                const isToday = i === todayMonIdx
-                return (
-                  <div key={i} style={{ display: 'flex', flexDirection: 'column',
-                    alignItems: 'center', gap: 6 }}>
-                    <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-                      color: isToday ? 'var(--strength)' : 'var(--dim)',
-                      letterSpacing: '0.06em',
-                    }}>
-                      {ltr}
-                    </div>
-                    <div style={{
-                      width: 8, height: 8, borderRadius: '50%',
-                      background: active ? 'var(--strength)' : 'var(--s3)',
-                      border: isToday && !active ? '1.5px solid var(--strength)' : 'none',
-                      boxSizing: 'border-box',
-                    }} />
-                  </div>
-                )
-              })}
+            <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+              <a href="/mobility" style={{
+                fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--muted)',
+                textDecoration: 'none', padding: '6px 14px', background: 'var(--s3)',
+                borderRadius: 7,
+              }}>
+                Open mobility
+              </a>
+              <a href="/wind-down" style={{
+                fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--muted)',
+                textDecoration: 'none', padding: '6px 14px', background: 'var(--s3)',
+                borderRadius: 7,
+              }}>
+                Wind-down
+              </a>
+              <a href="/sleep" style={{
+                fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--muted)',
+                textDecoration: 'none', padding: '6px 14px', background: 'var(--s3)',
+                borderRadius: 7,
+              }}>
+                Log sleep
+              </a>
             </div>
           </div>
+        )}
+        <RecoveryCard />
+      </div>
 
-          {/* Quick stat cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <div style={{ background: 'var(--s2)', border: '0.5px solid var(--border)',
-              borderRadius: 12, padding: '14px 16px' }}>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-                color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: '0.1em',
-                marginBottom: 6 }}>Training week</div>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20,
-                fontWeight: 700, color: 'var(--text)' }}>Wk {currentWeek}</div>
-              <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11,
-                color: 'var(--muted)', marginTop: 2 }}>{currentPhase}</div>
+      {/* ── Weekly progress + quick stats ── */}
+      <div className="dash-2col">
+        <div className="card">
+          <div className="card-title"><span>Weekly Progress</span></div>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 14 }}>
+            <span style={{ fontFamily: 'Figtree, sans-serif', fontSize: 22,
+              fontWeight: 700, color: 'var(--text)' }}>
+              {thisWeekCount}
+            </span>
+            <span style={{ fontFamily: 'Figtree, sans-serif', fontSize: 13,
+              color: 'var(--muted)' }}>
+              / 5 workouts
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 6, justifyContent: 'space-between' }}>
+            {DAY_LETTERS.map((ltr, i) => {
+              const active = activeDays[i]
+              const isToday = i === todayMonIdx
+              return (
+                <div key={i} style={{ display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', gap: 6 }}>
+                  <div style={{
+                    fontFamily: 'Figtree, sans-serif', fontSize: 11, fontWeight: 500,
+                    color: isToday ? 'var(--accent)' : 'var(--dim)',
+                  }}>
+                    {ltr}
+                  </div>
+                  <div style={{
+                    width: 8, height: 8, borderRadius: '50%',
+                    background: active ? 'var(--accent)' : 'var(--s3)',
+                    border: isToday && !active ? '1.5px solid var(--accent)' : 'none',
+                    boxSizing: 'border-box',
+                  }} />
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+          <div className="card">
+            <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11, fontWeight: 500,
+              color: 'var(--muted)',
+              marginBottom: 6 }}>Training week</div>
+            <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 20,
+              fontWeight: 700, color: 'var(--text)' }}>{isOffSeason ? '—' : `Wk ${currentWeek}`}</div>
+            <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11,
+              color: 'var(--muted)', marginTop: 2 }}>{currentPhase}</div>
+          </div>
+          <div className="card">
+            <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11, fontWeight: 500,
+              color: 'var(--muted)',
+              marginBottom: 6 }}>Mobility</div>
+            <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 20,
+              fontWeight: 700, color: streak > 0 ? 'var(--mobility)' : 'var(--text)' }}>
+              {streak > 0 ? `${streak}d` : '—'}
             </div>
-            <div style={{ background: 'var(--s2)', border: '0.5px solid var(--border)',
-              borderRadius: 12, padding: '14px 16px' }}>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
-                color: 'var(--dim)', textTransform: 'uppercase', letterSpacing: '0.1em',
-                marginBottom: 6 }}>Mobility</div>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20,
-                fontWeight: 700, color: streak > 0 ? 'var(--strength)' : 'var(--text)' }}>
-                {streak > 0 ? `${streak}d` : '—'}
-              </div>
-              <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11,
-                color: 'var(--muted)', marginTop: 2 }}>streak</div>
-            </div>
+            <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11,
+              color: 'var(--muted)', marginTop: 2 }}>streak</div>
           </div>
         </div>
       </div>

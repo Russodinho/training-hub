@@ -1,6 +1,7 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { getSupabaseClient, migrateLocalStorage } from '@/lib/supabase'
 
 interface InjuryUpdate {
   date: string
@@ -28,6 +29,41 @@ interface ArchivedInjury extends InjuryCard {
   archivedAt: string
   finalStatus: string
   injuryUpdates: InjuryUpdate[]
+}
+
+interface InjuryRow {
+  key: string
+  name: string
+  status: string
+  pain: string | null
+  since: string | null
+  location: string | null
+  aggravated: string | null
+  not_affected: string | null
+  treatment: string | null
+  notes: string | null
+  symptoms: string | null
+  is_builtin: boolean
+  archived: boolean
+  archived_at: string | null
+  final_status: string | null
+}
+
+interface InjuryUpdateRow {
+  injury_key: string
+  date: string
+  status: string
+  pain: string | null
+  note: string | null
+}
+
+function rowToCard(r: InjuryRow): InjuryCard {
+  return {
+    key: r.key, name: r.name, status: r.status, pain: r.pain || '',
+    since: r.since || '', location: r.location || '', aggravated: r.aggravated || '',
+    notAffected: r.not_affected || '', treatment: r.treatment || '', notes: r.notes || '',
+    symptoms: r.symptoms || '', isBuiltin: r.is_builtin,
+  }
 }
 
 const BUILTIN_INJURIES: InjuryCard[] = [
@@ -101,9 +137,11 @@ function getDuration(since: string, until: string): string {
 }
 
 export default function InjuriesPage() {
+  const [loading, setLoading] = useState(true)
   const [updates, setUpdates] = useState<Record<string, InjuryUpdate[]>>({})
-  const [newInjuries, setNewInjuries] = useState<InjuryCard[]>([])
+  const [customInjuries, setCustomInjuries] = useState<InjuryCard[]>([])
   const [archivedInjuries, setArchivedInjuries] = useState<ArchivedInjury[]>([])
+  const [archivedBuiltinKeys, setArchivedBuiltinKeys] = useState<string[]>([])
   const [archivedOpen, setArchivedOpen] = useState(false)
   const [expandedArchive, setExpandedArchive] = useState<string | null>(null)
   const [updateForms, setUpdateForms] = useState<Record<string, { note: string; status: string; pain: string; date: string }>>({})
@@ -113,80 +151,104 @@ export default function InjuriesPage() {
     location: '', aggravated: '', notAffected: '', treatment: '', notes: '',
   })
 
-  // Track which built-in keys are archived
-  const [archivedBuiltinKeys, setArchivedBuiltinKeys] = useState<string[]>([])
+  const load = useCallback(async () => {
+    await migrateLocalStorage()
+    const sb = getSupabaseClient()
+    const [{ data: injuryRows }, { data: updateRows }] = await Promise.all([
+      sb.from('injuries').select('*'),
+      sb.from('injury_updates').select('*').order('date', { ascending: false }),
+    ])
 
-  useEffect(() => {
-    const stored = localStorage.getItem('injury_updates')
-    if (stored) setUpdates(JSON.parse(stored))
-    const storedNew = localStorage.getItem('new_injuries')
-    if (storedNew) setNewInjuries(JSON.parse(storedNew))
-    const storedArchive = localStorage.getItem('archived_injuries')
-    if (storedArchive) {
-      const parsed: ArchivedInjury[] = JSON.parse(storedArchive)
-      setArchivedInjuries(parsed)
-      setArchivedBuiltinKeys(parsed.filter(a => a.isBuiltin).map(a => a.key))
+    const rows = (injuryRows || []) as InjuryRow[]
+    const archived = rows.filter(r => r.archived)
+    const activeCustom = rows.filter(r => !r.archived && !r.is_builtin)
+
+    const updatesByKey: Record<string, InjuryUpdate[]> = {}
+    for (const u of (updateRows || []) as InjuryUpdateRow[]) {
+      if (!updatesByKey[u.injury_key]) updatesByKey[u.injury_key] = []
+      updatesByKey[u.injury_key].push({ date: u.date, status: u.status, pain: u.pain || '', note: u.note || '' })
     }
+
+    setUpdates(updatesByKey)
+    setCustomInjuries(activeCustom.map(rowToCard))
+    setArchivedBuiltinKeys(archived.filter(r => r.is_builtin).map(r => r.key))
+    setArchivedInjuries(archived.map(r => ({
+      ...rowToCard(r),
+      archivedAt: r.archived_at || '',
+      finalStatus: r.final_status || r.status,
+      injuryUpdates: updatesByKey[r.key] || [],
+    })))
+    setLoading(false)
   }, [])
 
-  const saveUpdates = (u: typeof updates) => {
-    setUpdates(u)
-    localStorage.setItem('injury_updates', JSON.stringify(u))
-  }
+  useEffect(() => { load() }, [load])
 
-  const addUpdate = (key: string) => {
+  const addUpdate = async (key: string) => {
     const form = updateForms[key] || { note: '', status: 'monitoring', pain: '', date: '' }
     if (!form.note && !form.pain) return
-    const entry: InjuryUpdate = {
+    const sb = getSupabaseClient()
+    await sb.from('injury_updates').insert({
+      injury_key: key,
       date: form.date || new Date().toISOString().split('T')[0],
       status: form.status,
-      pain: form.pain,
-      note: form.note,
-    }
-    const next = { ...updates, [key]: [entry, ...(updates[key] || [])] }
-    saveUpdates(next)
+      pain: form.pain || null,
+      note: form.note || null,
+    })
     setUpdateForms(f => ({ ...f, [key]: { note: '', status: 'monitoring', pain: '', date: '' } }))
+    await load()
   }
 
-  const addInjury = () => {
+  const addInjury = async () => {
     if (!newForm.name) return
-    const inj: InjuryCard = { ...newForm, key: `inj-${Date.now()}`, symptoms: '' }
-    const next = [...newInjuries, inj]
-    setNewInjuries(next)
-    localStorage.setItem('new_injuries', JSON.stringify(next))
+    const sb = getSupabaseClient()
+    const key = `inj-${Date.now()}`
+    await sb.from('injuries').insert({
+      key,
+      name: newForm.name,
+      status: newForm.status,
+      pain: newForm.pain || null,
+      since: newForm.since || null,
+      location: newForm.location || null,
+      aggravated: newForm.aggravated || null,
+      not_affected: newForm.notAffected || null,
+      treatment: newForm.treatment || null,
+      notes: newForm.notes || null,
+      is_builtin: false,
+      archived: false,
+    })
     setNewForm({ name: '', since: '', status: 'monitoring', pain: '', location: '', aggravated: '', notAffected: '', treatment: '', notes: '' })
     setShowNewForm(false)
+    await load()
   }
 
-  const archiveInjury = (inj: InjuryCard) => {
+  const archiveInjury = async (inj: InjuryCard) => {
     const injUpdates = updates[inj.key] || []
     const finalStatus = injUpdates.length > 0 ? injUpdates[0].status : inj.status
     const archivedAt = new Date().toISOString().split('T')[0]
-
-    const archived: ArchivedInjury = {
-      ...inj,
-      archivedAt,
-      finalStatus,
-      injuryUpdates: injUpdates,
-    }
-
-    const nextArchive = [archived, ...archivedInjuries]
-    setArchivedInjuries(nextArchive)
-    localStorage.setItem('archived_injuries', JSON.stringify(nextArchive))
-
-    if (inj.isBuiltin) {
-      const nextKeys = [...archivedBuiltinKeys, inj.key]
-      setArchivedBuiltinKeys(nextKeys)
-    } else {
-      const next = newInjuries.filter(i => i.key !== inj.key)
-      setNewInjuries(next)
-      localStorage.setItem('new_injuries', JSON.stringify(next))
-    }
+    const sb = getSupabaseClient()
+    await sb.from('injuries').upsert({
+      key: inj.key,
+      name: inj.name,
+      status: inj.status,
+      pain: inj.pain || null,
+      since: inj.since || null,
+      location: inj.location || null,
+      aggravated: inj.aggravated || null,
+      not_affected: inj.notAffected || null,
+      treatment: inj.treatment || null,
+      notes: inj.notes || null,
+      symptoms: inj.symptoms || null,
+      is_builtin: !!inj.isBuiltin,
+      archived: true,
+      archived_at: archivedAt,
+      final_status: finalStatus,
+    }, { onConflict: 'key' })
+    await load()
   }
 
   const activeInjuries = [
     ...BUILTIN_INJURIES.filter(i => !archivedBuiltinKeys.includes(i.key)),
-    ...newInjuries,
+    ...customInjuries,
   ]
 
   const renderCard = (inj: InjuryCard) => {
@@ -269,6 +331,16 @@ export default function InjuriesPage() {
             <input type="number" placeholder="Pain" min="0" max="10" value={form.pain} onChange={e => setUpdateForms(f => ({ ...f, [inj.key]: { ...form, pain: e.target.value } }))} />
           </div>
           <button className="hub-btn" onClick={() => addUpdate(inj.key)}>Add Update</button>
+        </div>
+      </div>
+    )
+  }
+
+  if (loading) {
+    return (
+      <div className="hub-page">
+        <div style={{ textAlign: 'center', padding: 60, fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
+          Loading...
         </div>
       </div>
     )

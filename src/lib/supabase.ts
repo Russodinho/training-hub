@@ -59,29 +59,29 @@ export interface NutritionActual {
   raw_data: Record<string, unknown> | null
 }
 
-export interface StravaActivity {
+export interface GarminActivity {
   id: string
-  strava_id: number
+  date: string
   activity_type: string
   name: string | null
-  distance: number | null
-  moving_time: number | null
-  elapsed_time: number | null
-  start_date: string | null
-  average_speed: number | null
-  max_speed: number | null
-  average_heartrate: number | null
-  total_elevation_gain: number | null
-  raw_data: Record<string, unknown> | null
+  duration_min: number | null
+  distance_km: number | null
+  avg_hr: number | null
+  max_hr: number | null
+  calories: number | null
+  avg_pace: string | null
 }
 
-export interface StravaToken {
-  id: string
-  access_token: string
-  refresh_token: string
-  expires_at: number
-  athlete_id: number | null
-  updated_at: string
+// Collapse garmin_sync.py's sport types into the swim/bike/run/lift buckets
+// the dashboard's volume + distribution charts are built around.
+const GARMIN_BUCKET: Record<string, 'swim' | 'bike' | 'run' | 'lift'> = {
+  swimming: 'swim',
+  cycling: 'bike',
+  running: 'run',
+  strength: 'lift',
+}
+export function garminBucket(activityType: string): 'swim' | 'bike' | 'run' | 'lift' | 'other' {
+  return GARMIN_BUCKET[activityType] ?? 'other'
 }
 
 // ── Mobility helpers ──
@@ -153,35 +153,25 @@ export async function upsertRaceResult(result: Omit<RaceResult, 'id' | 'created_
   await getSupabase().from('race_results').upsert(result, { onConflict: 'race_id' })
 }
 
-// ── Strava helpers ──
+// ── Garmin activity helpers (synced via garmin_sync.py → garmin_activities) ──
 
-export async function getStravaToken(): Promise<StravaToken | null> {
+export async function getRecentGarminActivities(limit = 10): Promise<GarminActivity[]> {
   const { data } = await getSupabase()
-    .from('strava_tokens')
+    .from('garmin_activities')
     .select('*')
-    .order('updated_at', { ascending: false })
-    .limit(1)
-    .single()
-  return data
-}
-
-export async function getRecentActivities(limit = 10): Promise<StravaActivity[]> {
-  const { data } = await getSupabase()
-    .from('strava_activities')
-    .select('*')
-    .order('start_date', { ascending: false })
+    .order('date', { ascending: false })
     .limit(limit)
   return data || []
 }
 
-export async function getActivitiesForWeeks(weeksBack = 8): Promise<StravaActivity[]> {
+export async function getGarminActivitiesForWeeks(weeksBack = 8): Promise<GarminActivity[]> {
   const since = new Date()
   since.setDate(since.getDate() - weeksBack * 7)
   const { data } = await getSupabase()
-    .from('strava_activities')
+    .from('garmin_activities')
     .select('*')
-    .gte('start_date', since.toISOString())
-    .order('start_date', { ascending: true })
+    .gte('date', since.toISOString().split('T')[0])
+    .order('date', { ascending: true })
   return data || []
 }
 
@@ -238,6 +228,70 @@ export async function migrateLocalStorage(): Promise<void> {
   const raceRes = JSON.parse(localStorage.getItem('race_results') || '{}')
   for (const [race_id, val] of Object.entries(raceRes as Record<string, Record<string, string>>)) {
     await getSupabase().from('race_results').upsert({ race_id, ...val }, { onConflict: 'race_id' })
+  }
+
+  // Migrate manual tri-session logs (Progress / Training Log pages, pre-Supabase)
+  type LooseEntry = { date: string } & Record<string, string>
+  const triKindMap: [string, 'swim' | 'bike' | 'run' | 'brick'][] = [
+    ['track_swim', 'swim'], ['track_bike', 'bike'], ['track_run', 'run'], ['track_bricks', 'brick'],
+  ]
+  for (const [storageKey, kind] of triKindMap) {
+    const entries: LooseEntry[] = JSON.parse(localStorage.getItem(storageKey) || '[]')
+    for (const entry of entries) {
+      const { date, ...rest } = entry
+      if (!date) continue
+      await getSupabase().from('tri_log_entries').insert({ kind, date, data: rest })
+    }
+  }
+
+  const weightEntries: LooseEntry[] = JSON.parse(localStorage.getItem('track_weight') || '[]')
+  for (const entry of weightEntries) {
+    if (!entry.date || !entry.weight) continue
+    await getSupabase().from('manual_weight_log').insert({
+      date: entry.date,
+      weight: parseFloat(entry.weight),
+      bf: entry.bf ? parseFloat(entry.bf) : null,
+      notes: entry.notes || null,
+    })
+  }
+
+  // Migrate injuries (custom injuries, archived injuries, and recovery-log updates)
+  interface LegacyInjury {
+    key: string; name: string; status: string; pain: string; since: string
+    location: string; aggravated: string; notAffected: string; treatment: string
+    notes: string; symptoms: string; isBuiltin?: boolean
+  }
+  interface LegacyArchivedInjury extends LegacyInjury {
+    archivedAt: string; finalStatus: string
+    injuryUpdates: { date: string; status: string; pain: string; note: string }[]
+  }
+  const legacyUpdates: Record<string, { date: string; status: string; pain: string; note: string }[]> =
+    JSON.parse(localStorage.getItem('injury_updates') || '{}')
+  for (const [key, list] of Object.entries(legacyUpdates)) {
+    for (const u of list) {
+      await getSupabase().from('injury_updates').insert({ injury_key: key, date: u.date, status: u.status, pain: u.pain || null, note: u.note || null })
+    }
+  }
+  const legacyNewInjuries: LegacyInjury[] = JSON.parse(localStorage.getItem('new_injuries') || '[]')
+  for (const inj of legacyNewInjuries) {
+    await getSupabase().from('injuries').upsert({
+      key: inj.key, name: inj.name, status: inj.status, pain: inj.pain || null, since: inj.since || null,
+      location: inj.location || null, aggravated: inj.aggravated || null, not_affected: inj.notAffected || null,
+      treatment: inj.treatment || null, notes: inj.notes || null, symptoms: inj.symptoms || null,
+      is_builtin: false, archived: false,
+    }, { onConflict: 'key' })
+  }
+  const legacyArchived: LegacyArchivedInjury[] = JSON.parse(localStorage.getItem('archived_injuries') || '[]')
+  for (const a of legacyArchived) {
+    await getSupabase().from('injuries').upsert({
+      key: a.key, name: a.name, status: a.status, pain: a.pain || null, since: a.since || null,
+      location: a.location || null, aggravated: a.aggravated || null, not_affected: a.notAffected || null,
+      treatment: a.treatment || null, notes: a.notes || null, symptoms: a.symptoms || null,
+      is_builtin: !!a.isBuiltin, archived: true, archived_at: a.archivedAt || null, final_status: a.finalStatus || a.status,
+    }, { onConflict: 'key' })
+    for (const u of a.injuryUpdates || []) {
+      await getSupabase().from('injury_updates').insert({ injury_key: a.key, date: u.date, status: u.status, pain: u.pain || null, note: u.note || null })
+    }
   }
 
   localStorage.setItem('supabase_migrated', '1')

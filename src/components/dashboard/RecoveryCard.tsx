@@ -9,26 +9,26 @@ interface DailyStat {
   stress_avg: number | null
 }
 
-function Ring({ value, color }: { value: number; color: string }) {
-  const r = 42
+function Ring({ value }: { value: number }) {
+  const r = 70
   const circ = 2 * Math.PI * r
   const offset = circ * (1 - value / 100)
   return (
-    <svg width="108" height="108" viewBox="0 0 108 108" style={{ display: 'block' }}>
-      <circle cx="54" cy="54" r={r} fill="none" stroke="var(--s3)" strokeWidth="7" />
+    <svg width="168" height="168" viewBox="0 0 168 168" style={{ display: 'block' }}>
+      <circle cx="84" cy="84" r={r} fill="none" stroke="var(--s3)" strokeWidth="9" />
       <circle
-        cx="54" cy="54" r={r} fill="none"
-        stroke={color} strokeWidth="7" strokeLinecap="round"
+        cx="84" cy="84" r={r} fill="none"
+        stroke="var(--strength)" strokeWidth="9" strokeLinecap="round"
         strokeDasharray={`${circ}`}
         strokeDashoffset={`${offset}`}
-        transform="rotate(-90 54 54)"
+        transform="rotate(-90 84 84)"
         style={{ transition: 'stroke-dashoffset 0.6s ease' }}
       />
-      <text x="54" y="49" textAnchor="middle" dominantBaseline="middle"
-        fill="var(--text)" fontFamily="'IBM Plex Mono', monospace"
-        fontSize="22" fontWeight="700">{value}</text>
-      <text x="54" y="67" textAnchor="middle" dominantBaseline="middle"
-        fill="var(--muted)" fontFamily="'IBM Plex Mono', monospace" fontSize="9">/ 100</text>
+      <text x="84" y="80" textAnchor="middle" dominantBaseline="middle"
+        fill="var(--text)" fontFamily="Figtree, sans-serif"
+        fontSize="34" fontWeight="700">{value}</text>
+      <text x="84" y="106" textAnchor="middle" dominantBaseline="middle"
+        fill="var(--muted)" fontFamily="Figtree, sans-serif" fontSize="12">Recovery</text>
     </svg>
   )
 }
@@ -51,68 +51,71 @@ export default function RecoveryCard() {
   }, [])
 
   const score = stat?.sleep_score ?? stat?.body_battery_max ?? null
-  const color = score === null ? 'var(--muted)'
-    : score >= 75 ? 'var(--strength)'
+  const labelColor = score === null ? 'var(--muted)'
+    : score >= 75 ? 'var(--mobility)'
     : score >= 50 ? 'var(--amber)'
-    : 'var(--run)'
-  const label = score === null ? '—' : score >= 75 ? 'Good' : score >= 50 ? 'Fair' : 'Low'
+    : 'var(--danger)'
+  const label = score === null ? '—' : score >= 75 ? 'Good recovery' : score >= 50 ? 'Fair recovery' : 'Low recovery'
 
   return (
-    <div style={{
-      background: 'var(--s2)',
-      border: '0.5px solid var(--border)',
-      borderRadius: 14,
-      padding: '20px',
-    }}>
-      <div style={{
-        fontFamily: "'IBM Plex Mono', monospace",
-        fontSize: 9,
-        letterSpacing: '0.14em',
-        textTransform: 'uppercase',
-        color: 'var(--dim)',
-        marginBottom: 16,
-      }}>Recovery</div>
+    <div className="card recovery-card">
+      <div className="card-title"><span>Recovery</span></div>
 
       {loading ? (
         <div style={{ height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--dim)' }}>
+          fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--dim)' }}>
           Loading…
         </div>
       ) : score !== null ? (
         <>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-            <Ring value={score} color={color} />
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 600, color }}>
+          {/* Desktop: purple ring */}
+          <div className="recovery-ring-view">
+            <Ring value={score} />
+            <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 13, fontWeight: 600, color: labelColor, marginTop: 4 }}>
               {label}
             </div>
           </div>
+
+          {/* Mobile: compact purple card, no ring */}
+          <div className="recovery-compact-view">
+            <span className="recovery-compact-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M19 15A8 8 0 0 1 9 5a8 8 0 1 0 10 10z" />
+              </svg>
+            </span>
+            <div>
+              <div className="recovery-compact-label">Recovery</div>
+              <div className="recovery-compact-value">{score} · {label}</div>
+            </div>
+          </div>
+
           <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 16 }}>
             {stat?.resting_hr && (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>
+                <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>
                   {stat.resting_hr}
                 </div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11, color: 'var(--muted)' }}>
                   RHR
                 </div>
               </div>
             )}
             {stat?.stress_avg && (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>
+                <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>
                   {stat.stress_avg}
                 </div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11, color: 'var(--muted)' }}>
                   Stress
                 </div>
               </div>
             )}
             {stat?.body_battery_max && (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>
+                <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 16, fontWeight: 600, color: 'var(--text)' }}>
                   {stat.body_battery_max}
                 </div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11, color: 'var(--muted)' }}>
                   Battery
                 </div>
               </div>
@@ -121,10 +124,10 @@ export default function RecoveryCard() {
         </>
       ) : (
         <div style={{ padding: '16px 0', textAlign: 'center' }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
+          <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--muted)' }}>
             No Garmin data yet
           </div>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--dim)', marginTop: 4 }}>
+          <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11, color: 'var(--dim)', marginTop: 4 }}>
             Run garmin_sync.py to sync
           </div>
         </div>
@@ -133,8 +136,8 @@ export default function RecoveryCard() {
       <a href="/recovery" style={{
         display: 'block',
         textAlign: 'center',
-        fontFamily: "'IBM Plex Mono', monospace",
-        fontSize: 10,
+        fontFamily: 'Figtree, sans-serif',
+        fontSize: 12,
         color: 'var(--muted)',
         textDecoration: 'none',
         marginTop: 16,

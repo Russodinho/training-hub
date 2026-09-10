@@ -12,7 +12,7 @@ export default function DistributionChart({ data }: DistributionChartProps) {
       <div className="empty-state" style={{ padding: '32px 16px' }}>
         <div className="empty-icon">🥧</div>
         <div className="empty-title">No activity data yet</div>
-        <div>Connect Strava to see your training distribution.</div>
+        <div>Run <code>garmin_sync.py --all</code> to see your training distribution.</div>
       </div>
     )
   }

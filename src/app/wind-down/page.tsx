@@ -61,34 +61,50 @@ const STRETCHES: Stretch[] = [
 ]
 
 const RULES: { title: string; body: string }[] = [
-  {
-    title: 'No massage gun.',
-    body: 'The gun is stimulating — it wakes up tissue. Save it for post-workout mobility.',
-  },
-  {
-    title: 'No active movements.',
-    body: "No World's Greatest Stretch, no hip switches, no couch stretch. Those are mobility work. This is wind-down.",
-  },
-  {
-    title: 'Dark room preferred.',
-    body: 'Do this with low light or no light. Blue light from screens works against everything you\'re doing here.',
-  },
-  {
-    title: 'On the floor or in bed.',
-    body: "All 5 can be done on a carpet, yoga mat, or your bed. Don't overthink the surface.",
-  },
-  {
-    title: 'Order matters slightly.',
-    body: 'Legs up the wall first (drains legs, starts the slowdown), 90/90 breathing second-to-last (the real nervous system flip), neck release last (final tension dump before sleep).',
-  },
-  {
-    title: 'If you only do one:',
-    body: 'Do the 90/90 breathing. 10 breaths, 2 minutes, biggest impact on sleep latency.',
-  },
+  { title: 'No massage gun.', body: 'The gun is stimulating — it wakes up tissue. Save it for post-workout mobility.' },
+  { title: 'No active movements.', body: "No World's Greatest Stretch, no hip switches, no couch stretch. Those are mobility work. This is wind-down." },
+  { title: 'Dark room preferred.', body: 'Do this with low light or no light. Blue light from screens works against everything you\'re doing here.' },
+  { title: 'On the floor or in bed.', body: "All 5 can be done on a carpet, yoga mat, or your bed. Don't overthink the surface." },
+  { title: 'Order matters slightly.', body: 'Legs up the wall first (drains legs, starts the slowdown), 90/90 breathing second-to-last (the real nervous system flip), neck release last (final tension dump before sleep).' },
+  { title: 'If you only do one:', body: 'Do the 90/90 breathing. 10 breaths, 2 minutes, biggest impact on sleep latency.' },
 ]
+
+function MoonIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M19 15A8 8 0 0 1 9 5a8 8 0 1 0 10 10z" />
+    </svg>
+  )
+}
+
+function CompletionRing({ done, total }: { done: number; total: number }) {
+  const r = 42
+  const circ = 2 * Math.PI * r
+  const pct = total > 0 ? done / total : 0
+  const offset = circ * (1 - pct)
+  return (
+    <svg width="100" height="100" viewBox="0 0 100 100" style={{ display: 'block', flexShrink: 0 }}>
+      <circle cx="50" cy="50" r={r} fill="none" stroke="var(--s3)" strokeWidth="8" />
+      <circle
+        cx="50" cy="50" r={r} fill="none"
+        stroke="var(--strength)" strokeWidth="8" strokeLinecap="round"
+        strokeDasharray={circ} strokeDashoffset={offset}
+        transform="rotate(-90 50 50)"
+        style={{ transition: 'stroke-dashoffset 0.4s ease' }}
+      />
+      <text x="50" y="47" textAnchor="middle" dominantBaseline="middle"
+        fill="var(--text)" fontFamily="Figtree, sans-serif" fontSize="20" fontWeight="700">{done} / {total}</text>
+      <text x="50" y="65" textAnchor="middle" dominantBaseline="middle"
+        fill="var(--muted)" fontFamily="Figtree, sans-serif" fontSize="10">Completed</text>
+    </svg>
+  )
+}
 
 export default function WindDownPage() {
   const [checked, setChecked] = useState<Set<number>>(new Set())
+  const [expanded, setExpanded] = useState<number | null>(null)
+  const [rulesOpen, setRulesOpen] = useState(false)
 
   const toggle = (id: number) => {
     setChecked(prev => {
@@ -101,65 +117,56 @@ export default function WindDownPage() {
 
   const total = STRETCHES.length
   const done = checked.size
-  const complete = done === total
 
   return (
     <div className="hub-page">
       <div className="page-header">
         <div>
-          <h2>Pre-Sleep Wind-Down</h2>
-          <div className="sub">5 stretches · ~10 min · every night before bed · parasympathetic only</div>
-        </div>
-        <div className="page-header-right">
-          No massage gun<br />
-          No active movements<br />
-          Dark room · slow breathing
+          <h2>Wind-Down</h2>
+          <div className="sub">Slow down. Settle into sleep.</div>
         </div>
       </div>
 
-      {/* Intent */}
-      <div className="wind-intent">
-        <strong>Purpose:</strong> This is not a mobility session — it&apos;s a nervous system shut-off switch. Everything here is passive, gravity-assisted, and breath-focused. The goal is to downregulate from the day and transition into sleep. If you feel like you&apos;re &ldquo;working&rdquo; during any of these, you&apos;re doing too much.
-      </div>
-
-      {/* Status tile */}
-      <div className={`wind-status${complete ? ' complete' : ''}`}>
-        <div className="wind-status-icon">{complete ? '✅' : '🌙'}</div>
+      {/* Summary card */}
+      <div className="wind-summary">
         <div>
-          <div className="wind-status-title">
-            {complete ? 'Wind-down complete' : 'Wind-down'}
-          </div>
-          <div className="wind-status-sub">
-            {complete ? 'Time for sleep. Lights out.' : 'Click each stretch as you finish it'}
-          </div>
+          <div className="wind-summary-title">Tonight&apos;s routine</div>
+          <div className="wind-summary-sub">{total} stretches · About 10 min</div>
+          <div className="wind-summary-link">Slow breathing</div>
         </div>
-        <div className="wind-status-right">
-          <div className="wind-status-progress">{done}/{total}</div>
-        </div>
+        <CompletionRing done={done} total={total} />
       </div>
 
-      {/* Stretch cards */}
+      {/* Stretch rows */}
       <div className="wind-grid">
         {STRETCHES.map(stretch => {
           const isChecked = checked.has(stretch.id)
+          const isOpen = expanded === stretch.id
           return (
-            <div
-              key={stretch.id}
-              className={`wind-card${isChecked ? ' checked' : ''}`}
-              onClick={() => toggle(stretch.id)}
-            >
-              <div className="wind-num">{stretch.num}</div>
-              <div>
-                <div className="wind-name">{stretch.name}</div>
-                <div className="wind-focus">{stretch.focus}</div>
-                <div className="wind-badges">
-                  {stretch.badges.map(b => (
-                    <span key={b} className="wind-badge">{b}</span>
-                  ))}
+            <div key={stretch.id} className={`wind-card${isChecked ? ' checked' : ''}`}>
+              <div className="wind-row" onClick={() => setExpanded(isOpen ? null : stretch.id)}>
+                <div className="wind-icon-tile"><MoonIcon /></div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="wind-name">{stretch.name}</div>
+                  <div className="wind-focus">{isOpen ? stretch.focus : 'Passive · Follow existing cues'}</div>
                 </div>
-                <div className="wind-cue">{stretch.cue}</div>
-                <div className="wind-breath">{stretch.breath}</div>
+                <button
+                  className={`wind-check${isChecked ? ' checked' : ''}`}
+                  onClick={e => { e.stopPropagation(); toggle(stretch.id) }}
+                  aria-label={isChecked ? `Mark ${stretch.name} not done` : `Mark ${stretch.name} done`}
+                >
+                  {isChecked && '✓'}
+                </button>
               </div>
+              {isOpen && (
+                <div className="wind-detail">
+                  <div className="wind-badges">
+                    {stretch.badges.map(b => <span key={b} className="wind-badge">{b}</span>)}
+                  </div>
+                  <div className="wind-cue">{stretch.cue}</div>
+                  <div className="wind-breath">{stretch.breath}</div>
+                </div>
+              )}
             </div>
           )
         })}
@@ -167,8 +174,11 @@ export default function WindDownPage() {
 
       {/* Ground rules */}
       <div className="wind-rules">
-        <div className="wind-rules-title">Ground Rules</div>
-        {RULES.map((rule, i) => (
+        <div className="wind-rules-title" onClick={() => setRulesOpen(o => !o)}>
+          Ground rules
+          <span className="wind-rules-toggle">{rulesOpen ? '▲ collapse' : '▼ expand'}</span>
+        </div>
+        {rulesOpen && RULES.map((rule, i) => (
           <div key={i} className="wind-rule-item">
             <strong>{rule.title}</strong> {rule.body}
           </div>

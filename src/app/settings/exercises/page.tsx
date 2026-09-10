@@ -95,8 +95,8 @@ export default function ExercisesPage() {
       <div className="page-header">
         <h2>Exercises</h2>
         <button onClick={() => { setShowAdd(!showAdd); setForm({ ...DEFAULT_FORM, category: activeTab }) }} style={{
-          background: 'var(--strength)', color: '#000', border: 'none', borderRadius: 6,
-          padding: '6px 14px', fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, fontWeight: 600, cursor: 'pointer',
+          background: 'linear-gradient(180deg, #65f3ec, #22dcd4)', color: '#07171c', border: 'none', borderRadius: 8,
+          padding: '8px 16px', fontFamily: "'Figtree', sans-serif", fontSize: 12, fontWeight: 600, cursor: 'pointer',
         }}>
           + Add
         </button>
@@ -135,7 +135,7 @@ export default function ExercisesPage() {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button type="submit" disabled={saving} style={{ flex: 1, background: 'var(--strength)', color: '#000', border: 'none', borderRadius: 6, padding: '9px', fontFamily: "'Figtree', sans-serif", fontSize: 13, fontWeight: 700, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}>
+            <button type="submit" disabled={saving} style={{ flex: 1, background: 'linear-gradient(180deg, #65f3ec, #22dcd4)', color: '#07171c', border: 'none', borderRadius: 8, padding: '9px', fontFamily: "'Figtree', sans-serif", fontSize: 13, fontWeight: 700, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}>
               {saving ? 'Saving…' : 'Add Exercise'}
             </button>
             <button type="button" onClick={() => setShowAdd(false)} style={{ padding: '9px 16px', background: 'transparent', border: '0.5px solid var(--border)', borderRadius: 6, fontFamily: "'Figtree', sans-serif", fontSize: 13, color: 'var(--muted)', cursor: 'pointer' }}>
@@ -153,7 +153,7 @@ export default function ExercisesPage() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {tabExercises.map(ex => (
-            <div key={ex.id} style={{ borderRadius: 8, border: '0.5px solid var(--border)', background: 'var(--s1)', padding: '10px 12px', opacity: ex.is_active ? 1 : 0.4 }}>
+            <div key={ex.id} style={{ borderRadius: 8, border: '0.5px solid var(--border)', background: 'var(--s1)', padding: '10px 12px' }}>
               {editingId === ex.id ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   <input value={editForm.name || ''} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} style={inputS} />
@@ -164,22 +164,27 @@ export default function ExercisesPage() {
                     ))}
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => saveEdit(ex.id)} disabled={saving} style={{ flex: 1, background: 'var(--strength)', color: '#000', border: 'none', borderRadius: 6, padding: '7px', fontFamily: "'Figtree', sans-serif", fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Save</button>
+                    <button onClick={() => saveEdit(ex.id)} disabled={saving} style={{ flex: 1, background: 'linear-gradient(180deg, #65f3ec, #22dcd4)', color: '#07171c', border: 'none', borderRadius: 8, padding: '7px', fontFamily: "'Figtree', sans-serif", fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Save</button>
                     <button onClick={() => setEditingId(null)} style={{ flex: 1, background: 'transparent', border: '0.5px solid var(--border)', borderRadius: 6, padding: '7px', fontFamily: "'Figtree', sans-serif", fontSize: 12, color: 'var(--muted)', cursor: 'pointer' }}>Cancel</button>
                   </div>
                 </div>
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ex.name}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ex.name}</p>
+                      {!ex.is_active && (
+                        <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: 10, fontWeight: 600, color: 'var(--faint)', background: 'var(--s2)', border: '1px solid var(--border)', borderRadius: 20, padding: '1px 8px', flexShrink: 0 }}>Inactive</span>
+                      )}
+                    </div>
                     {(ex.default_sets || ex.default_reps) && (
-                      <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)', marginTop: 2 }}>
+                      <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: 11, color: 'var(--faint)', marginTop: 2 }}>
                         {[ex.default_sets && `${ex.default_sets} sets`, ex.default_reps && `${ex.default_reps} reps`, ex.default_rpe && `RPE ${ex.default_rpe}`, ex.rest_seconds && `${ex.rest_seconds}s rest`].filter(Boolean).join(' · ')}
                       </p>
                     )}
                   </div>
-                  <button onClick={() => { setEditingId(ex.id); setEditForm(ex) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)', padding: '0 4px' }}>Edit</button>
-                  <button onClick={() => toggleActive(ex)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: ex.is_active ? 'var(--faint)' : 'var(--strength)', padding: '0 4px' }}>
+                  <button onClick={() => { setEditingId(ex.id); setEditForm(ex) }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'Figtree', sans-serif", fontSize: 11, color: 'var(--faint)', padding: '0 4px' }}>Edit</button>
+                  <button onClick={() => toggleActive(ex)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'Figtree', sans-serif", fontSize: 11, color: ex.is_active ? 'var(--faint)' : 'var(--accent)', padding: '0 4px' }}>
                     {ex.is_active ? 'Disable' : 'Enable'}
                   </button>
                 </div>
