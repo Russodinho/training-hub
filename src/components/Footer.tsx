@@ -9,7 +9,7 @@ export default function Footer() {
       textAlign: 'center',
       letterSpacing: '0.04em',
     }}>
-      Built with Next.js · Data from Strava, Google Sheets, Cronometer · Google Health (coming soon)
+      Built with Next.js · Data from Garmin, Google Sheets, Cronometer
     </footer>
   )
 }

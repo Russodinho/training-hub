@@ -15,6 +15,7 @@ const NAV_LINKS = [
   { href: '/mobility', label: 'Mobility' },
   { href: '/sleep', label: 'Sleep' },
   { href: '/cardio', label: 'Cardio' },
+  { href: '/recovery', label: 'Recovery' },
   { href: '/race-day', label: 'Race Day' },
   { href: '/injuries', label: 'Injuries' },
 ]
@@ -24,7 +25,6 @@ const NAV_PLACEHOLDERS: { label: string; soon: boolean }[] = []
 export default function Nav() {
   const pathname = usePathname()
   const [daysOut, setDaysOut] = useState<string | number>('—')
-  const [stravaConnected, setStravaConnected] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -38,7 +38,6 @@ export default function Nav() {
     } else {
       setDaysOut('Done')
     }
-    fetch('/api/strava/status').then(r => r.json()).then(d => setStravaConnected(d.connected)).catch(() => {})
   }, [])
 
   useEffect(() => { setMenuOpen(false) }, [pathname])
@@ -210,31 +209,8 @@ export default function Nav() {
           )}
         </button>
 
-        {/* Right: Strava + countdown */}
+        {/* Right: race countdown */}
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, paddingLeft: 12 }}>
-          {stravaConnected ? (
-            <span style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              background: 'rgba(252,76,2,0.12)',
-              border: '0.5px solid rgba(252,76,2,0.3)',
-              color: '#fc4c02',
-              borderRadius: 20, padding: '3px 10px', whiteSpace: 'nowrap',
-            }}>
-              ● Strava
-            </span>
-          ) : (
-            <a href="/api/strava/auth" style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-              background: 'rgba(252,76,2,0.12)',
-              border: '0.5px solid rgba(252,76,2,0.3)',
-              color: '#fc4c02',
-              borderRadius: 20, padding: '3px 10px',
-              textDecoration: 'none', whiteSpace: 'nowrap',
-            }}>
-              Connect Strava
-            </a>
-          )}
-
           {activeRace && (
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', whiteSpace: 'nowrap' }}>
               <strong style={{ color: 'var(--strength)', fontSize: 14 }}>{daysOut}</strong>
