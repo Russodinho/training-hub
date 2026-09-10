@@ -58,6 +58,7 @@ HEALTH_DIR    = Path.home() / 'HealthData' / 'DBs'
 DB_ACTIVITIES = HEALTH_DIR / 'garmin_activities.db'
 DB_SUMMARY    = HEALTH_DIR / 'garmin_summary.db'
 DB_MONITORING = HEALTH_DIR / 'garmin_monitoring.db'
+DB_MAIN       = HEALTH_DIR / 'garmin.db'
 
 # ── Sport type mapping ──────────────────────────────────────────────────────────
 _SPORT_MAP = {
@@ -237,6 +238,39 @@ def sync_activities(since: date, sb) -> int:
 
 
 # ── Daily stats sync ────────────────────────────────────────────────────────────
+def _sleep_scores_by_day(since: date) -> dict:
+    """garmin.db's dedicated sleep table has the real 0-100 sleep score —
+    days_summary only has sleep *duration*, no score at all."""
+    if not DB_MAIN.exists():
+        return {}
+    conn = sqlite3.connect(str(DB_MAIN))
+    conn.row_factory = sqlite3.Row
+    if not _columns(conn, 'sleep'):
+        conn.close()
+        return {}
+    rows = conn.execute(
+        'SELECT day, score FROM sleep WHERE day >= ?', (since.isoformat(),)
+    ).fetchall()
+    conn.close()
+    return {str(r['day'])[:10]: _to_int(r['score']) for r in rows if r['day']}
+
+def _resting_hr_by_day(since: date) -> dict:
+    """garmin.db's resting_hr table has the actual Garmin-computed resting HR —
+    days_summary's hr_min is just the day's lowest reading, not the same thing."""
+    if not DB_MAIN.exists():
+        return {}
+    conn = sqlite3.connect(str(DB_MAIN))
+    conn.row_factory = sqlite3.Row
+    if not _columns(conn, 'resting_hr'):
+        conn.close()
+        return {}
+    rows = conn.execute(
+        'SELECT day, resting_heart_rate FROM resting_hr WHERE day >= ?', (since.isoformat(),)
+    ).fetchall()
+    conn.close()
+    return {str(r['day'])[:10]: _to_int(r['resting_heart_rate']) for r in rows if r['day']}
+
+
 def sync_daily_stats(since: date, sb) -> int:
     # GarminDB may put daily summaries in garmin_summary.db or garmin_monitoring.db
     candidates = [
@@ -245,6 +279,9 @@ def sync_daily_stats(since: date, sb) -> int:
         (DB_MONITORING, 'daily_summary'),
         (DB_MONITORING, 'days_summary'),
     ]
+
+    sleep_scores = _sleep_scores_by_day(since)
+    resting_hrs = _resting_hr_by_day(since)
 
     for db_path, table in candidates:
         if not db_path.exists():
@@ -269,7 +306,9 @@ def sync_daily_stats(since: date, sb) -> int:
             day = d.get('day') or d.get('date')
             if not day:
                 continue
-            weight_val = _get(d, 'weight', 'weight_kg')
+            day_str = str(day)[:10]
+
+            weight_val = _get(d, 'weight_avg', 'weight', 'weight_kg')
             # GarminDB stores weight in kg when metric, or lbs when imperial
             # We store as kg; if value is suspiciously large it may be lbs
             weight_kg = None
@@ -281,13 +320,13 @@ def sync_daily_stats(since: date, sb) -> int:
                     pass
 
             records.append({
-                'date':             str(day)[:10],
-                'resting_hr':       _to_int(_get(d, 'resting_hr', 'hr_min')),
+                'date':             day_str,
+                'resting_hr':       resting_hrs.get(day_str) or _to_int(_get(d, 'rhr_avg', 'resting_hr', 'hr_min')),
                 'steps':            _to_int(d.get('steps')),
                 'stress_avg':       _to_int(d.get('stress_avg')),
-                'body_battery_min': _to_int(d.get('body_battery_min')),
-                'body_battery_max': _to_int(d.get('body_battery_max')),
-                'sleep_score':      _to_int(d.get('sleep_score')),
+                'body_battery_min': _to_int(_get(d, 'bb_min', 'body_battery_min')),
+                'body_battery_max': _to_int(_get(d, 'bb_max', 'body_battery_max')),
+                'sleep_score':      sleep_scores.get(day_str) or _to_int(d.get('sleep_score')),
                 'weight_kg':        weight_kg,
             })
 
