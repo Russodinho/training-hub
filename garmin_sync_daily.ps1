@@ -24,7 +24,17 @@ $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 Add-Content $logFile "`n=== $timestamp ==="
 
 # Step 1: download + import + analyze latest from Garmin Connect
-& $python $cli --all --latest --download --import --analyze 2>&1 | Tee-Object -Append -FilePath $logFile
+#
+# Explicit stats instead of --all: --hrv downloads real JSON files every
+# run, but every single one comes back `{}` (confirmed by checking all 985
+# backfilled files directly) — this Garmin account/device just doesn't
+# report HRV. garmindb_cli.py's "have we already got this" check is
+# `SELECT MAX(day) FROM hrv`, which is永always empty since nothing ever
+# imports, so it re-does a ~985-day historical re-scan on *every* run
+# (15-20 min) for data that will never exist. Dropping --hrv is the fix —
+# not a bug in our code, just no reason to keep asking for data this
+# account has none of. (garmin_sync.py doesn't read HRV anyway.)
+& $python $cli --activities --monitoring --rhr --sleep --weight --latest --download --import --analyze 2>&1 | Tee-Object -Append -FilePath $logFile
 
 # Step 2: push all data to Supabase (upsert is idempotent — safe to run daily)
 & $python $sync --all 2>&1 | Tee-Object -Append -FilePath $logFile
