@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { getActiveRace } from '@/lib/data'
+import { getActiveRace } from '@/lib/supabase'
 import { NAV_ITEMS, MOBILE_TABS, linkActive, tabActive } from './navConfig'
 
 // ── Icons (16×16, stroke-based) ────────────────────────────────────────────
@@ -110,14 +110,14 @@ export default function Sidebar() {
   const [raceName, setRaceName] = useState('')
 
   useEffect(() => {
-    const active = getActiveRace()
-    if (active) {
+    getActiveRace().then(active => {
+      if (!active) return
       setRaceName(active.race.name)
       const today = new Date(); today.setHours(0, 0, 0, 0)
       const rd = new Date(active.race.date); rd.setHours(0, 0, 0, 0)
       const d = Math.round((rd.getTime() - today.getTime()) / 86400000)
       setDaysOut(d > 0 ? d : d === 0 ? 'Today!' : 'Done')
-    }
+    })
   }, [])
 
   return (

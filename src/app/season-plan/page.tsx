@@ -1,7 +1,8 @@
 ﻿'use client'
 
-import { useState } from 'react'
-import { getActiveRace, getDaysToRace } from '@/lib/data'
+import { useState, useEffect } from 'react'
+import { getActiveRace, getDaysToRace } from '@/lib/supabase'
+import type { Race } from '@/lib/supabase'
 
 interface Phase {
   num: number
@@ -165,7 +166,13 @@ type Tab = 'plan' | 'goals'
 
 export default function SeasonPlanPage() {
   const [tab, setTab] = useState<Tab>('plan')
-  const active = getActiveRace()
+  const [active, setActive] = useState<{ race: Race; isPast: boolean } | null>(null)
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    getActiveRace().then(a => { setActive(a); setLoaded(true) })
+  }, [])
+
   const daysOut = active ? getDaysToRace(active.race) : null
 
   return (
@@ -176,7 +183,7 @@ export default function SeasonPlanPage() {
           <div className="sub">7-week tri plan · stretch goals · 2026</div>
         </div>
         <div className="page-header-right">
-          {daysOut !== null && daysOut >= 0 ? (
+          {!loaded ? '' : daysOut !== null && daysOut >= 0 ? (
             <>{active!.race.name.split(' ')[0]} in<br /><strong style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20 }}>{daysOut}</strong> days</>
           ) : active ? `${active.race.name}` : 'Season in progress'}
         </div>

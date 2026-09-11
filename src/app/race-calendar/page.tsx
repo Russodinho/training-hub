@@ -1,112 +1,102 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect } from 'react'
-import { RACES, getDaysToRace } from '@/lib/data'
-import type { Race } from '@/lib/data'
+import { useState, useEffect, useCallback } from 'react'
+import { getRaces, getActiveRace, getDaysToRace, addRace, setRaceStatus, deleteRace, getRaceResult } from '@/lib/supabase'
+import type { Race, RaceResult } from '@/lib/supabase'
 
 const TYPE_LABELS: Record<string, { label: string; cls: string }> = {
   sprint: { label: 'Sprint', cls: 'tag-sprint' },
   olympic: { label: 'Olympic', cls: 'tag-olympic' },
   decide: { label: 'Decide', cls: 'tag-decide' },
+  target: { label: 'Target', cls: 'tag-decide' },
+}
+
+const SPORT_LABELS: Record<Race['sport'], string> = {
+  tri: 'Triathlon', run: 'Run', bike: 'Bike', swim: 'Swim',
 }
 
 const EMPTY_FORM = {
   name: '', date: '', location: '',
-  swim: '', bike: '', run: '',
-  type: 'sprint' as Race['type'],
+  sport: 'tri' as Race['sport'],
+  distanceSwim: '', distanceBike: '', distanceRun: '', distanceSingle: '',
+  tier: 'sprint' as NonNullable<Race['type']>,
   notes: '',
 }
 
-function computeActiveRace(allRaces: Race[]) {
-  const now = new Date()
-  const sorted = [...allRaces].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-  for (const r of sorted) {
-    const lagEnd = new Date(new Date(r.date).getTime() + 5 * 86400000)
-    if (now < lagEnd) return r
-  }
-  return null
-}
-
 export default function RaceCalendarPage() {
-  const [hiddenIds, setHiddenIds] = useState<string[]>([])
-  const [customRaces, setCustomRaces] = useState<Race[]>([])
+  const [races, setRaces] = useState<Race[]>([])
+  const [results, setResults] = useState<Record<string, RaceResult | null>>({})
+  const [activeRaceId, setActiveRaceId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [showHistory, setShowHistory] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
 
-  useEffect(() => {
-    const h = localStorage.getItem('hidden_races')
-    if (h) setHiddenIds(JSON.parse(h))
-    const c = localStorage.getItem('custom_races')
-    if (c) setCustomRaces(JSON.parse(c))
+  const load = useCallback(async () => {
+    const [allRaces, active] = await Promise.all([getRaces(), getActiveRace()])
+    setRaces(allRaces)
+    setActiveRaceId(active?.race.id ?? null)
+    setLoading(false)
   }, [])
 
-  const allRaces = [
-    ...RACES.filter(r => !hiddenIds.includes(r.id)),
-    ...customRaces,
-  ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  useEffect(() => { load() }, [load])
 
-  const activeRace = computeActiveRace(allRaces)
+  // Results (for the History section's breakdown) are fetched lazily,
+  // only once there's an archived race to show them for.
+  useEffect(() => {
+    const archived = races.filter(r => r.status === 'archived')
+    if (archived.length === 0) return
+    Promise.all(archived.map(r => getRaceResult(r.id).then(res => [r.id, res] as const)))
+      .then(pairs => setResults(Object.fromEntries(pairs)))
+  }, [races])
 
-  const removeRace = (id: string, isBuiltin: boolean) => {
-    if (isBuiltin) {
-      const next = [...hiddenIds, id]
-      setHiddenIds(next)
-      localStorage.setItem('hidden_races', JSON.stringify(next))
-    } else {
-      const next = customRaces.filter(r => r.id !== id)
-      setCustomRaces(next)
-      localStorage.setItem('custom_races', JSON.stringify(next))
-    }
+  const upcoming = races.filter(r => r.status !== 'archived').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const archived = races.filter(r => r.status === 'archived').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  const archiveRace = async (id: string) => {
+    await setRaceStatus(id, 'archived')
+    load()
+  }
+  const restoreRace = async (id: string) => {
+    await setRaceStatus(id, 'upcoming')
+    load()
+  }
+  const removeRace = async (id: string) => {
+    if (!confirm('Delete this race permanently? This cannot be undone.')) return
+    await deleteRace(id)
+    load()
   }
 
-  const addRace = () => {
+  const submitRace = async () => {
     if (!form.name || !form.date) return
-    const d = new Date(form.date + 'T07:00:00')
-    const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    const race: Race = {
-      id: `custom-${Date.now()}`,
+    await addRace({
       name: form.name,
       date: form.date + 'T07:00:00',
-      dateLabel: `${label} · 7:00 AM`,
-      location: form.location || '—',
-      headerRight: form.notes || '',
-      distances: {
-        swim: form.swim || '—',
-        bike: form.bike || '—',
-        run: form.run || '—',
-      },
-      type: form.type,
-      timeline: [],
-      strategy: [],
-    }
-    const next = [...customRaces, race]
-    setCustomRaces(next)
-    localStorage.setItem('custom_races', JSON.stringify(next))
+      location: form.location,
+      sport: form.sport,
+      tier: form.sport === 'tri' ? form.tier : undefined,
+      distanceSwim: form.sport === 'tri' ? form.distanceSwim : form.sport === 'swim' ? form.distanceSingle : undefined,
+      distanceBike: form.sport === 'tri' ? form.distanceBike : form.sport === 'bike' ? form.distanceSingle : undefined,
+      distanceRun: form.sport === 'tri' ? form.distanceRun : form.sport === 'run' ? form.distanceSingle : undefined,
+      notes: form.notes,
+    })
     setForm(EMPTY_FORM)
     setShowForm(false)
+    load()
   }
 
-  const totalRaces = allRaces.length
-  const pastRaces = allRaces.filter(r => getDaysToRace(r) < -5).length
+  const totalRaces = upcoming.length
 
   return (
     <div className="hub-page">
       <div className="page-header">
         <div>
           <h2>Race Calendar</h2>
-          <div className="sub">2026 Triathlon Season · {totalRaces} races</div>
-        </div>
-        <div className="page-header-right">
-          {activeRace ? (
-            <>
-              Next: {activeRace.name}<br />
-              {getDaysToRace(activeRace)} days out
-            </>
-          ) : 'Season complete'}
+          <div className="sub">2026 Triathlon Season · {totalRaces} upcoming race{totalRaces === 1 ? '' : 's'}</div>
         </div>
       </div>
 
-      {/* Legend + add button */}
+      {/* Legend + actions */}
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
         <div className="legend" style={{ margin: 0, flex: 1 }}>
           <div className="leg"><div className="ldot" style={{ background: 'var(--sprint-bg)', border: '1px solid var(--sprint-t)' }} /><span>Sprint</span></div>
@@ -114,11 +104,10 @@ export default function RaceCalendarPage() {
           <div className="leg"><div className="ldot" style={{ background: 'var(--decide-bg)', border: '1px solid var(--decide-t)' }} /><span>Decide (may skip)</span></div>
           <div className="leg"><div className="ldot" style={{ background: 'var(--target-bg)', border: '1px solid var(--target-t)' }} /><span>Target / A race</span></div>
         </div>
-        <button
-          className="hub-btn"
-          onClick={() => setShowForm(f => !f)}
-          style={{ flexShrink: 0 }}
-        >
+        <button className="hub-btn-ghost" onClick={() => setShowHistory(h => !h)} style={{ flexShrink: 0 }}>
+          {showHistory ? 'Hide history' : `History (${archived.length})`}
+        </button>
+        <button className="hub-btn" onClick={() => setShowForm(f => !f)} style={{ flexShrink: 0 }}>
           {showForm ? '✕ Cancel' : '+ Add race'}
         </button>
       </div>
@@ -130,32 +119,71 @@ export default function RaceCalendarPage() {
             Add race
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10, marginBottom: 10 }}>
-            {[
-              { label: 'Race name *', key: 'name', placeholder: 'e.g. Atlantic City Tri' },
-              { label: 'Date *', key: 'date', type: 'date' },
-              { label: 'Location', key: 'location', placeholder: 'City, State' },
-              { label: 'Swim distance', key: 'swim', placeholder: '750m' },
-              { label: 'Bike distance', key: 'bike', placeholder: '12.4 mi' },
-              { label: 'Run distance', key: 'run', placeholder: '5K' },
-            ].map(field => (
-              <div key={field.key}>
-                <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>{field.label}</label>
-                <input
-                  type={field.type || 'text'}
-                  placeholder={field.placeholder}
-                  value={(form as Record<string, string>)[field.key]}
-                  onChange={e => setForm(f => ({ ...f, [field.key]: e.target.value }))}
-                />
-              </div>
-            ))}
             <div>
-              <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Race type</label>
-              <select value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as Race['type'] }))}>
-                <option value="sprint">Sprint</option>
-                <option value="olympic">Olympic</option>
-                <option value="decide">Decide (may skip)</option>
+              <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Race name *</label>
+              <input type="text" placeholder="e.g. Atlantic City Tri" value={form.name}
+                onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div>
+              <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Date *</label>
+              <input type="date" value={form.date}
+                onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
+            </div>
+            <div>
+              <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Location</label>
+              <input type="text" placeholder="City, State" value={form.location}
+                onChange={e => setForm(f => ({ ...f, location: e.target.value }))} />
+            </div>
+            <div>
+              <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Sport</label>
+              <select value={form.sport} onChange={e => setForm(f => ({ ...f, sport: e.target.value as Race['sport'] }))}>
+                <option value="tri">Triathlon</option>
+                <option value="run">Run</option>
+                <option value="bike">Bike</option>
+                <option value="swim">Swim</option>
               </select>
             </div>
+
+            {form.sport === 'tri' ? (
+              <>
+                <div>
+                  <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Swim distance</label>
+                  <input type="text" placeholder="750m" value={form.distanceSwim}
+                    onChange={e => setForm(f => ({ ...f, distanceSwim: e.target.value }))} />
+                </div>
+                <div>
+                  <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Bike distance</label>
+                  <input type="text" placeholder="12.4 mi" value={form.distanceBike}
+                    onChange={e => setForm(f => ({ ...f, distanceBike: e.target.value }))} />
+                </div>
+                <div>
+                  <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Run distance</label>
+                  <input type="text" placeholder="5K" value={form.distanceRun}
+                    onChange={e => setForm(f => ({ ...f, distanceRun: e.target.value }))} />
+                </div>
+                <div>
+                  <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Race type</label>
+                  <select value={form.tier} onChange={e => setForm(f => ({ ...f, tier: e.target.value as NonNullable<Race['type']> }))}>
+                    <option value="sprint">Sprint</option>
+                    <option value="olympic">Olympic</option>
+                    <option value="decide">Decide (may skip)</option>
+                    <option value="target">Target / A race</option>
+                  </select>
+                </div>
+              </>
+            ) : (
+              <div>
+                <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>
+                  {SPORT_LABELS[form.sport]} distance
+                </label>
+                <input
+                  type="text"
+                  placeholder={form.sport === 'run' ? '5K, 10K, half marathon...' : form.sport === 'bike' ? '25 mi' : '1500m'}
+                  value={form.distanceSingle}
+                  onChange={e => setForm(f => ({ ...f, distanceSingle: e.target.value }))}
+                />
+              </div>
+            )}
           </div>
           <div style={{ marginBottom: 10 }}>
             <label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes / wave info</label>
@@ -166,25 +194,24 @@ export default function RaceCalendarPage() {
               onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
             />
           </div>
-          <button className="hub-btn" onClick={addRace}>Add Race</button>
+          <button className="hub-btn" onClick={submitRace}>Add Race</button>
         </div>
       )}
 
-      {allRaces.length === 0 && (
+      {!loading && upcoming.length === 0 && (
         <div className="empty-state">
           <div className="empty-icon">🏁</div>
           <div className="empty-title">No races on calendar</div>
-          <div>Click "+ Add race" to add your first race.</div>
+          <div>Click &quot;+ Add race&quot; to add your first race.</div>
         </div>
       )}
 
       <div className="race-grid">
-        {allRaces.map(race => {
+        {upcoming.map(race => {
           const daysOut = getDaysToRace(race)
           const isPast = daysOut < -5
-          const isActive = activeRace?.id === race.id
-          const typeInfo = TYPE_LABELS[race.type] || TYPE_LABELS.sprint
-          const isBuiltin = RACES.some(r => r.id === race.id)
+          const isActive = activeRaceId === race.id
+          const typeInfo = race.type ? (TYPE_LABELS[race.type] ?? TYPE_LABELS.sprint) : null
 
           return (
             <div key={race.id} className="race-card" style={{
@@ -192,24 +219,26 @@ export default function RaceCalendarPage() {
               borderColor: isActive ? 'var(--text)' : 'var(--border)',
               position: 'relative',
             }}>
-              {/* Remove button */}
-              <button
-                onClick={() => removeRace(race.id, isBuiltin)}
-                style={{
-                  position: 'absolute', top: 10, right: 10,
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  color: 'var(--faint)', fontSize: 13, padding: 2, lineHeight: 1,
-                }}
-                title="Remove race"
-              >✕</button>
+              {/* Archive / delete */}
+              <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 8 }}>
+                <button onClick={() => archiveRace(race.id)} title="Archive race"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--faint)', fontSize: 12, padding: 2, lineHeight: 1 }}>
+                  🗄
+                </button>
+                <button onClick={() => removeRace(race.id)} title="Delete race permanently"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--faint)', fontSize: 13, padding: 2, lineHeight: 1 }}>
+                  ✕
+                </button>
+              </div>
 
-              <div className="race-card-header" style={{ paddingRight: 20 }}>
+              <div className="race-card-header" style={{ paddingRight: 44 }}>
                 <div>
                   <div className="race-name">{race.name}</div>
                   <div className="race-date">{race.dateLabel}</div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
-                  <span className={`tag ${typeInfo.cls}`}>{typeInfo.label}</span>
+                  {race.sport !== 'tri' && <span className="tag" style={{ background: 'var(--s3)' }}>{SPORT_LABELS[race.sport]}</span>}
+                  {typeInfo && <span className={`tag ${typeInfo.cls}`}>{typeInfo.label}</span>}
                   {isActive && <span className="tag" style={{ background: 'var(--text)', color: 'var(--bg)' }}>Next</span>}
                   {isPast && <span className="tag tg-rest">Done</span>}
                 </div>
@@ -218,13 +247,21 @@ export default function RaceCalendarPage() {
               <div className="race-location">{race.location}</div>
 
               {/* Course bar */}
-              <div className="course-bar" style={{ marginBottom: 10 }}>
-                <div className="course-seg cs-swim">{race.distances.swim}</div>
-                <div className="course-seg cs-t1">T1</div>
-                <div className="course-seg cs-bike">{race.distances.bike}</div>
-                <div className="course-seg cs-t2">T2</div>
-                <div className="course-seg cs-run">{race.distances.run}</div>
-              </div>
+              {race.sport === 'tri' ? (
+                <div className="course-bar" style={{ marginBottom: 10 }}>
+                  <div className="course-seg cs-swim">{race.distances.swim}</div>
+                  <div className="course-seg cs-t1">T1</div>
+                  <div className="course-seg cs-bike">{race.distances.bike}</div>
+                  <div className="course-seg cs-t2">T2</div>
+                  <div className="course-seg cs-run">{race.distances.run}</div>
+                </div>
+              ) : (
+                <div className="course-bar" style={{ marginBottom: 10 }}>
+                  <div className={`course-seg cs-${race.sport}`}>
+                    {race.distances[race.sport === 'swim' ? 'swim' : race.sport === 'bike' ? 'bike' : 'run']}
+                  </div>
+                </div>
+              )}
 
               {!isPast && daysOut >= 0 && (
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
@@ -242,19 +279,63 @@ export default function RaceCalendarPage() {
         })}
       </div>
 
-      {/* Removed races — restore option */}
-      {hiddenIds.length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <button
-            className="hub-btn-ghost"
-            onClick={() => {
-              setHiddenIds([])
-              localStorage.removeItem('hidden_races')
-            }}
-            style={{ fontSize: 11 }}
-          >
-            Restore {hiddenIds.length} hidden race{hiddenIds.length > 1 ? 's' : ''}
-          </button>
+      {/* History — archived races with results (breakdown) if entered */}
+      {showHistory && (
+        <div style={{ marginTop: 24 }}>
+          <div className="section-hdr"><span className="ptitle">Race History</span></div>
+          {archived.length === 0 ? (
+            <div className="empty-state" style={{ padding: '20px 16px' }}>
+              <div>No archived races yet. Archive a race from the calendar above once it's done.</div>
+            </div>
+          ) : (
+            <div className="race-grid">
+              {archived.map(race => {
+                const res = results[race.id]
+                return (
+                  <div key={race.id} className="race-card" style={{ position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 8 }}>
+                      <button onClick={() => restoreRace(race.id)} title="Restore to upcoming"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--faint)', fontSize: 11, padding: 2 }}>
+                        ↺
+                      </button>
+                      <button onClick={() => removeRace(race.id)} title="Delete race permanently"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--faint)', fontSize: 13, padding: 2, lineHeight: 1 }}>
+                        ✕
+                      </button>
+                    </div>
+                    <div className="race-card-header" style={{ paddingRight: 44 }}>
+                      <div>
+                        <div className="race-name">{race.name}</div>
+                        <div className="race-date">{race.dateLabel}</div>
+                      </div>
+                    </div>
+                    <div className="race-location">{race.location}</div>
+                    {race.sport === 'tri' && res ? (
+                      <div className="rd-results-saved" style={{ marginTop: 8 }}>
+                        {[
+                          { val: res.swim, lbl: 'Swim' },
+                          { val: res.t1, lbl: 'T1' },
+                          { val: res.bike, lbl: 'Bike' },
+                          { val: res.t2, lbl: 'T2' },
+                          { val: res.run, lbl: 'Run' },
+                          { val: res.total, lbl: 'Total', total: true },
+                        ].map(cell => (
+                          <div key={cell.lbl} className={`rd-result-cell${cell.total ? ' total' : ''}`}>
+                            <div className="rd-result-val">{cell.val || '—'}</div>
+                            <div className="rd-result-lbl">{cell.lbl}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--faint)', marginTop: 8 }}>
+                        No results logged — enter times on the <a href="/race-day" className="empty-cta" style={{ display: 'inline' }}>Race Day page</a>.
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 

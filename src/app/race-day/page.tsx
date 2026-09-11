@@ -1,23 +1,25 @@
 ﻿'use client'
 
 import { useState, useEffect } from 'react'
-import { RACES, KIT_CHECKLIST, getActiveRace, getDaysToRace } from '@/lib/data'
-import { getRaceResult, upsertRaceResult, migrateLocalStorage } from '@/lib/supabase'
-import type { RaceResult } from '@/lib/supabase'
+import { KIT_CHECKLIST } from '@/lib/data'
+import { getRaceResult, upsertRaceResult, getRaces, getActiveRace, getDaysToRace } from '@/lib/supabase'
+import type { RaceResult, Race } from '@/lib/supabase'
 
 export default function RaceDayPage() {
+  const [races, setRaces] = useState<Race[]>([])
+  const [active, setActive] = useState<{ race: Race; isPast: boolean } | null>(null)
   const [results, setResults] = useState<Record<string, RaceResult | null>>({})
   const [formData, setFormData] = useState<Record<string, string>>({})
   const [kitChecked, setKitChecked] = useState<Set<number>>(new Set())
   const [loading, setLoading] = useState(true)
 
-  const active = getActiveRace()
-
   useEffect(() => {
     async function load() {
-      await migrateLocalStorage()
+      const [allRaces, activeRace] = await Promise.all([getRaces(), getActiveRace()])
+      setRaces(allRaces)
+      setActive(activeRace)
       const allResults: Record<string, RaceResult | null> = {}
-      for (const race of RACES) {
+      for (const race of allRaces) {
         allResults[race.id] = await getRaceResult(race.id)
       }
       setResults(allResults)
@@ -91,7 +93,7 @@ export default function RaceDayPage() {
             2026 triathlon season — every race in the books
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10, maxWidth: 700, margin: '0 auto' }}>
-            {RACES.map(race => {
+            {races.map(race => {
               const res = results[race.id]
               return (
                 <div key={race.id} className="rd-season-race">
@@ -250,7 +252,7 @@ export default function RaceDayPage() {
       <div style={{ marginTop: 32 }}>
         <div className="section-hdr"><span className="ptitle">All races this season</span></div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
-          {RACES.map(r => {
+          {races.map(r => {
             const res = results[r.id]
             const isActiveRace = r.id === race.id
             return (

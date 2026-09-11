@@ -1,5 +1,4 @@
-import { getActiveRace, getDaysToRace } from '@/lib/data'
-import { getGarminActivitiesForWeeks, getMobilityStreak, garminBucket } from '@/lib/supabase'
+import { getActiveRace, getDaysToRace, getGarminActivitiesForWeeks, getMobilityStreak, garminBucket } from '@/lib/supabase'
 import { getTodaySchedule } from '@/lib/schedule'
 import VolumeChart from '@/components/dashboard/VolumeChart'
 import NutritionActualsPanel from '@/components/dashboard/NutritionActualsPanel'
@@ -33,16 +32,16 @@ function toMonIdx(day: number) { return day === 0 ? 6 : day - 1 }
 const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
 export default async function DashboardPage() {
-  const activeRace = getActiveRace()
-  const daysToRace = activeRace ? getDaysToRace(activeRace.race) : null
-
-  const [weeklyActivities, mobilityStreak] = await Promise.allSettled([
+  const [weeklyActivities, mobilityStreak, activeRaceResult] = await Promise.allSettled([
     getGarminActivitiesForWeeks(13),
     getMobilityStreak(),
+    getActiveRace(),
   ])
 
   const allActivities = weeklyActivities.status === 'fulfilled' ? weeklyActivities.value : []
   const streak = mobilityStreak.status === 'fulfilled' ? mobilityStreak.value : 0
+  const activeRace = activeRaceResult.status === 'fulfilled' ? activeRaceResult.value : null
+  const daysToRace = activeRace ? getDaysToRace(activeRace.race) : null
 
   // Weekly progress dots (Mon-indexed)
   const now = new Date()
