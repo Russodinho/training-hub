@@ -46,31 +46,6 @@ function useSupaTriLog(kind: TriKind) {
   return [data, add] as const
 }
 
-// Manual weight/body-fat log persisted in Supabase (manual_weight_log).
-function useSupaWeightLog() {
-  const [data, setData] = useState<Entry[]>([])
-  useEffect(() => {
-    const sb = getSupabase()
-    sb.from('manual_weight_log').select('date, weight, bf, notes').order('date', { ascending: true })
-      .then(({ data: rows }) => {
-        setData((rows || []).map((r: { date: string; weight: number; bf: number | null; notes: string | null }) => ({
-          date: r.date, weight: String(r.weight), bf: r.bf != null ? String(r.bf) : '', notes: r.notes || '',
-        })))
-      })
-  }, [])
-  const add = useCallback(async (entry: Entry) => {
-    const sb = getSupabase()
-    await sb.from('manual_weight_log').insert({
-      date: entry.date,
-      weight: parseFloat(entry.weight),
-      bf: entry.bf ? parseFloat(entry.bf) : null,
-      notes: entry.notes || null,
-    })
-    setData(prev => [...prev, entry])
-  }, [])
-  return [data, add] as const
-}
-
 type Tab = 'lifts' | 'tri' | 'bodycomp' | 'history'
 
 interface LoggedSet {
@@ -144,12 +119,6 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
   }, [tab, historyLoaded])
 
   // ── Tri session log state ──
-  const [wDate, setWDate] = useState(todayStr())
-  const [wWeight, setWWeight] = useState('')
-  const [wBf, setWBf] = useState('')
-  const [wNotes, setWNotes] = useState('')
-  const [weightLog, addWeightEntry] = useSupaWeightLog()
-
   const [sDate, setSDate] = useState(todayStr())
   const [sDist, setSDist] = useState('')
   const [sTime, setSTime] = useState('')
@@ -228,11 +197,6 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
   }, [])
 
   // ── Tri log actions ──
-  const logWeight = async () => {
-    if (!wWeight) return
-    await addWeightEntry({ date: wDate, weight: wWeight, bf: wBf, notes: wNotes })
-    setWWeight(''); setWBf(''); setWNotes('')
-  }
   const logSwim = async () => {
     if (!sDist) return
     await addSwimEntry({ date: sDate, dist: sDist, time: sTime, notes: sNotes })
@@ -255,7 +219,6 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
   }
 
   const allBricks = [...brickLog]
-  const weights = weightLog.filter(e => e.weight).map(e => parseFloat(e.weight))
   const swims = swimLog.filter(e => e.dist).map(e => parseFloat(e.dist))
   const bikes = bikeLog.filter(e => e.dist).map(e => parseFloat(e.dist))
   const runs = runLog.filter(e => e.dist).map(e => parseFloat(e.dist))
@@ -527,42 +490,6 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
             </div>
           </div>
 
-          {/* Manual weight log */}
-          <div className="tracker-card">
-            <div className="section-hdr"><span className="ptitle">Weight & Body Comp (manual log)</span></div>
-            <div className="tracker-stats">
-              <div className="tracker-stat"><div className="tracker-stat-val">{weights.length > 0 ? `${weights[weights.length - 1]} lbs` : '—'}</div><div className="tracker-stat-lbl">Current</div></div>
-              <div className="tracker-stat"><div className="tracker-stat-val">{weights.length > 0 ? `${weights[0]} lbs` : '—'}</div><div className="tracker-stat-lbl">Starting</div></div>
-              <div className="tracker-stat">
-                <div className="tracker-stat-val">
-                  {weights.length > 1 ? `${(weights[weights.length - 1] - weights[0] > 0 ? '+' : '')}${(weights[weights.length - 1] - weights[0]).toFixed(1)} lbs` : '—'}
-                </div>
-                <div className="tracker-stat-lbl">Change</div>
-              </div>
-              <div className="tracker-stat">
-                <div className="tracker-stat-val">{weightLog.filter(e => e.bf).slice(-1)[0]?.bf ? `${weightLog.filter(e => e.bf).slice(-1)[0].bf}%` : '—'}</div>
-                <div className="tracker-stat-lbl">Latest BF%</div>
-              </div>
-            </div>
-            <div className="tracker-form">
-              <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Date</label><input type="date" value={wDate} onChange={e => setWDate(e.target.value)} /></div>
-              <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Weight (lbs)</label><input type="number" placeholder="195.5" value={wWeight} onChange={e => setWWeight(e.target.value)} /></div>
-              <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Body Fat %</label><input type="number" placeholder="18.5" value={wBf} onChange={e => setWBf(e.target.value)} /></div>
-              <div><label style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', display: 'block', marginBottom: 3 }}>Notes</label><input type="text" placeholder="Morning fasted" value={wNotes} onChange={e => setWNotes(e.target.value)} /></div>
-              <div style={{ display: 'flex', alignItems: 'flex-end' }}><button className="hub-btn" onClick={logWeight}>Log</button></div>
-            </div>
-            <div style={{ maxHeight: 150, overflowY: 'auto' }}>
-              {weightLog.slice().reverse().map((e, i) => (
-                <div key={i} className="tracker-log-entry">
-                  <span className="tl-date">{e.date}</span>
-                  <span className="tl-val">{e.weight} lbs</span>
-                  <span className="tl-val">{e.bf ? `${e.bf}%` : '—'}</span>
-                  <span style={{ color: 'var(--muted)', fontSize: 12 }}>{e.notes}</span>
-                </div>
-              ))}
-              {weightLog.length === 0 && <div className="tracker-log-empty">No entries yet</div>}
-            </div>
-          </div>
         </>
       )}
 

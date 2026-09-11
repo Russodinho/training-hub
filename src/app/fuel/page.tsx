@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { NUTRITION_TARGETS, NUTRITION_BASELINE } from '@/lib/data'
+import { NUTRITION_BASELINE } from '@/lib/data'
 import { getSupabaseClient } from '@/lib/supabase'
 import NutritionActualsPanel from '@/components/dashboard/NutritionActualsPanel'
 import MacroAccuracyPanel from '@/components/dashboard/MacroAccuracyPanel'
@@ -108,36 +108,33 @@ export default function FuelPage() {
             <div className="chart-card"><MacroAccuracyPanel onFuelPage /></div>
           </div>
 
-          {/* Daily targets by day */}
+          {/* Daily targets — Sunday-Friday are identical, shown as one row;
+              Saturday stays separate (flex, untracked cheat meal). Workout
+              names were dropped from here since what's scheduled on a given
+              day changes with the season and shouldn't be baked into a
+              fixed nutrition-target display. */}
           <div style={{ marginBottom: 24 }}>
-            <div className="section-hdr"><span className="ptitle">Daily targets by day</span></div>
+            <div className="section-hdr"><span className="ptitle">Daily targets</span></div>
             <div className="fuel-nested-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 10 }}>
-              {NUTRITION_TARGETS.map(day => {
-                const isFlex = day.calories === 0
-                return (
-                  <div key={day.day} className="nutrition-day">
-                    <div className="nutrition-day-header">
-                      <div>
-                        <div className="nutrition-day-name">{day.day}</div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>{day.activity}</div>
-                      </div>
-                      {isFlex ? (
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--bike)', fontWeight: 500 }}>Flex</div>
-                      ) : (
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20, fontWeight: 500 }}>{day.calories.toLocaleString()}</div>
-                      )}
-                    </div>
-                    {!isFlex && (
-                      <div className="macro-strip" style={{ marginBottom: 8 }}>
-                        <div className="macro-chip"><span>P</span>{day.protein}g</div>
-                        <div className="macro-chip"><span>C</span>{day.carbs}g</div>
-                        <div className="macro-chip"><span>F</span>{day.fat}g</div>
-                      </div>
-                    )}
-                    <div style={{ fontSize: 12, color: 'var(--muted)' }}>{day.notes}</div>
-                  </div>
-                )
-              })}
+              <div className="nutrition-day">
+                <div className="nutrition-day-header">
+                  <div className="nutrition-day-name">Sunday – Friday</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20, fontWeight: 500 }}>{NUTRITION_BASELINE.calories.toLocaleString()}</div>
+                </div>
+                <div className="macro-strip" style={{ marginBottom: 8 }}>
+                  <div className="macro-chip"><span>P</span>{NUTRITION_BASELINE.protein}g</div>
+                  <div className="macro-chip"><span>C</span>{NUTRITION_BASELINE.carbs}g</div>
+                  <div className="macro-chip"><span>F</span>{NUTRITION_BASELINE.fat}g</div>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>Maintenance target — protein stays at 200g+ regardless of day</div>
+              </div>
+              <div className="nutrition-day">
+                <div className="nutrition-day-header">
+                  <div className="nutrition-day-name">Saturday</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--bike)', fontWeight: 500 }}>Flex</div>
+                </div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>~1,800 calories clean with one cheat meal (not tracked)</div>
+              </div>
             </div>
           </div>
 
@@ -147,9 +144,8 @@ export default function FuelPage() {
             {[
               { title: '🥩 Protein: 200g every day', body: 'Non-negotiable regardless of day type. Eggs + egg whites + Greek yogurt at breakfast. Chicken at dinner. This number doesn\'t change.' },
               { title: '🎯 Fixed targets, every day', body: 'No more high/low lever — 2,650 kcal · 200g P · 250g C · 85g F is the target every day except Saturday. Cronometer\'s own fixed targets total 2,565 kcal; the ~85 cal buffer fills naturally from cooking oils, supplements, and rounding.' },
-              { title: '🍯 Honey stays — always', body: '31g honey in breakfast is untouched. It\'s pre/intra workout carbs that matter for performance and compliance. Not where to cut.' },
-              { title: '🚴 As training ramps up', body: 'Real TDEE with full training runs ~2,700–2,800. Food stays the same — the slight natural deficit comes from high-activity days (soccer 3x/week), not from cutting food.' },
-              { title: '🏊 Race-day fueling', body: 'Oats + banana 2–2.5 hrs pre-race. Nothing heavy within 90 min. Electrolytes throughout. Gel if race > 1.5 hrs (Stone Harbor+). Breakfast is already the race-day template.' },
+              { title: '🚴 As training ramps up', body: 'Real TDEE with full training runs ~2,700–2,800. Food stays the same — the slight natural deficit comes from high-activity days, not from cutting food.' },
+              { title: '🏊 Race-day fueling', body: 'Oats + banana 2–2.5 hrs pre-race. Nothing heavy within 90 min. Electrolytes throughout. Gel if race > 1.5 hrs. Breakfast is already the race-day template.' },
               { title: '📊 Tracking', body: 'Nutrition and weight/body-fat sync automatically from Cronometer (scripts/cronometer-sync.ts) — no manual upload needed. Goal is 14–16% body fat, sustainable year-round — not a crash cut.' },
             ].map((note, i) => (
               <div key={i} className="note">

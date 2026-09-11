@@ -521,3 +521,20 @@ redesign "complete":**
 **Next agent needs to:**
 - Nothing outstanding on this fix — verified against real current data, not just a build check.
 - Worth keeping `easternNow()`/`todayStr()` in mind as the standard going forward: any *new* "what day is it" logic added later should use these, not a fresh `new Date()`, to avoid reintroducing this exact bug class.
+
+---
+
+## 2026-09-11 — Batch of smaller fixes: race history, body comp, sleep, recovery, fuel
+**Agent:** Claude
+**Completed:**
+- **Seeded the `races` table for real**: it turned out `0007_races.sql` had actually been run (table existed, no error), but `scripts/seed-races.mjs` never had been — ran it myself (no DDL needed, just an insert), so the 6 original races now exist with their original ids, correctly linked to the one real logged result (`race_results` had `abington: 1:38:18` sitting there this whole time with nothing to attach it to).
+- **Fixed the real race-calendar history bug**: `race-calendar/page.tsx`'s History section only ever showed races with `status === 'archived'` — a race that's simply over doesn't move there automatically, only an explicit archive click does. Changed the split to "History = archived OR chronologically past (`date < today`), Upcoming = neither" — so Abington's real result now shows up in History without the user needing to remember to archive it. Removed the now-dead `isPast`/"Done" tag logic from the upcoming-grid cards (unreachable now that anything past moves to History immediately).
+- **Training Log → Body Comp**: removed the entire manual weight/body-fat log (its own `manual_weight_log` table, a local `useSupaWeightLog` hook, and the whole form+list card) — the tab now only shows the Cronometer-synced card (`BodyCompWidget`, already reading live from `biometrics`), per the user's request that this come from the Cronometer pull exclusively.
+- **Sleep Protocol**: removed the 1-5 sleep-quality selector (state, load/save wiring, and the button row) — kept `lights_out_time` and `notes` so the page still functions as a running diary future coaches can read from. Renamed "Phone Out of Room" → "Phone Across the Room" with the user's own reasoning in the subtext (still need to get up to kill the alarm).
+- **Recovery page**: added an "All time" option alongside 7d/14d/30d — averages compute over full history when selected, but the day-by-day table below is skipped entirely for that option (shows a one-line note instead) per the user's explicit ask, since a full-history day list would be a long, slow, not-useful scroll.
+- **Fuel page**: collapsed the 7 near-identical daily-target cards into 2 ("Sunday – Friday" showing the shared 2,650/200/250/85, "Saturday" flex with updated note text "~1,800 calories clean with one cheat meal (not tracked)"). Dropped the per-day workout/activity label entirely, per the user's reasoning that what's scheduled on a given day depends on the season and shouldn't be baked into a fixed nutrition display. Removed the "🍯 Honey stays" strategy note. Reworded "🚴 As training ramps up" to drop the soccer-specific parenthetical. Updated "🏊 Race-day fueling" to drop the "(Stone Harbor+)" reference. `NUTRITION_TARGETS`'s underlying per-day data in `data.ts` was left untouched (still needed by `MacroAccuracyPanel`/`agentContext.ts`'s day-of-week target lookups) — only the fuel page's *rendering* changed, not the data model.
+- Aligned `agentPrompts.ts`'s `fueling` coach expertise text with the same updated race-day protocol wording, so the coach and the fuel page's strategy note no longer disagree.
+- `npm run build` passes (20 routes, unchanged).
+
+**Next agent needs to:**
+- None outstanding on this batch — all verified via a clean build; the races fix specifically was verified against the real `race_results` row that had been orphaned.

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { getRaces, getActiveRace, getDaysToRace, addRace, setRaceStatus, deleteRace, getRaceResult } from '@/lib/supabase'
+import { getRaces, getActiveRace, getDaysToRace, addRace, setRaceStatus, deleteRace, getRaceResult, todayStr } from '@/lib/supabase'
 import type { Race, RaceResult } from '@/lib/supabase'
 
 const TYPE_LABELS: Record<string, { label: string; cls: string }> = {
@@ -41,17 +41,25 @@ export default function RaceCalendarPage() {
 
   useEffect(() => { load() }, [load])
 
+  // History = explicitly archived OR chronologically past — a race that's
+  // simply over shouldn't need a manual archive click to show its result;
+  // "archive" is for pulling a race out of the upcoming view early
+  // (skipping it) rather than the only way to reach history.
+  const today = todayStr()
+  const isHistorical = (r: Race) => r.status === 'archived' || r.date < today
+
   // Results (for the History section's breakdown) are fetched lazily,
-  // only once there's an archived race to show them for.
+  // only once there's a historical race to show them for.
   useEffect(() => {
-    const archived = races.filter(r => r.status === 'archived')
-    if (archived.length === 0) return
-    Promise.all(archived.map(r => getRaceResult(r.id).then(res => [r.id, res] as const)))
+    const historical = races.filter(isHistorical)
+    if (historical.length === 0) return
+    Promise.all(historical.map(r => getRaceResult(r.id).then(res => [r.id, res] as const)))
       .then(pairs => setResults(Object.fromEntries(pairs)))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [races])
 
-  const upcoming = races.filter(r => r.status !== 'archived').sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-  const archived = races.filter(r => r.status === 'archived').sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const upcoming = races.filter(r => !isHistorical(r)).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  const archived = races.filter(isHistorical).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   const archiveRace = async (id: string) => {
     await setRaceStatus(id, 'archived')
@@ -209,13 +217,11 @@ export default function RaceCalendarPage() {
       <div className="race-grid">
         {upcoming.map(race => {
           const daysOut = getDaysToRace(race)
-          const isPast = daysOut < -5
           const isActive = activeRaceId === race.id
           const typeInfo = race.type ? (TYPE_LABELS[race.type] ?? TYPE_LABELS.sprint) : null
 
           return (
             <div key={race.id} className="race-card" style={{
-              opacity: isPast ? 0.5 : 1,
               borderColor: isActive ? 'var(--text)' : 'var(--border)',
               position: 'relative',
             }}>
@@ -240,7 +246,6 @@ export default function RaceCalendarPage() {
                   {race.sport !== 'tri' && <span className="tag" style={{ background: 'var(--s3)' }}>{SPORT_LABELS[race.sport]}</span>}
                   {typeInfo && <span className={`tag ${typeInfo.cls}`}>{typeInfo.label}</span>}
                   {isActive && <span className="tag" style={{ background: 'var(--text)', color: 'var(--bg)' }}>Next</span>}
-                  {isPast && <span className="tag tg-rest">Done</span>}
                 </div>
               </div>
 
@@ -263,7 +268,7 @@ export default function RaceCalendarPage() {
                 </div>
               )}
 
-              {!isPast && daysOut >= 0 && (
+              {daysOut >= 0 && (
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)' }}>
                   {daysOut === 0 ? 'Race day!' : `${daysOut} days out`}
                 </div>

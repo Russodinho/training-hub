@@ -4,14 +4,12 @@ import { useState, useEffect } from 'react'
 
 const PROTOCOL_STEPS = [
   { key: 'magnesium_taken', time: '9:00 PM',  label: 'Magnesium Glycinate',  sub: 'Take it now — before you get distracted',                                              icon: '💊' },
-  { key: 'phone_out',       time: '9:30 PM',  label: 'Phone Out of Room',    sub: 'Non-negotiable — charge it in another room',                                           icon: '📵' },
+  { key: 'phone_out',       time: '9:30 PM',  label: 'Phone Across the Room', sub: 'Not out of the room — you need to get out of bed to turn off your alarm',            icon: '📵' },
   { key: 'wind_down_done',  time: '9:35 PM',  label: 'Wind-Down Routine',    sub: "Legs up wall · Spinal twist · Child's pose · 90/90 breathing · Neck release",         icon: '🧘' },
   { key: 'in_bed_reading',  time: '9:45 PM',  label: 'In Bed Reading',       sub: 'Orange lamp only — no screens',                                                        icon: '📖' },
 ] as const
 
 type StepKey = typeof PROTOCOL_STEPS[number]['key']
-
-const QUALITY_LABELS = ['', 'Terrible', 'Poor', 'OK', 'Good', 'Great']
 
 export default function SleepPage() {
   const today = new Date()
@@ -22,7 +20,6 @@ export default function SleepPage() {
     magnesium_taken: false, phone_out: false, wind_down_done: false, in_bed_reading: false,
   })
   const [lightsOutTime, setLightsOutTime] = useState('22:10')
-  const [quality, setQuality] = useState(0)
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -36,13 +33,11 @@ export default function SleepPage() {
       if (data) {
         setChecks({ magnesium_taken: data.magnesium_taken, phone_out: data.phone_out, wind_down_done: data.wind_down_done, in_bed_reading: data.in_bed_reading })
         setLightsOutTime(data.lights_out_time || '22:10')
-        setQuality(data.sleep_quality || 0)
         setNotes(data.notes || '')
         setSaved(true)
       } else {
         setChecks({ magnesium_taken: false, phone_out: false, wind_down_done: false, in_bed_reading: false })
         setLightsOutTime('22:10')
-        setQuality(0)
         setNotes('')
         setSaved(false)
       }
@@ -69,7 +64,7 @@ export default function SleepPage() {
     try {
       const sb = getSupabaseClient()
       const { error: err } = await sb.from('sleep_logs').upsert(
-        { date, ...checks, lights_out_time: lightsOutTime || null, sleep_quality: quality || null, notes: notes || null },
+        { date, ...checks, lights_out_time: lightsOutTime || null, notes: notes || null },
         { onConflict: 'date' }
       )
       if (err) throw err
@@ -145,25 +140,6 @@ export default function SleepPage() {
         <input type="time" value={lightsOutTime} onChange={e => { setLightsOutTime(e.target.value); setSaved(false) }}
           style={{ background: 'var(--s2)', border: '0.5px solid var(--border)', borderRadius: 6, padding: '5px 10px', fontSize: 13, color: 'var(--text)', fontFamily: "'IBM Plex Mono', monospace" }} />
         <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)' }}>target 10:00–10:15</span>
-      </div>
-
-      {/* Sleep quality */}
-      <div style={{ marginBottom: 20 }}>
-        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 8 }}>Sleep quality (last night)</p>
-        <div style={{ display: 'flex', gap: 8 }}>
-          {[1, 2, 3, 4, 5].map(n => (
-            <button key={n} onClick={() => { setQuality(n); setSaved(false) }} style={{
-              flex: 1, padding: '8px 0', borderRadius: 6, cursor: 'pointer', transition: 'all 0.15s',
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: quality === n ? 700 : 400,
-              background: quality === n ? 'var(--strength-bg)' : 'var(--s1)',
-              color: quality === n ? 'var(--strength)' : 'var(--muted)',
-              border: `0.5px solid ${quality === n ? 'var(--strength-bd)' : 'var(--border)'}`,
-            }}>{n}</button>
-          ))}
-        </div>
-        {quality > 0 && (
-          <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)', marginTop: 6, textAlign: 'center' }}>{QUALITY_LABELS[quality]}</p>
-        )}
       </div>
 
       <textarea placeholder="Notes (fell asleep fast, woke at 3am, etc.)…" value={notes} onChange={e => { setNotes(e.target.value); setSaved(false) }} rows={2}

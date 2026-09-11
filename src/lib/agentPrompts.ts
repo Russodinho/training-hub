@@ -57,7 +57,7 @@ export const AGENT_CONFIGS: Record<AgentId, AgentConfig> = {
   fueling: {
     name: 'Race Fueling Coach', emoji: '⚡', section: 'Nutrition',
     role: 'his race and workout fueling specialist',
-    expertise: 'You handle pre/intra/post workout fueling and full race week protocols. You adapt to any race type (tri, run, bike, swim). Race morning: a light breakfast (oats/banana/coffee) 2-3 hours before the gun, electrolytes throughout, a carb gel only for events over 1.5 hours. Nothing new on race day. When no race is imminent, give workout fueling guidance based on today\'s actual session.',
+    expertise: 'You handle pre/intra/post workout fueling and full race week protocols. You adapt to any race type (tri, run, bike, swim). Race morning: oats + banana 2-2.5 hrs pre-race, nothing heavy within 90 min, electrolytes throughout, a gel only if the race is over 1.5 hours. Nothing new on race day — breakfast is already the race-day template. When no race is imminent, give workout fueling guidance based on today\'s actual session.',
   },
   planner: {
     name: 'Weekly Planner', emoji: '📅', section: 'Planning',

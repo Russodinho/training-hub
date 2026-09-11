@@ -12,7 +12,7 @@ interface DailyStat {
   stress_avg: number | null
 }
 
-type Range = 7 | 14 | 30
+type Range = 7 | 14 | 30 | 'all'
 
 function scoreColor(val: number, low: number, mid: number): string {
   if (val >= mid) return 'var(--mobility)'
@@ -109,13 +109,16 @@ export default function RecoveryPage() {
     async function load() {
       setLoading(true)
       const supabase = getSupabaseClient()
-      const since = new Date()
-      since.setDate(since.getDate() - range)
-      const { data } = await supabase
+      let query = supabase
         .from('garmin_daily_stats')
         .select('date,sleep_score,body_battery_min,body_battery_max,resting_hr,stress_avg')
-        .gte('date', since.toISOString().slice(0, 10))
         .order('date', { ascending: false })
+      if (range !== 'all') {
+        const since = new Date()
+        since.setDate(since.getDate() - range)
+        query = query.gte('date', since.toISOString().slice(0, 10))
+      }
+      const { data } = await query
       setStats((data as DailyStat[]) ?? [])
       setLoading(false)
     }
@@ -147,9 +150,9 @@ export default function RecoveryPage() {
           <div className="sub">Garmin sleep &amp; stress metrics</div>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
-          {([7, 14, 30] as Range[]).map(r => (
+          {([7, 14, 30, 'all'] as Range[]).map(r => (
             <button key={r} onClick={() => setRange(r)} style={pillStyle(range === r)}>
-              {r}d
+              {r === 'all' ? 'All time' : `${r}d`}
             </button>
           ))}
         </div>
@@ -181,37 +184,47 @@ export default function RecoveryPage() {
         />
       </div>
 
-      {/* Day-by-day table */}
-      <div className="card" style={{ padding: '0 20px' }}>
-        <div className="recovery-day-header">
-          <div>Date</div>
-          <div>Sleep Score</div>
-          <div>Body Battery</div>
-          <div style={{ textAlign: 'right' }}>Resting HR</div>
-          <div style={{ textAlign: 'right' }}>Stress</div>
+      {/* Day-by-day table — skipped for "all time" (averages only, per the
+          user's request; a full-history day list isn't useful there and
+          would just be a long, slow-loading scroll). */}
+      {range === 'all' ? (
+        <div className="card" style={{ padding: '24px 20px', textAlign: 'center' }}>
+          <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: 13, color: 'var(--muted)' }}>
+            Averages above cover your full history. Pick 7d/14d/30d to see day-by-day detail.
+          </div>
         </div>
-
-        {loading && (
-          <div style={{ padding: '40px 0', textAlign: 'center', fontFamily: "'Figtree', sans-serif", fontSize: 13, color: 'var(--dim)' }}>
-            Loading…
+      ) : (
+        <div className="card" style={{ padding: '0 20px' }}>
+          <div className="recovery-day-header">
+            <div>Date</div>
+            <div>Sleep Score</div>
+            <div>Body Battery</div>
+            <div style={{ textAlign: 'right' }}>Resting HR</div>
+            <div style={{ textAlign: 'right' }}>Stress</div>
           </div>
-        )}
 
-        {!loading && stats.length === 0 && (
-          <div style={{ padding: '40px 0', textAlign: 'center' }}>
-            <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: 14, color: 'var(--muted)', marginBottom: 8 }}>
-              No recovery data yet
+          {loading && (
+            <div style={{ padding: '40px 0', textAlign: 'center', fontFamily: "'Figtree', sans-serif", fontSize: 13, color: 'var(--dim)' }}>
+              Loading…
             </div>
-            <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--dim)' }}>
-              Run <code style={{ background: 'var(--s3)', padding: '2px 6px', borderRadius: 4 }}>garmin_sync.py --all</code> to sync Garmin data
-            </div>
-          </div>
-        )}
+          )}
 
-        {!loading && stats.map(stat => (
-          <DayRow key={stat.date} stat={stat} />
-        ))}
-      </div>
+          {!loading && stats.length === 0 && (
+            <div style={{ padding: '40px 0', textAlign: 'center' }}>
+              <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: 14, color: 'var(--muted)', marginBottom: 8 }}>
+                No recovery data yet
+              </div>
+              <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--dim)' }}>
+                Run <code style={{ background: 'var(--s3)', padding: '2px 6px', borderRadius: 4 }}>garmin_sync.py --all</code> to sync Garmin data
+              </div>
+            </div>
+          )}
+
+          {!loading && stats.map(stat => (
+            <DayRow key={stat.date} stat={stat} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }
