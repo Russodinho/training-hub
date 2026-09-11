@@ -17,6 +17,28 @@ function getSupabase(): SupabaseClient {
 // For use in 'use client' components — called inside useEffect/handlers, never at module load
 export const getSupabaseClient = getSupabase
 
+// "Today" for a single-user app based in Lansdale, PA — pinned to Eastern
+// time rather than server-local/UTC time. Vercel functions run in UTC, so
+// a naive `new Date().toISOString().split('T')[0]` would flip to
+// "tomorrow" a few hours before midnight actually arrives locally.
+export function todayStr(): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date())
+}
+
+// A Date whose local getters (.getDay(), .getHours(), .getDate(), etc.)
+// reflect Eastern wall-clock time regardless of the server's actual
+// timezone — needed anywhere day-of-week or "is it still today" logic
+// matters (nutrition target lookup by weekday, week-start/end bounds,
+// race countdown cutoffs). A millisecond timestamp diff between two
+// values from this function is identical to one from `new Date()`, so
+// it's safe to use everywhere `new Date()` was being used for "what day
+// is it" purposes.
+export function easternNow(): Date {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }))
+}
+
 // Server-side client with service role (only use in API routes / server components)
 export function createServiceClient(): SupabaseClient {
   return createClient(
@@ -113,7 +135,7 @@ export async function getMobilityStreak(): Promise<number> {
   if (!data) return 0
 
   let streak = 0
-  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const today = easternNow(); today.setHours(0, 0, 0, 0)
   const d = new Date(today)
 
   for (const entry of data) {
@@ -224,7 +246,7 @@ export async function getRaces(): Promise<Race[]> {
 
 export async function getActiveRace(): Promise<{ race: Race; isPast: boolean } | null> {
   const races = (await getRaces()).filter(r => r.status !== 'archived')
-  const now = new Date()
+  const now = easternNow()
   for (const race of races) {
     const rd = new Date(race.date)
     const lagEnd = new Date(rd.getTime() + RACE_LAG_DAYS * 86400000)
@@ -234,7 +256,7 @@ export async function getActiveRace(): Promise<{ race: Race; isPast: boolean } |
 }
 
 export function getDaysToRace(race: Race): number {
-  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const today = easternNow(); today.setHours(0, 0, 0, 0)
   const rd = new Date(race.date); rd.setHours(0, 0, 0, 0)
   return Math.round((rd.getTime() - today.getTime()) / 86400000)
 }

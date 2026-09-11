@@ -2,18 +2,10 @@
 // calendar day, and so /agent can show previous days' output below
 // today's. See supabase/migrations/0008_agent_messages.sql.
 
-import { getSupabaseClient } from './supabase'
+import { getSupabaseClient, todayStr } from './supabase'
 import type { AgentId } from './agentPrompts'
 
-// "Calendar day" for a single-user app based in Lansdale, PA — fixed to
-// Eastern time regardless of where the server process actually runs
-// (Vercel functions run in UTC), so an evening check-in after ~8pm EDT
-// doesn't get miscounted as "tomorrow."
-export function todayStr(): string {
-  return new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
-  }).format(new Date())
-}
+export { todayStr }
 
 export async function getCachedMessage(agentId: AgentId, date: string): Promise<string | null> {
   const sb = getSupabaseClient()

@@ -9,7 +9,7 @@ import { NUTRITION_TARGETS, NUTRITION_BASELINE } from './data'
 import { getTodaySchedule, SCHEDULE } from './schedule'
 import {
   getSupabaseClient, getRaces, getActiveRace, getDaysToRace, getRaceResult,
-  garminBucket, type Race,
+  garminBucket, easternNow, type Race,
 } from './supabase'
 
 export interface Workout {
@@ -165,7 +165,7 @@ async function fetchToday() {
 }
 
 async function fetchWeek() {
-  const now = new Date()
+  const now = easternNow()
   const { start, end } = weekBounds(now)
   const todayStr = now.toISOString().split('T')[0]
   const sb = getSupabaseClient()
@@ -203,7 +203,7 @@ async function fetchWeek() {
 
 async function fetchRaces() {
   const [allRaces, active] = await Promise.all([getRaces(), getActiveRace()])
-  const today = new Date().toISOString().split('T')[0]
+  const today = easternNow().toISOString().split('T')[0]
 
   const upcomingRaces = allRaces.filter(r => r.status !== 'archived' && r.date >= today)
   const pastRaces = allRaces
@@ -247,7 +247,7 @@ async function fetchGarmin() {
 
 async function fetchNutrition() {
   const sb = getSupabaseClient()
-  const now = new Date()
+  const now = easternNow()
   const todayStr = now.toISOString().split('T')[0]
   const since = new Date(now); since.setDate(since.getDate() - 7)
 
@@ -294,7 +294,7 @@ const TARGET_BODY_FAT_PCT = 15
 
 async function fetchBodyComp() {
   const sb = getSupabaseClient()
-  const since = new Date(); since.setDate(since.getDate() - 14)
+  const since = easternNow(); since.setDate(since.getDate() - 14)
   const { data } = await sb
     .from('biometrics')
     .select('date, weight_lbs, body_fat_pct')
@@ -363,7 +363,7 @@ export async function getAthleteContext(): Promise<AthleteContext> {
     fetchRecovery(),
   ])
 
-  const now = new Date()
+  const now = easternNow()
   const daysToNextRace = races.next
     ? Math.ceil((new Date(races.next.date).getTime() - now.getTime()) / 86400000)
     : null

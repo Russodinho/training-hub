@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { getSupabaseClient } from '@/lib/supabase'
+import { getSupabaseClient, todayStr } from '@/lib/supabase'
 
 interface DailyStat {
   sleep_score: number | null
@@ -41,8 +41,7 @@ export default function RecoveryCard() {
     getSupabaseClient()
       .from('garmin_daily_stats')
       .select('sleep_score,body_battery_max,resting_hr,stress_avg')
-      .order('date', { ascending: false })
-      .limit(1)
+      .eq('date', todayStr())
       .maybeSingle()
       .then(({ data }) => {
         if (data) setStat(data as DailyStat)
@@ -125,10 +124,10 @@ export default function RecoveryCard() {
       ) : (
         <div style={{ padding: '16px 0', textAlign: 'center' }}>
           <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--muted)' }}>
-            No Garmin data yet
+            No recovery data for today yet
           </div>
           <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11, color: 'var(--dim)', marginTop: 4 }}>
-            Run garmin_sync.py to sync
+            Syncs at 5am and 12pm, or use the dashboard&apos;s sync button
           </div>
         </div>
       )}

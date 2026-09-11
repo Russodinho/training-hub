@@ -502,3 +502,22 @@ redesign "complete":**
 **Next agent needs to:**
 - **Run `supabase/migrations/0008_agent_messages.sql`** — until then, every check-in behaves as if it's always the first of the day (never actually caches), which is a safe default but not the intended behavior.
 - Once it's run and a few real days of check-ins accumulate, verify the "Previous days" section renders correctly and that a same-day re-run of "Run daily check-in" truly makes zero new API calls (should be near-instant, no 30s gaps at all, since everything comes back `cached: true`).
+
+---
+
+## 2026-09-11 — Fixed real bug: dashboard recovery card showed yesterday's data as today's
+**Agent:** Claude
+**Completed:**
+- User reported the dashboard's Recovery card was showing yesterday's numbers. Root cause: `RecoveryCard.tsx` queried `garmin_daily_stats` with `.order('date', {ascending:false}).limit(1)` — the *most recent row available*, with no check that its date actually matched today. Whenever today's sync hadn't landed yet (which is often, since Garmin only finalizes a day's stats sometime after it ends), it silently displayed the prior day's numbers with nothing indicating they were stale.
+- **This is the same bug class the agent-messages work surfaced a few entries ago** (`agentContext.ts`'s ad-hoc `now.toISOString().split('T')[0]` computing "today" from server-local/UTC time, not the user's actual Eastern time) — checked while fixing this, and it was real: several spots derived "today" or day-of-week from raw UTC, which during evening Eastern hours (server is already into "tomorrow" in UTC) would silently use the wrong date or the wrong weekday for nutrition-target lookups.
+- Consolidated the fix into two shared helpers in `src/lib/supabase.ts`: `todayStr()` (already existed in `agentStore.ts`, moved here as the single shared copy — `agentStore.ts` now re-exports it instead of duplicating) and new `easternNow()`, which returns a `Date` whose local getters (`.getDay()`, `.getHours()`, etc.) reflect Eastern wall-clock time regardless of server timezone, via the `toLocaleString` round-trip trick. A millisecond diff between two `easternNow()` values is identical to `new Date()` values, so it's a safe drop-in wherever `new Date()` was being used for "what day is it" rather than pure elapsed-time math.
+- Fixed every exact-day-boundary spot found, not just the reported one:
+  - `RecoveryCard.tsx` — now `.eq('date', todayStr())` instead of "most recent." Shows a "No recovery data for today yet" empty state instead of silently substituting an older day. Also updated the stale empty-state copy (referenced a manual `garmin_sync.py` run — now points at the 5am/12pm schedule and the dashboard's own sync button).
+  - `src/lib/supabase.ts`: `getActiveRace()` and `getDaysToRace()` (race countdown, used by the dashboard, race-day, race-calendar, and season-plan pages) and `getMobilityStreak()` — both used `new Date()` + `.setHours(0,0,0,0)` for "today," which zeroes to server-local (UTC) midnight, not Eastern midnight.
+  - `src/lib/agentContext.ts`: all 5 `now`/`today` computations (week bounds, nutrition-today lookup + day-of-week target matching, races upcoming/past cutoff, the `athlete.todayDate` field shown to every coach) switched from `new Date()` to `easternNow()`.
+- Did **not** touch the wide date-range `since` computations (`getGarminActivitiesForWeeks`, `getBiometrics`, `getNutritionActuals`, etc.) — a few hours of timezone slop on a 90-day-back cutoff doesn't change anything meaningfully; only fixed spots where an exact day match or day-of-week actually determines behavior.
+- `npm run build` passes. **Verified the fix directly against real data**: queried `garmin_daily_stats` for Eastern-today (`2026-09-11`) vs. the table's actual most-recent row (`2026-09-10`) — confirmed they differ right now, which is exactly the scenario that was silently mis-displaying before this fix, and confirms the empty-state path is what a real user will see today until the next sync lands.
+
+**Next agent needs to:**
+- Nothing outstanding on this fix — verified against real current data, not just a build check.
+- Worth keeping `easternNow()`/`todayStr()` in mind as the standard going forward: any *new* "what day is it" logic added later should use these, not a fresh `new Date()`, to avoid reintroducing this exact bug class.
