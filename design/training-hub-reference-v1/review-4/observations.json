@@ -1,0 +1,601 @@
+[
+  {
+    "url": "/injuries",
+    "width": 1100,
+    "scrollWidth": 1085,
+    "bodyWidth": 1085,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Injuries",
+        "x": 208,
+        "y": 24,
+        "w": 207,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "H3",
+        "cls": "",
+        "text": "Your body at a glance",
+        "x": 665,
+        "y": 163,
+        "w": 377,
+        "h": 35,
+        "font": "Figtree, sans-serif",
+        "size": "23px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [],
+    "images": [],
+    "bodyText": "Training Hub 2026\nHome\nCoaches\nPlan\nTrain\nRecover\nOverview\nInjuries\nMobility\nWind-Down\nSleep\nFuel\nExercise Library\nWarrington Sprint Tri\n2\ndays\nInjuries\nActive · monitoring · recovery log\n3 active\n0 archived\nFront\nR\nL\n2\n3\nBack\nL\nR\n1\nRECOVERY / INJURIES\nYour body at a glance\n\nReported pain across 3 tracked injuries.\n\n1\nLeft Achilles\nBack view · Left Achilles tendon · insertion and mid-body\n2\n/10\n2\nRight Knee (IT Band)\nFront view · Right knee · lateral aspect · IT band insertion\n1\n/10\n3\nLeft Ankle\nFront view · Left ankle · lateral ligaments\n1\n/10\n🟡 1–3\n🟠 4–6\n🔴 7–10\n0 = no pain\n\nColor reflects your reported pain, not tissue damage. Highlights show approximate areas. L and R refer to your lef",
+    "viewport": {
+      "width": 1100,
+      "height": 900
+    }
+  },
+  {
+    "url": "/injuries",
+    "width": 390,
+    "scrollWidth": 375,
+    "bodyWidth": 375,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Injuries",
+        "x": 20,
+        "y": 126,
+        "w": 207,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "H3",
+        "cls": "",
+        "text": "Your body at a glance",
+        "x": 39,
+        "y": 537,
+        "w": 297,
+        "h": 32,
+        "font": "Figtree, sans-serif",
+        "size": "21px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Home",
+        "x": 4,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Plan",
+        "x": 77,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Train",
+        "x": 151,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab active",
+        "text": "Recover",
+        "x": 224,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Fuel",
+        "x": 298,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\nMenu\n2\nd\nHome\nPlan\nTrain\nRecover\nFuel\nRecover / Injuries\n▼\nInjuries\nActive · monitoring · recovery log\n3 active\n0 archived\nFront\nR\nL\n2\n3\nBack\nL\nR\n1\nRECOVERY / INJURIES\nYour body at a glance\n\nReported pain across 3 tracked injuries.\n\n1\nLeft Achilles\nBack view · Left Achilles tendon · insertion and mid-body\n2\n/10\n2\nRight Knee (IT Band)\nFront view · Right knee · lateral aspect · IT band insertion\n1\n/10\n3\nLeft Ankle\nFront view · Left ankle · lateral ligaments\n1\n/10\n🟡 1–3\n🟠 4–6\n🔴 7–10\n0 = no pain\n\nColor reflects your reported pain, not tissue damage. Highlights show approximate areas. L and R refer to your left and right.\n\nmonitoring\nLeft Achilles\nPain: 2/10\n✕\nSINCE\n2024-09-0",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  {
+    "url": "/injuries",
+    "width": 320,
+    "scrollWidth": 305,
+    "bodyWidth": 305,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Injuries",
+        "x": 16,
+        "y": 126,
+        "w": 207,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "H3",
+        "cls": "",
+        "text": "Your body at a glance",
+        "x": 35,
+        "y": 541,
+        "w": 235,
+        "h": 32,
+        "font": "Figtree, sans-serif",
+        "size": "21px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Home",
+        "x": 4,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Plan",
+        "x": 63,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Train",
+        "x": 123,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab active",
+        "text": "Recover",
+        "x": 182,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Fuel",
+        "x": 242,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\nMenu\n2\nd\nHome\nPlan\nTrain\nRecover\nFuel\nRecover / Injuries\n▼\nInjuries\nActive · monitoring · recovery log\n3 active\n0 archived\nFront\nR\nL\n2\n3\nBack\nL\nR\n1\nRECOVERY / INJURIES\nYour body at a glance\n\nReported pain across 3 tracked injuries.\n\n1\nLeft Achilles\nBack view · Left Achilles tendon · insertion and mid-body\n2\n/10\n2\nRight Knee (IT Band)\nFront view · Right knee · lateral aspect · IT band insertion\n1\n/10\n3\nLeft Ankle\nFront view · Left ankle · lateral ligaments\n1\n/10\n🟡 1–3\n🟠 4–6\n🔴 7–10\n0 = no pain\n\nColor reflects your reported pain, not tissue damage. Highlights show approximate areas. L and R refer to your left and right.\n\nmonitoring\nLeft Achilles\nPain: 2/10\n✕\nSINCE\n2024-09-0",
+    "viewport": {
+      "width": 320,
+      "height": 800
+    }
+  }
+]

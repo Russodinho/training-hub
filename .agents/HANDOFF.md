@@ -695,3 +695,31 @@ The user explicitly requires detailed updates in this handoff after every work s
 - The underlying sync-timing gap itself (5am pull structurally can't have that morning's sleep) is now explained on the page but not solved — user hasn't yet chosen whether to retime/add a sync closer to wake time, rely on the manual sync button, or leave it as an honestly-labeled gap. Revisit if they raise it again.
 - Nothing outstanding on the nav collapse fix — root-caused via the CSS cascade rule (author origin beats user-agent origin regardless of specificity), not guessed at.
 - Not committed as of this entry being written — see the following commit in git log.
+
+---
+
+## 2026-09-11 - Codex: separate front and back injury silhouettes implemented
+**User request:** The existing map works well; show both front and back so posterior injuries such as the left Achilles appear on the back.
+
+**Completed implementation:**
+- Updated `src/components/InjuryBodyMap.tsx`: two labeled Front/Back figures stay visible side by side. Each has its own image, anatomical L/R labels and view-specific SVG overlays. Anatomical left is screen-right in front and screen-left in back.
+- Added `public/training-hub-design/body-silhouette-back.png` (1024x1536), generated with the built-in image_gen tool using the original front silhouette as the style/proportion reference. Kept `public/training-hub-design/body-silhouette.png` unchanged.
+- Left Achilles now appears ONLY on the back at native coordinates x377/y1335, radii 23/62, label x200. Removed the dashed front-view posterior projection and its old explanatory text. Right knee and left ankle remain on the front. Injury summary labels now identify Front view or Back view explicitly.
+- Preserved injury numbering, links to detail-card anchors, current pain selection and color thresholds. Enlarged SVG number/side-label typography for the smaller paired figures. No database, update-form, archive or persistence changes.
+- Updated `.inj-map` CSS in `src/app/globals.css`: paired figures in a navy bordered well, summary alongside on desktop, summary below at <=800px, both figures still visible on phones. The rear image has an opaque navy background, not alpha transparency; the well matches it. Initial generated checkerboard output was rejected and corrected with image_gen.
+
+**Verification:**
+- Reviewed the running LOCAL site at localhost:3000/injuries. Captured 1100x900, 390x844 and 320x800 screenshots; all three reported no horizontal overflow. Inspected desktop and 320px screenshots: both figures load, left Achilles sits on the rear left heel/tendon area, front highlights remain correct, and the summary fits.
+- `npx tsc --noEmit` passed. No production build, deployment, commit, data mutation or migration performed. Review covers the injury page, not a fresh full-site/nav-interaction audit.
+
+**Artifacts and reproducibility:**
+- `design/training-hub-reference-v1/review-4/README.md` contains implementation details, limitations, generation mode and both exact image prompts.
+- `design/training-hub-reference-v1/review-4/screenshots/01-injuries-1100.png`, `01-injuries-390.png`, `01-injuries-320.png` show the implementation.
+- `design/training-hub-reference-v1/review-4/observations.json` contains measurements; `capture-app.cjs` reproduces the focused capture; `.gitignore` excludes its Chrome profile.
+
+**Remaining scope for Claude / future work:**
+- Two-view display and built-in Achilles placement are complete. Earlier handoff statements describing Achilles as a dashed front projection are superseded by this entry.
+- Custom injuries still use free-text locations and are listed as unmapped. Creating a new back injury does NOT automatically place it on the rear diagram. To support arbitrary new locations reliably, add explicit user-selected body view/region (or coordinates) in the injury data workflow and pass that mapping to the visual component. Do not invent injury coordinates from ambiguous text or add hypothetical injuries to real records.
+- No other work required for the requested two-image layout; do not replace the front asset or regress the existing injury-card workflows.
+
+**Update — verified and shipped by Claude, 2026-09-11:** Reviewed Codex's diff directly (`InjuryBodyMap.tsx`, `globals.css`) before shipping — self-contained, no data/API/Supabase touches, matches what this entry describes. Confirmed `public/training-hub-design/body-silhouette-back.png` exists. `npx tsc --noEmit` clean, `npm run build` passes (20 routes), restarted the dev server and curled `/injuries` (200). Committed and pushed to production.
