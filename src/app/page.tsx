@@ -1,5 +1,6 @@
 import { getActiveRace, getDaysToRace, getGarminActivitiesForWeeks, getMobilityStreak, garminBucket } from '@/lib/supabase'
 import { getTodaySchedule } from '@/lib/schedule'
+import { getAthleteContext } from '@/lib/agentContext'
 import VolumeChart from '@/components/dashboard/VolumeChart'
 import NutritionActualsPanel from '@/components/dashboard/NutritionActualsPanel'
 import MacroAccuracyPanel from '@/components/dashboard/MacroAccuracyPanel'
@@ -9,7 +10,7 @@ import BodyCompWidget from '@/components/dashboard/BodyCompWidget'
 import RaceCountdown from '@/components/dashboard/RaceCountdown'
 import RecoveryCard from '@/components/dashboard/RecoveryCard'
 import ActivityIcon, { iconForBlockClass } from '@/components/dashboard/ActivityIcon'
-import AgentRecap from '@/components/dashboard/AgentRecap'
+import { TrainingSummary } from '@/components/TrainingSummary'
 import GarminSyncButton from '@/components/dashboard/GarminSyncButton'
 
 const WORKOUT_CLASSES = ['bl-gym', 'bl-swim', 'bl-bike', 'bl-run', 'bl-brick', 'bl-soccer']
@@ -32,16 +33,18 @@ function toMonIdx(day: number) { return day === 0 ? 6 : day - 1 }
 const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
 export default async function DashboardPage() {
-  const [weeklyActivities, mobilityStreak, activeRaceResult] = await Promise.allSettled([
+  const [weeklyActivities, mobilityStreak, activeRaceResult, athleteContextResult] = await Promise.allSettled([
     getGarminActivitiesForWeeks(13),
     getMobilityStreak(),
     getActiveRace(),
+    getAthleteContext(),
   ])
 
   const allActivities = weeklyActivities.status === 'fulfilled' ? weeklyActivities.value : []
   const streak = mobilityStreak.status === 'fulfilled' ? mobilityStreak.value : 0
   const activeRace = activeRaceResult.status === 'fulfilled' ? activeRaceResult.value : null
   const daysToRace = activeRace ? getDaysToRace(activeRace.race) : null
+  const athleteContext = athleteContextResult.status === 'fulfilled' ? athleteContextResult.value : null
 
   // Weekly progress dots (Mon-indexed)
   const now = new Date()
@@ -274,7 +277,17 @@ export default async function DashboardPage() {
       </div>
 
       <div className="chart-card" style={{ marginBottom: 16 }}>
-        <AgentRecap />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+          <div className="chart-card-title" style={{ marginBottom: 0 }}>Training snapshot</div>
+          <a href="/agent" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', textDecoration: 'none' }}>
+            Full coaching report →
+          </a>
+        </div>
+        {athleteContext ? (
+          <TrainingSummary ctx={athleteContext} compact />
+        ) : (
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>Unable to load right now.</div>
+        )}
       </div>
 
       {/* ── Charts ── */}

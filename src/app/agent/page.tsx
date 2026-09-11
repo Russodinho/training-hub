@@ -1,139 +1,174 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import type { CoachingAnalysis } from '@/lib/agentAnalysis'
+import { useState, useEffect, useRef } from 'react'
+import { TrainingSummary } from '@/components/TrainingSummary'
+import type { AthleteContext } from '@/lib/agentContext'
+import { AGENT_LIST } from '@/lib/agentPrompts'
+import type { AgentId } from '@/lib/agentPrompts'
+
+type AgentStatus = 'idle' | 'loading' | 'done' | 'error' | 'stopped'
+
+const DELAY_MS = 30000 // gap between agents — rate-limit protection across 12 sequential calls
 
 export default function AgentPage() {
-  const [data, setData] = useState<CoachingAnalysis | null>(null)
-  const [checked, setChecked] = useState(false)
+  const [ctx, setCtx] = useState<AthleteContext | null>(null)
+  const [messages, setMessages] = useState<Record<string, string>>({})
+  const [statuses, setStatuses] = useState<Record<string, AgentStatus>>({})
   const [running, setRunning] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [countdown, setCountdown] = useState<number | null>(null)
+  const [currentAgent, setCurrentAgent] = useState<AgentId | null>(null)
+  const stoppedRef = useRef(false)
 
-  // Peek only on load — never spends anything just from visiting the page.
-  // Whether to actually run the analysis is entirely your call, since your
-  // day (soccer nights especially) isn't always over on a fixed schedule.
   useEffect(() => {
-    let alive = true
-    fetch('/api/agent/analyze?peek=1')
-      .then(res => res.json())
-      .then(json => { if (alive) setData(json.data ?? null) })
-      .catch(() => { /* falls through to the "not run yet" state */ })
-      .finally(() => { if (alive) setChecked(true) })
-    return () => { alive = false }
+    fetch('/api/athlete-context').then(r => r.json()).then(setCtx)
   }, [])
 
-  const runAnalysis = () => {
+  async function runAll() {
+    stoppedRef.current = false
     setRunning(true)
-    setError(null)
-    fetch('/api/agent/analyze')
-      .then(async res => {
-        const json = await res.json()
-        if (!res.ok) throw new Error(json.error ?? 'Analysis failed')
-        return json as CoachingAnalysis
-      })
-      .then(setData)
-      .catch((err: Error) => setError(err.message))
-      .finally(() => setRunning(false))
+    setMessages({})
+
+    const toRun = AGENT_LIST.filter(a => statuses[a.id] !== 'done')
+    toRun.forEach(a => setStatuses(s => ({ ...s, [a.id]: 'idle' })))
+
+    for (let i = 0; i < toRun.length; i++) {
+      if (stoppedRef.current) {
+        toRun.slice(i).forEach(a => setStatuses(s => ({ ...s, [a.id]: 'stopped' })))
+        break
+      }
+
+      const agent = toRun[i]
+      setCurrentAgent(agent.id)
+      setStatuses(s => ({ ...s, [agent.id]: 'loading' }))
+
+      try {
+        const res = await fetch('/api/agent-message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agentId: agent.id }),
+        })
+        const data = await res.json()
+
+        if (!res.ok) {
+          setStatuses(s => ({ ...s, [agent.id]: 'error' }))
+          setMessages(m => ({ ...m, [agent.id]: data.error ?? 'Failed to generate message' }))
+          if (data.retryable) {
+            stoppedRef.current = true
+            toRun.slice(i + 1).forEach(a => setStatuses(s => ({ ...s, [a.id]: 'stopped' })))
+            break
+          }
+        } else {
+          setMessages(m => ({ ...m, [agent.id]: data.message }))
+          setStatuses(s => ({ ...s, [agent.id]: 'done' }))
+        }
+      } catch {
+        setStatuses(s => ({ ...s, [agent.id]: 'error' }))
+        setMessages(m => ({ ...m, [agent.id]: 'Request failed — check your connection' }))
+        stoppedRef.current = true
+        toRun.slice(i + 1).forEach(a => setStatuses(s => ({ ...s, [a.id]: 'stopped' })))
+        break
+      }
+
+      const isLast = i === toRun.length - 1
+      if (!isLast && !stoppedRef.current) {
+        let remaining = DELAY_MS / 1000
+        setCountdown(remaining)
+        await new Promise<void>(resolve => {
+          const interval = setInterval(() => {
+            remaining--
+            setCountdown(remaining)
+            if (remaining <= 0 || stoppedRef.current) {
+              clearInterval(interval)
+              setCountdown(null)
+              resolve()
+            }
+          }, 1000)
+        })
+      }
+    }
+
+    setCurrentAgent(null)
+    setCountdown(null)
+    setRunning(false)
   }
+
+  function stop() {
+    stoppedRef.current = true
+  }
+
+  const failed = AGENT_LIST.filter(a => statuses[a.id] === 'error')
+  const done = AGENT_LIST.filter(a => statuses[a.id] === 'done')
+  const sections = [...new Set(AGENT_LIST.map(a => a.section))]
+  const currentAgentInfo = currentAgent ? AGENT_LIST.find(a => a.id === currentAgent) : null
 
   return (
     <div className="hub-page">
       <div className="page-header">
         <div>
           <h1>Training Agent</h1>
-          <div className="sub">Claude drafts, GPT-4 critiques, Claude refines — run it once a day, whenever your day is actually done</div>
+          <div className="sub">12 coaches, each fed the same live data — Claude drafts, GPT-4 critiques, Claude refines</div>
         </div>
       </div>
 
-      <div className="chart-card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-          <div className="chart-card-title" style={{ marginBottom: 0 }}>Today&apos;s coaching call</div>
-          {!checked && (
-            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
-              Checking…
-            </span>
-          )}
-          {checked && !data && (
-            <button
-              onClick={runAnalysis}
-              disabled={running}
-              style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 12,
-                padding: '6px 14px', borderRadius: 7,
-                border: '1px solid var(--accent)', background: 'var(--accent-bg)',
-                color: 'var(--accent)', cursor: running ? 'default' : 'pointer',
-                opacity: running ? 0.6 : 1,
-              }}
-            >
-              {running ? 'Analyzing…' : 'Run today’s analysis'}
-            </button>
-          )}
-        </div>
+      {ctx && <TrainingSummary ctx={ctx} />}
 
-        {checked && !data && !running && (
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
-            No analysis has run yet today. Run it once you&apos;re done for the day (workout logged, soccer game over, etc.) — it&apos;s capped at once per day, so there&apos;s no rush and no way to accidentally re-run it.
-          </div>
+      {/* Run controls */}
+      <div className="chart-card" style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+        <button
+          className="hub-btn"
+          onClick={runAll}
+          disabled={running || !ctx}
+        >
+          {running ? '⏳ Running…' : failed.length > 0 ? `↺ Retry ${failed.length} failed` : '▶ Run daily check-in'}
+        </button>
+        {running && <button className="hub-btn-ghost" onClick={stop}>■ Stop</button>}
+        {countdown != null && (
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+            Next coach in {countdown}s…
+          </span>
         )}
-
-        {running && (
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
-            Running the analysis → critique → refine loop…
-          </div>
+        {running && currentAgentInfo && (
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--accent)' }}>
+            {currentAgentInfo.emoji} {currentAgentInfo.name}…
+          </span>
         )}
-
-        {error && (
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--race-t)' }}>
-            {error}
-          </div>
-        )}
-
-        {data && (
-          <div>
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)',
-              marginBottom: 14,
-            }}>
-              Already analyzed today — check back tomorrow for a new one.
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14, marginBottom: 20 }}>
-              <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 18, fontWeight: 700 }}>
-                {data.final_recommendation}
-              </div>
-              <div style={{ textAlign: 'center', flexShrink: 0 }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20, fontWeight: 700, color: 'var(--accent)' }}>
-                  {data.confidence}%
-                </div>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>
-                  confidence
-                </div>
-              </div>
-            </div>
-
-            <div style={{
-              padding: '14px 16px', borderRadius: 8, marginBottom: 16,
-              background: 'var(--accent-bg)', border: '1px solid var(--accent)',
-            }}>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--accent)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                Today&apos;s action
-              </div>
-              <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 14, fontWeight: 600 }}>
-                {data.today_action}
-              </div>
-            </div>
-
-            <div>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                Debate summary
-              </div>
-              <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 13, color: 'var(--muted)', lineHeight: 1.6 }}>
-                {data.debate_summary}
-              </div>
-            </div>
-          </div>
-        )}
+        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)', marginLeft: 'auto' }}>
+          {done.length}/{AGENT_LIST.length} done
+        </span>
       </div>
+
+      {/* Agent cards by section */}
+      {sections.map(section => (
+        <div key={section} style={{ marginBottom: 24 }}>
+          <div className="section-hdr"><span className="ptitle">{section}</span></div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 12 }}>
+            {AGENT_LIST.filter(a => a.section === section).map(agent => {
+              const status = statuses[agent.id] ?? 'idle'
+              return (
+                <div key={agent.id} className="surface-card">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <span style={{ fontSize: 16 }}>{agent.emoji}</span>
+                    <span style={{ fontWeight: 600, fontSize: 13, flex: 1 }}>{agent.name}</span>
+                    <span style={{ fontSize: 13 }}>
+                      {status === 'loading' && '⟳'}
+                      {status === 'done' && '✓'}
+                      {status === 'error' && '✗'}
+                      {status === 'stopped' && '—'}
+                    </span>
+                  </div>
+                  {messages[agent.id] ? (
+                    <p style={{ fontSize: 13, lineHeight: 1.5, margin: 0 }}>{messages[agent.id]}</p>
+                  ) : status === 'loading' ? (
+                    <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0 }}>Analyzing your training data…</p>
+                  ) : (
+                    <p style={{ fontSize: 12, color: 'var(--faint)', margin: 0 }}>Waiting to run</p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
