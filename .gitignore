@@ -22,6 +22,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 garmindb.log
+cronometer-sync.log
+cronometer_sync.log
 
 # local env files
 .env*.local
