@@ -52,69 +52,12 @@ const SUPPLEMENT_STACK: TimingBlock[] = [
   },
 ]
 
-// ── Nutrition meal plans ─────────────────────────────────────────
-
-const MEAL_PLANS: Record<string, { meal: string; foods: string; kcal: number; p: number; c: number; f: number }[]> = {
-  Monday: [
-    { meal: 'Pre-workout (4:50am)', foods: 'Banana + coffee (black) + collagen 20g', kcal: 195, p: 20, c: 28, f: 1 },
-    { meal: 'Breakfast (7:00am)', foods: 'Oats 100g · egg whites 200ml · whole egg 1 · blueberries · protein shake', kcal: 620, p: 55, c: 75, f: 10 },
-    { meal: 'Lunch (12:00pm)', foods: 'Rice 200g cooked · chicken breast 180g · broccoli · olive oil 1 tbsp', kcal: 680, p: 52, c: 78, f: 12 },
-    { meal: 'Pre-soccer snack (5:30pm)', foods: 'Banana · protein shake · electrolytes', kcal: 290, p: 30, c: 35, f: 3 },
-    { meal: 'Post-soccer dinner (8:30pm)', foods: 'Salmon 180g · sweet potato 250g · salad + olive oil · cottage cheese', kcal: 780, p: 55, c: 74, f: 24 },
-    { meal: 'Evening', foods: 'Greek yogurt 200g · nuts 20g', kcal: 335, p: 21, c: 20, f: 21 },
-  ],
-  Tuesday: [
-    { meal: 'Pre-workout (4:50am)', foods: 'Banana + coffee + collagen 20g', kcal: 195, p: 20, c: 28, f: 1 },
-    { meal: 'Breakfast (7:00am)', foods: 'Oats 80g · egg whites 200ml · whole egg 1 · protein shake', kcal: 540, p: 52, c: 58, f: 10 },
-    { meal: 'Lunch (12:30pm)', foods: 'Rice 150g · chicken 200g · veg + olive oil', kcal: 620, p: 55, c: 60, f: 13 },
-    { meal: 'Dinner (6:30pm)', foods: 'Ground turkey 200g · pasta 120g · tomato sauce · parmesan', kcal: 720, p: 52, c: 62, f: 21 },
-    { meal: 'Evening', foods: 'Cottage cheese 200g', kcal: 180, p: 23, c: 8, f: 5 },
-  ],
-  Wednesday: [
-    { meal: 'Pre-swim (5:00am)', foods: 'Coffee (black) + half banana', kcal: 55, p: 1, c: 14, f: 0 },
-    { meal: 'Breakfast (6:30am)', foods: 'Oats 80g · eggs 2 whole · egg whites 150ml · collagen + protein shake', kcal: 570, p: 52, c: 58, f: 12 },
-    { meal: 'Lunch (12:30pm)', foods: 'Rice 150g · chicken 180g · veg', kcal: 570, p: 48, c: 57, f: 10 },
-    { meal: 'Dinner (6:30pm)', foods: 'Lean beef 180g · potato 200g · salad', kcal: 680, p: 52, c: 55, f: 20 },
-    { meal: 'Evening', foods: 'Greek yogurt 150g', kcal: 120, p: 15, c: 8, f: 2 },
-  ],
-  Thursday: [
-    { meal: 'Pre-workout (4:50am)', foods: 'Banana + coffee + collagen 20g', kcal: 195, p: 20, c: 28, f: 1 },
-    { meal: 'Breakfast (7:00am)', foods: 'Oats 100g · eggs 2 · egg whites 150ml · protein shake', kcal: 590, p: 52, c: 68, f: 11 },
-    { meal: 'Lunch (12:30pm)', foods: 'Rice 175g · chicken 200g · veg + olive oil', kcal: 650, p: 55, c: 67, f: 13 },
-    { meal: 'Pre-run snack (7:00pm)', foods: 'Banana · electrolytes', kcal: 110, p: 1, c: 28, f: 0 },
-    { meal: 'Dinner (8:30pm)', foods: 'Salmon 180g · sweet potato 200g · veg · olive oil', kcal: 720, p: 48, c: 64, f: 22 },
-    { meal: 'Evening', foods: 'Cottage cheese 200g', kcal: 180, p: 23, c: 8, f: 5 },
-  ],
-  Friday: [
-    { meal: 'Pre-workout (4:50am)', foods: 'Banana + coffee + collagen 20g', kcal: 195, p: 20, c: 28, f: 1 },
-    { meal: 'Breakfast (7:00am)', foods: 'Oats 80g · eggs 2 · egg whites 150ml · protein shake', kcal: 560, p: 50, c: 60, f: 11 },
-    { meal: 'Lunch (12:30pm)', foods: 'Rice 150g · chicken 180g · veg', kcal: 580, p: 48, c: 60, f: 11 },
-    { meal: 'Dinner (6:30pm)', foods: 'Ground turkey 180g · pasta 100g · tomato sauce', kcal: 660, p: 46, c: 70, f: 18 },
-    { meal: 'Evening', foods: 'Greek yogurt 200g · nuts 15g', kcal: 275, p: 21, c: 13, f: 17 },
-  ],
-  Saturday: [
-    { meal: 'Breakfast (7:30am)', foods: 'Oats 100g · eggs 2 · protein shake · banana', kcal: 620, p: 50, c: 78, f: 10 },
-    { meal: 'Pre-bike snack (10:30am)', foods: 'Banana · electrolytes', kcal: 110, p: 1, c: 28, f: 0 },
-    { meal: 'Lunch (12:30pm)', foods: 'Rice 175g · chicken 200g · veg + olive oil', kcal: 650, p: 55, c: 67, f: 13 },
-    { meal: 'Dinner — cheat, not tracked', foods: 'Whatever you want. No tracking, no cheat snacking before or after.', kcal: 0, p: 0, c: 0, f: 0 },
-  ],
-  Sunday: [
-    { meal: 'Breakfast (7:30am)', foods: 'Oats 80g · eggs 2 · protein shake', kcal: 510, p: 48, c: 55, f: 11 },
-    { meal: 'Pre-soccer (7:30am)', foods: 'Banana · coffee', kcal: 110, p: 1, c: 28, f: 0 },
-    { meal: 'Halftime snack', foods: 'Banana · electrolytes', kcal: 110, p: 1, c: 28, f: 0 },
-    { meal: 'Post-soccer lunch (12:30pm)', foods: 'Rice 200g · chicken 200g · veg + olive oil', kcal: 700, p: 57, c: 78, f: 13 },
-    { meal: 'Dinner (6:30pm)', foods: 'Lean beef 180g · sweet potato 200g · salad', kcal: 680, p: 48, c: 58, f: 19 },
-    { meal: 'Evening', foods: 'Greek yogurt 150g · nuts 15g', kcal: 235, p: 18, c: 11, f: 13 },
-  ],
-}
-
 // ── Top-level tabs ───────────────────────────────────────────────
 
 type FuelTab = 'targets' | 'supplements'
 
 export default function FuelPage() {
   const [tab, setTab] = useState<FuelTab>('targets')
-  const [expanded, setExpanded] = useState<string | null>(null)
   const [liveBio, setLiveBio] = useState<{ weight_lbs: number | null; body_fat_pct: number | null } | null>(null)
 
   // Latest weight/body-fat from Supabase `biometrics` — backfilled from
@@ -192,30 +135,6 @@ export default function FuelPage() {
                       </div>
                     )}
                     <div style={{ fontSize: 12, color: 'var(--muted)' }}>{day.notes}</div>
-                    {!isFlex && (
-                      <>
-                        <button className="hub-btn-ghost" style={{ marginTop: 10, fontSize: 10 }}
-                          onClick={() => setExpanded(expanded === day.day ? null : day.day)}>
-                          {expanded === day.day ? '▲ Hide meal plan' : '▼ Show meal plan'}
-                        </button>
-                        {expanded === day.day && MEAL_PLANS[day.day] && (
-                          <div style={{ marginTop: 10 }}>
-                            {MEAL_PLANS[day.day].map((meal, i) => (
-                              <div key={i} style={{ padding: '7px 0', borderBottom: '0.5px solid var(--border)', fontSize: 12 }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 2 }}>
-                                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>{meal.meal}</span>
-                                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11 }}>{meal.kcal} kcal</span>
-                                </div>
-                                <div style={{ marginBottom: 4 }}>{meal.foods}</div>
-                                <div style={{ display: 'flex', gap: 10, fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>
-                                  <span>P {meal.p}g</span><span>C {meal.c}g</span><span>F {meal.f}g</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </>
-                    )}
                   </div>
                 )
               })}

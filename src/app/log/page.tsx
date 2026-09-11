@@ -264,9 +264,26 @@ export default function LogWorkoutPage() {
         }
       })
       setPrevWeights(weights)
+
+      // Backfill only sets the user hasn't touched yet — never overwrite
+      // something they've already typed, and this can land after the
+      // blank-state init effect below since it's a separate async fetch.
+      setExerciseData(prev => {
+        const next = { ...prev }
+        for (const [exIdx, ex] of Object.entries(next)) {
+          const exercise = plan.exercises[Number(exIdx)]
+          const prevWeight = exercise && weights[exercise.name]
+          if (!prevWeight) continue
+          next[Number(exIdx)] = {
+            ...ex,
+            sets: ex.sets.map(s => s.weight === '' ? { ...s, weight: `${prevWeight}` } : s),
+          }
+        }
+        return next
+      })
     }
     fetchPrev()
-  }, [workoutType])
+  }, [workoutType, plan])
 
   const updateSet = useCallback((exIdx: number, setIdx: number, updated: SetEntry) => {
     setExerciseData(prev => {
