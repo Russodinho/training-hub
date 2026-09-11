@@ -82,7 +82,7 @@ async function fetchLast7Days(): Promise<{ workouts: WorkoutSummary[]; sleep: Da
 
 async function readCache(date: string): Promise<CoachingAnalysis | null> {
   const sb = createServiceClient()
-  const { data } = await sb.from('agent_analysis_cache').select('*').eq('date', date).maybeSingle()
+  const { data } = await sb.from('agent_cache').select('*').eq('date', date).maybeSingle()
   if (!data) return null
   return {
     final_recommendation: data.final_recommendation,
@@ -92,9 +92,17 @@ async function readCache(date: string): Promise<CoachingAnalysis | null> {
   }
 }
 
+// Plain insert (not upsert) — the `date` unique constraint in
+// 0005_agent_cache.sql is the real guard against duplicate rows. If two
+// requests race and both miss the cache, the loser's insert hits a unique
+// violation (Postgres code 23505); that's expected and fine — the winner's
+// row is what both callers should return, so we just swallow it here.
 async function writeCache(date: string, analysis: CoachingAnalysis): Promise<void> {
   const sb = createServiceClient()
-  await sb.from('agent_analysis_cache').upsert({ date, ...analysis }, { onConflict: 'date' })
+  const { error } = await sb.from('agent_cache').insert({ date, ...analysis })
+  if (error && error.code !== '23505') {
+    console.error('agent_cache insert failed', error)
+  }
 }
 
 // Three-step coaching loop: Claude drafts an analysis, GPT-4 critiques it,
@@ -156,18 +164,20 @@ async function runCoachingLoop(workouts: WorkoutSummary[], sleep: DailyStatRow[]
 }
 
 export async function getAgentAnalysis(forceRefresh = false): Promise<CoachingAnalysis> {
+  const date = todayStr()
+
+  // Cache check comes before anything else — including the API key checks
+  // below — so a cache hit never touches Claude or OpenAI at all.
+  if (!forceRefresh) {
+    const cached = await readCache(date)
+    if (cached) return cached
+  }
+
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY is not set — add it to .env.local (and to Vercel env vars) to enable the coaching agent')
   }
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OPENAI_API_KEY is not set — add it to .env.local (and to Vercel env vars) to enable the coaching agent\'s critique step')
-  }
-
-  const date = todayStr()
-
-  if (!forceRefresh) {
-    const cached = await readCache(date)
-    if (cached) return cached
   }
 
   const { workouts, sleep } = await fetchLast7Days()

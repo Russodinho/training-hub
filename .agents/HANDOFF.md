@@ -295,3 +295,22 @@ redesign "complete":**
 - **Run `supabase/migrations/0005_agent_analysis_cache.sql`** — without it, every dashboard/`/agent` load re-runs the full Claude+GPT-4 loop (real cost, ~35s latency) instead of hitting the cache once/day.
 - The underlying training/recovery data is currently pretty sparse (seeded lift sessions have no real sets logged day-to-day; Garmin sync hasn't been run recently) — the agent is behaving correctly by hedging, but it'll get much more useful once `/log` is used regularly and Garmin sync runs again.
 - Still unstyled/functional by design — next step is Codex's pass.
+
+---
+
+## 2026-09-10 — Renamed cache table to agent_cache; added Cronometer auto-import pipeline
+**Agent:** Claude
+**Completed:**
+- Per a follow-up spec, replaced the never-run `0005_agent_analysis_cache.sql` with `0005_agent_cache.sql` — same purpose, renamed table (`agent_cache`), explicit `id` column, and the `date` column is `unique` at the DB level so two simultaneous requests can't produce two rows for the same day. **Still not run yet — this is the only outstanding migration now** (0001-0004 are confirmed applied).
+- `agentAnalysis.ts`: cache check now happens *before* the `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` presence checks, so a cache hit truly makes zero AI-provider calls (previously the key checks ran unconditionally, which would have thrown even on a cache hit if a key were ever unset). `writeCache` switched from `upsert` to a plain `insert` that swallows Postgres unique-violation errors (code `23505`) — the `date` unique constraint is the actual race guard; a losing concurrent insert is expected and not a real failure.
+- Built the requested Cronometer automation pipeline:
+  - `src/app/api/nutrition/cronometer-import/route.ts` — new dedicated endpoint, deliberately kept close to `/api/nutrition/upload`'s existing column-mapping (checked that file and `fuel/page.tsx`'s `handleFile` first, per instructions). Accepts the same `{ csv: string }` JSON contract as the existing upload routes rather than multipart/form-data — matches the established convention and is far simpler to POST from Windows PowerShell 5.1 (no native multipart support) than a real file upload would be. Upserts into `nutrition_actuals` `onConflict: 'date'`, so re-importing the same export is a no-op for already-seen days.
+  - `cronometer_sync.ps1` (project root) — same Task Scheduler-triggered pattern as `garmin_sync_daily.ps1`. Scans `Downloads` for `cronometer*.csv`, POSTs each as `{csv: <file content>}` JSON, archives the processed file into `cronometer-archive/` with a timestamp prefix (avoids collisions on same-named re-exports), and logs timestamped results to `cronometer_sync.log`. Exits silently (no log spam) when no matching file is found. **Not yet wired into Task Scheduler — that's a system-level change outside this repo, left for the user to set up (or ask me to) the same way the Garmin one presumably was.**
+  - **Note the script's `$apiUrl` points at `http://localhost:3001`, exactly as specified** — the dev server (`npm run dev`) defaults to port 3000, so this only works as-is if a separate instance is intentionally running on 3001. Flagged in a comment in the script; update the port if that wasn't intentional.
+- Verified the new import route against a real (fake-data) CSV POST on the dev server — worked correctly (`{"rows":2,"errors":0,"skipped":0,...}`). **Then deleted those 2 test rows from the live `nutrition_actuals` table** (dates `2026-09-09`/`2026-09-10`) immediately after confirming via their `created_at` timestamps that they were rows my own test had just created, not pre-existing real data.
+- `npm run build` passes (22 routes now).
+
+**Next agent needs to:**
+- **Run `supabase/migrations/0005_agent_cache.sql`** (the renamed version — ignore any memory of `0005_agent_analysis_cache.sql`, that file no longer exists).
+- If the user wants `cronometer_sync.ps1` actually running on a schedule, it needs a Task Scheduler entry — not created automatically this session.
+- Confirm with the user whether port 3001 in `cronometer_sync.ps1` is intentional (separate prod-like instance) or should be 3000 to match `npm run dev`.
