@@ -1,17 +1,31 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { CoachingAnalysis } from '@/lib/agentAnalysis'
 
 export default function AgentPage() {
   const [data, setData] = useState<CoachingAnalysis | null>(null)
+  const [checked, setChecked] = useState(false)
+  const [running, setRunning] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
 
-  const load = useCallback((forceRefresh = false) => {
-    setLoading(true)
+  // Peek only on load — never spends anything just from visiting the page.
+  // Whether to actually run the analysis is entirely your call, since your
+  // day (soccer nights especially) isn't always over on a fixed schedule.
+  useEffect(() => {
+    let alive = true
+    fetch('/api/agent/analyze?peek=1')
+      .then(res => res.json())
+      .then(json => { if (alive) setData(json.data ?? null) })
+      .catch(() => { /* falls through to the "not run yet" state */ })
+      .finally(() => { if (alive) setChecked(true) })
+    return () => { alive = false }
+  }, [])
+
+  const runAnalysis = () => {
+    setRunning(true)
     setError(null)
-    fetch(forceRefresh ? '/api/agent/analyze?refresh=1' : '/api/agent/analyze')
+    fetch('/api/agent/analyze')
       .then(async res => {
         const json = await res.json()
         if (!res.ok) throw new Error(json.error ?? 'Analysis failed')
@@ -19,39 +33,50 @@ export default function AgentPage() {
       })
       .then(setData)
       .catch((err: Error) => setError(err.message))
-      .finally(() => setLoading(false))
-  }, [])
-
-  useEffect(() => { load(false) }, [load])
+      .finally(() => setRunning(false))
+  }
 
   return (
     <div className="hub-page">
       <div className="page-header">
         <div>
           <h1>Training Agent</h1>
-          <div className="sub">Claude drafts, GPT-4 critiques, Claude refines — once per day, from your last 7 days of workouts and recovery</div>
+          <div className="sub">Claude drafts, GPT-4 critiques, Claude refines — run it once a day, whenever your day is actually done</div>
         </div>
       </div>
 
       <div className="chart-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div className="chart-card-title" style={{ marginBottom: 0 }}>Today&apos;s coaching call</div>
-          <button
-            onClick={() => load(true)}
-            disabled={loading}
-            style={{
-              fontFamily: "'IBM Plex Mono', monospace", fontSize: 12,
-              padding: '6px 14px', borderRadius: 7,
-              border: '1px solid var(--border)', background: 'var(--surface)',
-              color: 'var(--text)', cursor: loading ? 'default' : 'pointer',
-              opacity: loading ? 0.6 : 1,
-            }}
-          >
-            {loading ? 'Analyzing…' : 'Refresh analysis'}
-          </button>
+          {!checked && (
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+              Checking…
+            </span>
+          )}
+          {checked && !data && (
+            <button
+              onClick={runAnalysis}
+              disabled={running}
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: 12,
+                padding: '6px 14px', borderRadius: 7,
+                border: '1px solid var(--accent)', background: 'var(--accent-bg)',
+                color: 'var(--accent)', cursor: running ? 'default' : 'pointer',
+                opacity: running ? 0.6 : 1,
+              }}
+            >
+              {running ? 'Analyzing…' : 'Run today’s analysis'}
+            </button>
+          )}
         </div>
 
-        {loading && !data && (
+        {checked && !data && !running && (
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
+            No analysis has run yet today. Run it once you&apos;re done for the day (workout logged, soccer game over, etc.) — it&apos;s capped at once per day, so there&apos;s no rush and no way to accidentally re-run it.
+          </div>
+        )}
+
+        {running && (
           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--muted)' }}>
             Running the analysis → critique → refine loop…
           </div>
@@ -65,6 +90,13 @@ export default function AgentPage() {
 
         {data && (
           <div>
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)',
+              marginBottom: 14,
+            }}>
+              Already analyzed today — check back tomorrow for a new one.
+            </div>
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14, marginBottom: 20 }}>
               <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 18, fontWeight: 700 }}>
                 {data.final_recommendation}

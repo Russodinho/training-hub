@@ -163,6 +163,13 @@ async function runCoachingLoop(workouts: WorkoutSummary[], sleep: DailyStatRow[]
   return parsed
 }
 
+// Read-only check for today's cached result — never triggers the AI loop.
+// Used to render whatever's already there on page load without spending
+// anything; the actual run only happens when the user explicitly asks for it.
+export async function peekAgentCache(): Promise<CoachingAnalysis | null> {
+  return readCache(todayStr())
+}
+
 export async function getAgentAnalysis(forceRefresh = false): Promise<CoachingAnalysis> {
   const date = todayStr()
 

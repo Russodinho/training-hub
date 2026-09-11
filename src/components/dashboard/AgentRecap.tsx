@@ -6,22 +6,34 @@ import type { CoachingAnalysis } from '@/lib/agentAnalysis'
 
 export default function AgentRecap() {
   const [data, setData] = useState<CoachingAnalysis | null>(null)
+  const [checked, setChecked] = useState(false)
+  const [running, setRunning] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
 
+  // Peek only — never spends anything just from viewing the dashboard.
   useEffect(() => {
     let alive = true
+    fetch('/api/agent/analyze?peek=1')
+      .then(res => res.json())
+      .then(json => { if (alive) setData(json.data ?? null) })
+      .catch(() => { /* peek failures just fall through to the "not run yet" state */ })
+      .finally(() => { if (alive) setChecked(true) })
+    return () => { alive = false }
+  }, [])
+
+  const runAnalysis = () => {
+    setRunning(true)
+    setError(null)
     fetch('/api/agent/analyze')
       .then(async res => {
         const json = await res.json()
         if (!res.ok) throw new Error(json.error ?? 'Analysis failed')
         return json as CoachingAnalysis
       })
-      .then(json => { if (alive) setData(json) })
-      .catch((err: Error) => { if (alive) setError(err.message) })
-      .finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
-  }, [])
+      .then(setData)
+      .catch((err: Error) => setError(err.message))
+      .finally(() => setRunning(false))
+  }
 
   return (
     <div>
@@ -32,7 +44,32 @@ export default function AgentRecap() {
         </Link>
       </div>
 
-      {loading && (
+      {!checked && (
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+          Checking today&apos;s analysis…
+        </div>
+      )}
+
+      {checked && !data && !running && (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+            No analysis run yet today.
+          </div>
+          <button
+            onClick={runAnalysis}
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 11,
+              padding: '5px 12px', borderRadius: 6, whiteSpace: 'nowrap',
+              border: '1px solid var(--accent)', background: 'var(--accent-bg)',
+              color: 'var(--accent)', cursor: 'pointer',
+            }}
+          >
+            Run analysis
+          </button>
+        </div>
+      )}
+
+      {running && (
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
           Coach is reviewing the last 7 days…
         </div>

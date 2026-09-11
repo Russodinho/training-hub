@@ -314,3 +314,23 @@ redesign "complete":**
 - **Run `supabase/migrations/0005_agent_cache.sql`** (the renamed version — ignore any memory of `0005_agent_analysis_cache.sql`, that file no longer exists).
 - If the user wants `cronometer_sync.ps1` actually running on a schedule, it needs a Task Scheduler entry — not created automatically this session.
 - Confirm with the user whether port 3001 in `cronometer_sync.ps1` is intentional (separate prod-like instance) or should be 3000 to match `npm run dev`.
+
+---
+
+## 2026-09-10 — Agent is a manual "run once/day" button, not a scheduled trigger
+**Agent:** Claude
+**Completed:**
+- Discussed automation scheduling with the user. Confirmed `garmin_sync.py` writes straight to Supabase via the Python client (no dependency on the Next.js app being up at all), but `cronometer_sync.ps1` and any agent trigger POST to this app's own API routes, so they need a reachable server — flagged that `localhost:3001` in `cronometer_sync.ps1` won't work from an unattended Task Scheduler run unless something's already serving on that port. User is working through a Cronometer-side fix separately (not yet addressed).
+- Decided against a fixed evening Task Scheduler trigger for the agent: the user's Monday/Tuesday soccer games start anywhere from 7-10pm (a 10pm game ends ~10:50pm), so no fixed time reliably lands after "today" is actually complete. Landed on: **the agent has no schedule at all — it's a manual button, still capped at once per UTC day** by the existing `agent_cache` unique-date-row design.
+- This exposed a real gap in the previous turn's design: `getAgentAnalysis()` computed-if-missing on every plain `GET`, meaning just *loading* the dashboard or `/agent` page (e.g. absent-mindedly at 7am) would silently burn the day's one run on an incomplete day. Fixed by splitting read from compute:
+  - `agentAnalysis.ts`: added `peekAgentCache()` — pure cache read, never touches Claude/OpenAI.
+  - `api/agent/analyze/route.ts`: `?peek=1` calls `peekAgentCache()` (safe on every page load); a plain `GET` (no params) still does the real compute-or-cache flow, now only invoked from an explicit button click.
+  - `AgentRecap.tsx` (dashboard) and `app/agent/page.tsx`: both now peek on mount (free) and show a "Run analysis" / "Run today's analysis" button when nothing's cached yet; nothing fetches or computes automatically. Once run, the result is shown with no re-run option — `/agent` explicitly says "Already analyzed today — check back tomorrow."
+  - Dropped the `/agent` page's old "Refresh analysis" button (it called `?refresh=1`, which directly contradicted "capped at once a day"). The underlying `forceRefresh` param on `getAgentAnalysis()`/the route's `?refresh=1` still exists in code (harmless, unused by any UI now) in case a manual override is ever needed via direct API call — not exposed anywhere in the app.
+- Verified `?peek=1` on the dev server: instant `{"data":null}` (no cache row exists yet, since 0005_agent_cache.sql still hasn't been run) with no AI call triggered. `npm run build` passes.
+- **No Task Scheduler changes were made this session** — the user said "let's sort the agents first," so Garmin's 6am/12pm/5pm retiming and the new CronometerSync task are both still pending, to be picked up once the Cronometer localhost/production-URL question is resolved.
+
+**Next agent needs to:**
+- Still need to run `supabase/migrations/0005_agent_cache.sql` before the "once a day" cap and the peek/cache split actually do anything — right now every page load correctly shows "no analysis yet" and every button click computes fresh, since there's nowhere to persist the result.
+- Garmin (`GarminDailySync` scheduled task, currently daily 6am) needs retiming to 6am/12pm/5pm, and a new `CronometerSync` task needs creating at the same three times — both explicitly requested, just sequenced after the agent work and the Cronometer fix the user is bringing separately.
+- Once Cronometer's transport is sorted, decide whether `cronometer_sync.ps1`'s target URL should be localhost (requires a persistent local server) or the Vercel production URL (works unattended regardless of the PC's state) — user has not yet supplied the production URL.
