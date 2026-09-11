@@ -1091,6 +1091,9 @@ td.ing-name { color: var(--text); }
   display: flex;
   flex-direction: column;
 }
+.sidebar-group-children[hidden] {
+  display: none;
+}
 .sidebar-link-child {
   padding-left: 40px;
   font-size: 13px;

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getSupabaseClient } from '@/lib/supabase'
+import { getSupabaseClient, todayStr } from '@/lib/supabase'
 
 interface DailyStat {
   date: string
@@ -61,9 +61,9 @@ function MiniBar({ value, max, color }: { value: number; max: number; color: str
   )
 }
 
-function DayRow({ stat }: { stat: DailyStat }) {
+function DayRow({ stat, label }: { stat: DailyStat; label?: string }) {
   const date = new Date(stat.date + 'T00:00:00')
-  const dayLabel = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+  const dayLabel = label ?? date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 
   return (
     <div className="recovery-day-row">
@@ -104,6 +104,25 @@ export default function RecoveryPage() {
   const [stats, setStats] = useState<DailyStat[]>([])
   const [range, setRange] = useState<Range>(14)
   const [loading, setLoading] = useState(true)
+  const [todayStat, setTodayStat] = useState<DailyStat | null>(null)
+  const [todayChecked, setTodayChecked] = useState(false)
+
+  // Separate from the range query below: last night's sleep score doesn't
+  // exist in Garmin's own system until after you actually wake up, so the
+  // 5am sync never has it — the noon sync is the first real chance. Without
+  // this, the day-by-day list's top row (most recent synced day) can look
+  // like "today" even when it's actually yesterday.
+  useEffect(() => {
+    getSupabaseClient()
+      .from('garmin_daily_stats')
+      .select('date,sleep_score,body_battery_min,body_battery_max,resting_hr,stress_avg')
+      .eq('date', todayStr())
+      .maybeSingle()
+      .then(({ data }) => {
+        setTodayStat((data as DailyStat) ?? null)
+        setTodayChecked(true)
+      })
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -157,6 +176,26 @@ export default function RecoveryPage() {
           ))}
         </div>
       </div>
+
+      {/* Explicit "Today" card, separate from the historical list below —
+          without this, the list's top row (most recent synced day) can
+          look like today when it's actually a day behind. */}
+      {todayChecked && (
+        <div className="card" style={{ padding: '0 20px', marginBottom: 16 }}>
+          {todayStat ? (
+            <DayRow stat={todayStat} label="Today" />
+          ) : (
+            <div style={{ padding: '16px 0' }}>
+              <div style={{ fontFamily: "'Figtree', sans-serif", fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>
+                Today hasn&apos;t synced yet
+              </div>
+              <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 12, color: 'var(--dim)', marginTop: 4, lineHeight: 1.5 }}>
+                Last night&apos;s sleep isn&apos;t in Garmin&apos;s own system until after you wake up, so the 5am sync never has it — the 12pm sync is the first real chance. The most recent day below is the latest one actually synced.
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Summary cards — 2 × 2 at both desktop and mobile */}
       <div className="recovery-summary-grid">
