@@ -23,6 +23,7 @@ yarn-debug.log*
 yarn-error.log*
 garmindb.log
 cronometer-sync.log
+garmin_sync_poller.log
 
 # local env files
 .env*.local

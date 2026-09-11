@@ -11,6 +11,7 @@ import RaceCountdown from '@/components/dashboard/RaceCountdown'
 import RecoveryCard from '@/components/dashboard/RecoveryCard'
 import ActivityIcon, { iconForBlockClass } from '@/components/dashboard/ActivityIcon'
 import AgentRecap from '@/components/dashboard/AgentRecap'
+import GarminSyncButton from '@/components/dashboard/GarminSyncButton'
 
 const WORKOUT_CLASSES = ['bl-gym', 'bl-swim', 'bl-bike', 'bl-run', 'bl-brick', 'bl-soccer']
 const TIMELINE_CLASSES = [...WORKOUT_CLASSES, 'bl-mob', 'bl-wind']
@@ -116,6 +117,7 @@ export default async function DashboardPage() {
           <h2>Dashboard</h2>
           <div className="sub">{getGreeting()}, Matt</div>
         </div>
+        <GarminSyncButton />
       </div>
 
       {/* ── Row 1: race + today's workout, equal columns ── */}
