@@ -36,3 +36,6 @@ garmin_sync_poller.log
 *.tsbuildinfo
 next-env.d.ts
 .claude/
+
+.vercel
+.env*

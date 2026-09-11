@@ -394,3 +394,18 @@ redesign "complete":**
 - The same request-queue pattern (table already has a generic `type` column for this) could cover a manual Cronometer trigger too, if wanted later — not built, not asked for.
 
 **Update (same day):** User ran `0006_sync_requests.sql` and tested the real button live — end-to-end delay was **~42 seconds**, which they confirmed is fine. No poll-interval tuning needed; leave the 1-minute `GarminSyncPoller` trigger as-is unless the user says otherwise later.
+
+---
+
+## 2026-09-10 — Vercel CLI installed + linked; deployed agent keys fixed; dead env vars removed
+**Agent:** Claude
+**Completed:**
+- User hit "ANTHROPIC_API_KEY not found" running the agent — this was expected: `.env.local` is correctly gitignored (never should be in git), but that also means Vercel's deployed build never had it either. Vercel env vars are a separate store from the git repo, set via its own dashboard/CLI, not picked up from `.env.local` at all. User added `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` via the Vercel dashboard and redeployed.
+- Installed the Vercel CLI globally (`npm install -g vercel`, v59.15.1) so future sessions can manage this directly instead of walking the user through the dashboard each time. Logged in (`vercel login`, device-auth flow) and linked (`vercel link --yes --project training-hub`) to the existing project — **`vercel link` without `--project` tried to CREATE a new project using the local folder name ("Training Website HTML"), which failed on Vercel's lowercase-only naming rule; had to `vercel project ls` first to find the real project name (`training-hub`, scope `russodinho-s-projects`) and link explicitly.** `vercel link` also auto-appended `.vercel`/`.env*` lines to `.gitignore` itself (harmless duplicates of what was already there).
+- Verified via `vercel env ls` that `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` are present in Production, and confirmed the deployed `/api/agent/analyze?peek=1` responds correctly (though peek alone doesn't exercise the Claude/OpenAI keys — only an actual "Run analysis" click does that).
+- **Removed 11 dead env vars from Vercel** (`vercel env rm <name> --yes` per var) left over from the retired Google Sheets/Strava integrations: `GOOGLE_SHEET_ID`, `GOOGLE_SERVICE_ACCOUNT_KEY`, all 6 `NEXT_PUBLIC_SHEET_URL_*`, `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, `NEXT_PUBLIC_STRAVA_REDIRECT_URI`. Vercel's CLI itself warned on the two credential-shaped ones: removing them from Vercel does **not** revoke the underlying credential — flagged to the user that the Google service account key and Strava client secret are still live until rotated/revoked at their actual source (Google Cloud Console / Strava app settings), which is outside what I have access to do.
+- Final Vercel env var list is now just the 6 actually in use: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `NEXT_PUBLIC_APP_URL`. No redeploy needed for the removal — the running app never referenced those vars.
+
+**Next agent needs to:**
+- Vercel CLI is now authenticated and linked in this environment (`~/Documents/Training Website HTML` → `russodinho-s-projects/training-hub`) — `vercel env ls/add/rm` and `vercel --prod` are usable directly going forward, no need to walk the user through the dashboard for routine env var changes.
+- If the user wants the Google/Strava credentials fully dead (not just removed from Vercel), that requires them to act at the provider directly — I flagged it, didn't chase it further.
