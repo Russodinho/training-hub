@@ -6,6 +6,7 @@
 
 export interface WorkoutSet {
   week: number
+  date: string // ISO yyyy-mm-dd — the actual session date
   day: string
   session: string
   section: string   // '' | 'Core' | 'Finisher'
@@ -55,8 +56,9 @@ export function uniqueExercises(workouts: WorkoutSet[]): string[] {
   })
 }
 
-// Load progression per exercise across weeks (max load per week)
+// Load progression per exercise across time (max load per date logged)
 export interface LiftPoint {
+  date: string
   week: number
   load: number
   reps_hit: string | null
@@ -66,14 +68,14 @@ export interface LiftPoint {
 
 export function liftProgression(workouts: WorkoutSet[], exerciseName: string): LiftPoint[] {
   const norm = normEx(exerciseName)
-  const byWeek: Record<number, LiftPoint> = {}
+  const byDate: Record<string, LiftPoint> = {}
   for (const w of workouts) {
     if (normEx(w.exercise) !== norm || !w.load) continue
-    if (!byWeek[w.week] || w.load > byWeek[w.week].load) {
-      byWeek[w.week] = { week: w.week, load: w.load, reps_hit: w.reps_hit, rpe: w.rpe, notes: w.notes }
+    if (!byDate[w.date] || w.load > byDate[w.date].load) {
+      byDate[w.date] = { date: w.date, week: w.week, load: w.load, reps_hit: w.reps_hit, rpe: w.rpe, notes: w.notes }
     }
   }
-  return Object.values(byWeek).sort((a, b) => a.week - b.week)
+  return Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date))
 }
 
 // Group workouts by week → day for the session browser

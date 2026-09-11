@@ -221,6 +221,7 @@ export async function getLoggedWorkoutSets(): Promise<import('./workoutsParser')
     for (const s of setsBySession[session.id] || []) {
       out.push({
         week,
+        date: session.date,
         day,
         session: SESSION_LABEL[session.type] ?? session.type,
         section: '',
