@@ -297,6 +297,18 @@ export async function deleteRace(id: string): Promise<void> {
   await getSupabase().from('races').delete().eq('id', id)
 }
 
+// Lets a generated season plan (src/lib/seasonPlan.ts) populate the race's
+// own morning-of timeline/strategy, which Race Day already reads directly
+// — so a generated plan actually shows up there too, not just on the
+// Season Plan page.
+export async function updateRaceTimelineStrategy(
+  id: string,
+  timeline: Race['timeline'],
+  strategy: Race['strategy'],
+): Promise<void> {
+  await getSupabase().from('races').update({ timeline, strategy }).eq('id', id)
+}
+
 // ── Garmin activity helpers (synced via garmin_sync.py → garmin_activities) ──
 
 export async function getRecentGarminActivities(limit = 10): Promise<GarminActivity[]> {
