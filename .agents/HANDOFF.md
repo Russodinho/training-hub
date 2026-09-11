@@ -391,6 +391,6 @@ redesign "complete":**
 - `npm run build` passes.
 
 **Next agent needs to:**
-- **Run `supabase/migrations/0006_sync_requests.sql`** — until then, both the button (via the API route) and the poller will report clean errors instead of actually working.
-- Once verified working end-to-end (click button on a phone, watch it complete), the user wanted to observe the real delay and revisit the 1-minute poll interval if it feels too slow — this was an explicit "let's see and tune later," not a final decision.
 - The same request-queue pattern (table already has a generic `type` column for this) could cover a manual Cronometer trigger too, if wanted later — not built, not asked for.
+
+**Update (same day):** User ran `0006_sync_requests.sql` and tested the real button live — end-to-end delay was **~42 seconds**, which they confirmed is fine. No poll-interval tuning needed; leave the 1-minute `GarminSyncPoller` trigger as-is unless the user says otherwise later.
