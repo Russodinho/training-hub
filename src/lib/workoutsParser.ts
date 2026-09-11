@@ -1,11 +1,8 @@
-// Parses the Fitness Routine - Workouts sheet
-// CSV format: hierarchical, header: false
-// Col 0: "Week N" or Day name (when col 2 = "EXERCISE")
-// Col 1: Session type or section (Core / Finisher)
-// Col 2: Exercise name
-// Col 3: Warm-up sets | Col 4: Warmup % | Col 5: Warmup reps | Col 6: Warmup rest
-// Col 7: Working sets  | Col 8: Target reps | Col 9: Reps hit
-// Col 10: Load (lbs)  | Col 11: RPE | Col 12: Rest | Col 13: Notes
+// WorkoutSet used to be parsed from a hierarchical Google Sheets CSV export;
+// that integration was retired in favor of this app's own Supabase-backed
+// logging (see lib/supabase.ts's getLoggedWorkoutSets). The shape is kept
+// as the common interface between that source and the lift-progression
+// chart / session browser below.
 
 export interface WorkoutSet {
   week: number
@@ -19,81 +16,6 @@ export interface WorkoutSet {
   load: number | null
   rpe: string | null
   notes: string | null
-}
-
-const NON_EXERCISES = ['soccer', 'hot yoga', 'yoga', 'exercise', 'romanian deadlifts']
-
-export function parseWorkoutsCSV(rows: string[][]): WorkoutSet[] {
-  const results: WorkoutSet[] = []
-  let currentDay = ''
-  let currentWeek = 0
-  let currentSession = ''
-  let currentSection = ''
-
-  for (const row of rows) {
-    const c0 = (row[0] ?? '').trim()
-    const c1 = (row[1] ?? '').trim()
-    const c2 = (row[2] ?? '').trim()
-
-    // Day header row
-    if (c2 === 'EXERCISE') {
-      currentDay = c0
-      currentSession = ''
-      currentSection = ''
-      continue
-    }
-
-    if (!c2 && !c0 && !c1) continue
-
-    // Update week
-    if (c0.toLowerCase().startsWith('week')) {
-      const m = c0.match(/\d+/)
-      if (m) currentWeek = parseInt(m[0])
-    }
-
-    // Update session / section
-    if (c1) {
-      if (c1 === 'Core' || c1 === 'Finisher') {
-        currentSection = c1
-      } else if (!c1.startsWith('`')) {
-        currentSession = c1
-        currentSection = ''
-      }
-    }
-
-    if (!c2) continue
-    if (currentWeek === 0 || !currentDay) continue
-
-    // Skip non-exercise rows (row labels / warm-up-only headers)
-    const c2l = c2.toLowerCase()
-    if (NON_EXERCISES.some(s => c2l === s)) continue
-    // Skip row if it says "Day Skipped" in notes and has no load
-    const notes = (row[13] ?? '').trim()
-    const loadStr = (row[10] ?? '').trim()
-    const load = loadStr ? (parseFloat(loadStr) || null) : null
-
-    // Skip warm-up-only entries (no working sets and no load)
-    const workingSets = parseInt(row[7] ?? '') || null
-    const targetReps = (row[8] ?? '').trim() || null
-    const repsHit = (row[9] ?? '').trim() || null
-    if (!workingSets && !load && !repsHit) continue
-
-    results.push({
-      week: currentWeek,
-      day: currentDay,
-      session: currentSession,
-      section: currentSection,
-      exercise: c2,
-      working_sets: workingSets,
-      target_reps: targetReps,
-      reps_hit: repsHit,
-      load,
-      rpe: (row[11] ?? '').trim() || null,
-      notes: notes || null,
-    })
-  }
-
-  return results
 }
 
 // ── Key lifts (shown in chart by default) ──────────────────────────────────

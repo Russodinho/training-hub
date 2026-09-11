@@ -293,7 +293,7 @@ export default function TrainingLogClient({ workouts, byWeekDay, weeks, totalSet
             <div className="empty-state">
               <div className="empty-icon">🏋️</div>
               <div className="empty-title">No workout data found</div>
-              <div>Check that NEXT_PUBLIC_SHEET_URL_WORKOUTS is set and the sheet is published to web.</div>
+              <div>Log a session on the <a href="/log">Workout Log</a> page to see your lift progress here.</div>
             </div>
           ) : (
             <>

@@ -22,60 +22,61 @@ interface DbExercise {
   is_active: boolean
 }
 
-const DAY_WORKOUT: Record<number, string> = { 1: 'upper_a', 3: 'lower_a', 4: 'upper_b', 5: 'lower_b' }
+// Monday=Upper A, Tuesday=Lower A, Thursday=Upper B, Friday=Lower B — matches
+// the actual training schedule (previously this said Wednesday for Lower A).
+const DAY_WORKOUT: Record<number, string> = { 1: 'upper_a', 2: 'lower_a', 4: 'upper_b', 5: 'lower_b' }
 
+// Exercise lists below were reconciled against 19 weeks of real logged
+// history (previously tracked in a Google Sheet, now retired in favor of
+// this app's own Supabase-backed logging) so the day/exercise structure
+// matches what's actually been trained, instead of a divergent guess.
 const PLAN: Record<string, { label: string; sub: string; exercises: Exercise[] }> = {
   upper_a: {
     label: 'Upper A', sub: 'Push + Delts',
     exercises: [
-      { name: 'Incline DB/BB Press',           sets: 4, reps: '8-10',       rpe: '8-9', rest: 90 },
-      { name: 'Flat DB/Machine Press',          sets: 3, reps: '10-12',      rpe: '8-9', rest: 90 },
-      { name: 'Cable Fly (high-to-low)',        sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
+      { name: 'Incline DB or BB Press',        sets: 4, reps: '6-8',        rpe: '8-9', rest: 90 },
+      { name: 'Flat DB or Machine Press',       sets: 3, reps: '6-8',        rpe: '8',   rest: 90 },
+      { name: 'Cable Fly (high-to-low crossover)', sets: 3, reps: '12-15',  rpe: '9',   rest: 45 },
       { name: 'Standing DB OHP',               sets: 3, reps: '8-10',       rpe: '8-9', rest: 90 },
-      { name: 'Lateral Raise',                 sets: 4, reps: '12-15',      rpe: '9',   rest: 45 },
-      { name: 'Reverse Cable Fly',             sets: 3, reps: '15-20',      rpe: '9',   rest: 45 },
+      { name: 'Lateral Raise',                 sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
+      { name: 'Reverse Cable Fly',             sets: 3, reps: '10',         rpe: '9',   rest: 45 },
       { name: 'Cable Triceps Pushdowns',       sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
-      { name: 'Hammer Curls',                  sets: 3, reps: '10-12',      rpe: '8-9', rest: 45 },
-      { name: 'Weighted Cable Crunches',       sets: 4, reps: '15-20',      rpe: '9',   rest: 30, isCore: true },
+      { name: 'Hammer Curls',                  sets: 3, reps: '10',         rpe: '8-9', rest: 45 },
+      { name: 'Weighted Cable Crunches',       sets: 4, reps: '15',         rpe: '9',   rest: 30, isCore: true },
       { name: 'Pallof Press',                  sets: 3, reps: '12-15/side', rpe: '9',   rest: 60, isCore: true },
     ],
   },
   lower_a: {
     label: 'Lower A', sub: 'Quad Dominant',
     exercises: [
-      { name: 'Hack Squat',                         sets: 4, reps: '8-10',       rpe: '8-9', rest: 90 },
-      { name: 'Front Foot Elevated Split Squat',    sets: 3, reps: '10-12/side', rpe: '8-9', rest: 90 },
-      { name: 'Leg Press',                          sets: 3, reps: '10-12',      rpe: '9',   rest: 90 },
+      { name: 'Hack squat (quad)',                  sets: 4, reps: '4-6',        rpe: '8-9', rest: 90 },
+      { name: 'Front foot elevated split squat',    sets: 3, reps: '10/side',    rpe: '8-9', rest: 90 },
+      { name: 'Leg press',                          sets: 3, reps: '10-12',      rpe: '9',   rest: 90 },
       { name: 'Seated Hamstring Curl',              sets: 3, reps: '10-12',      rpe: '9',   rest: 60 },
-      { name: 'Standing Calf Raises',               sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
+      { name: 'Standing calf raises',               sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
     ],
   },
   upper_b: {
     label: 'Upper B', sub: 'Pull + Delts',
     exercises: [
-      { name: 'Pull-Ups / Lat Pulldown',            sets: 4, reps: '8-10',       rpe: '8-9', rest: 90 },
-      { name: 'Chest Supported Row',               sets: 4, reps: '10-12',      rpe: '8-9', rest: 90 },
-      { name: 'Machine Low Row (independent)',     sets: 3, reps: '10-12',      rpe: '8-9', rest: 60 },
+      { name: 'Lat Pulldown',                      sets: 4, reps: '8-10',       rpe: '8-9', rest: 90 },
+      { name: 'Chest Supported Row',               sets: 4, reps: '8-10',       rpe: '8-9', rest: 90 },
+      { name: 'Machine Low Row (single arm)',      sets: 3, reps: '10-12',      rpe: '8-9', rest: 60 },
       { name: 'Reverse Pec Deck',                  sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
-      { name: 'Face Pulls',                         sets: 4, reps: '15-20',      rpe: '8',   rest: 45 },
-      { name: 'Lateral Raise (Pull Day)',           sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
+      { name: 'Face Pulls',                         sets: 3, reps: '15',         rpe: '8',   rest: 45 },
       { name: 'EZ Bar Preacher Curl',              sets: 3, reps: '10-12',      rpe: '8-9', rest: 45 },
-      { name: 'Incline DB Press (Pull Day)',       sets: 3, reps: '10-12',      rpe: '8',   rest: 60 },
-      { name: 'Cable Woodchoppers / Machine Twists', sets: 3, reps: '12-15/side', rpe: '8-9', rest: 30, isCore: true },
-      { name: 'Hanging Leg Raises',                sets: 4, reps: '10-15',      rpe: '9',   rest: 60, isCore: true },
+      { name: 'Rotary Torso',                       sets: 3, reps: '12/side',    rpe: '8-9', rest: 30, isCore: true },
     ],
   },
   lower_b: {
-    label: 'Lower B', sub: 'Glute/Ham',
+    label: 'Lower B', sub: 'Glute Dominant',
     exercises: [
-      { name: 'Romanian Deadlift',                 sets: 4, reps: '8-10',       rpe: '8-9', rest: 90 },
-      { name: 'Lateral Step-Downs (left bias)',    sets: 3, reps: '12-15/side', rpe: '8',   rest: 60 },
+      { name: 'Romanian Deadlift',                 sets: 4, reps: '6-8',        rpe: '8',   rest: 90 },
       { name: 'Belted Hip Thrust',                 sets: 4, reps: '10-12',      rpe: '8-9', rest: 90 },
-      { name: 'Leg Extension',                     sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
-      { name: 'Hip Abduction',                     sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
+      { name: 'Leg Extension',                     sets: 3, reps: '12',         rpe: '9',   rest: 45 },
+      { name: 'Hip Abduction',                     sets: 3, reps: '15',         rpe: '9',   rest: 45 },
       { name: 'Standing Cable Hip Flexor Pull',   sets: 3, reps: '12-15/side', rpe: '8',   rest: 45 },
-      { name: 'Seated Hamstring Curl',             sets: 3, reps: '10-12',      rpe: '9',   rest: 60 },
-      { name: 'Seated Calf Raises',               sets: 3, reps: '15-20',      rpe: '9',   rest: 45 },
+      { name: 'Seated Calf Raises',               sets: 3, reps: '15',         rpe: '7',   rest: 45 },
     ],
   },
 }

@@ -175,6 +175,68 @@ export async function getGarminActivitiesForWeeks(weeksBack = 8): Promise<Garmin
   return data || []
 }
 
+// ── Logged workout sets (from /log's own workout_sessions/workout_sets) ──
+// Adapts them into the same WorkoutSet shape the Google-Sheet-backed
+// training-log Lifts tab used to consume, so that tab can read from this
+// app's own data instead of an external spreadsheet.
+
+const SESSION_LABEL: Record<string, string> = {
+  upper_a: 'Upper A (Push + Delts)',
+  lower_a: 'Lower A (Quad Dominant)',
+  upper_b: 'Upper B (Pull + Delts)',
+  lower_b: 'Lower B (Glute Dominant)',
+}
+
+function isoWeekNumber(dateStr: string): number {
+  const d = new Date(dateStr)
+  d.setHours(0, 0, 0, 0)
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7))
+  const week1 = new Date(d.getFullYear(), 0, 4)
+  return 1 + Math.round(((d.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7)
+}
+
+export async function getLoggedWorkoutSets(): Promise<import('./workoutsParser').WorkoutSet[]> {
+  const sb = getSupabase()
+  const { data: sessions } = await sb.from('workout_sessions')
+    .select('id, date, type, notes')
+    .order('date', { ascending: true })
+  if (!sessions || sessions.length === 0) return []
+
+  const ids = sessions.map((s: { id: string }) => s.id)
+  const { data: sets } = await sb.from('workout_sets')
+    .select('session_id, exercise_name, weight, reps, rpe')
+    .in('session_id', ids)
+
+  const setsBySession: Record<string, { exercise_name: string; weight: number | null; reps: number | null; rpe: number | null }[]> = {}
+  for (const s of sets || []) {
+    const key = (s as { session_id: string }).session_id
+    if (!setsBySession[key]) setsBySession[key] = []
+    setsBySession[key].push(s)
+  }
+
+  const out: import('./workoutsParser').WorkoutSet[] = []
+  for (const session of sessions) {
+    const day = new Date(session.date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' })
+    const week = isoWeekNumber(session.date)
+    for (const s of setsBySession[session.id] || []) {
+      out.push({
+        week,
+        day,
+        session: SESSION_LABEL[session.type] ?? session.type,
+        section: '',
+        exercise: s.exercise_name,
+        working_sets: null,
+        target_reps: null,
+        reps_hit: s.reps != null ? String(s.reps) : null,
+        load: s.weight,
+        rpe: s.rpe != null ? String(s.rpe) : null,
+        notes: session.notes ?? null,
+      })
+    }
+  }
+  return out
+}
+
 // ── Biometrics helpers ──
 
 export interface BiometricEntry {

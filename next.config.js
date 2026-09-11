@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  serverExternalPackages: ['googleapis', 'google-auth-library'],
-
   async redirects() {
     return [
       // Season Plan (replaces Tri Plan + Stretch Goals)
