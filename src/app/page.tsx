@@ -10,6 +10,7 @@ import BodyCompWidget from '@/components/dashboard/BodyCompWidget'
 import RaceCountdown from '@/components/dashboard/RaceCountdown'
 import RecoveryCard from '@/components/dashboard/RecoveryCard'
 import ActivityIcon, { iconForBlockClass } from '@/components/dashboard/ActivityIcon'
+import AgentRecap from '@/components/dashboard/AgentRecap'
 
 const WORKOUT_CLASSES = ['bl-gym', 'bl-swim', 'bl-bike', 'bl-run', 'bl-brick', 'bl-soccer']
 const TIMELINE_CLASSES = [...WORKOUT_CLASSES, 'bl-mob', 'bl-wind']
@@ -269,6 +270,10 @@ export default async function DashboardPage() {
               color: 'var(--muted)', marginTop: 2 }}>streak</div>
           </div>
         </div>
+      </div>
+
+      <div className="chart-card" style={{ marginBottom: 16 }}>
+        <AgentRecap />
       </div>
 
       {/* ── Charts ── */}

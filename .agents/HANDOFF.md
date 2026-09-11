@@ -260,3 +260,22 @@ redesign "complete":**
 **Next agent needs to:**
 - If a next redesign pass touches `/log` or `/training-log`, note the exercise lists in `PLAN` (log/page.tsx) are now the source of truth for Upper A/Lower A/Upper B/Lower B — don't reintroduce the old divergent names.
 - The `exercises` Supabase table (Settings → Exercises) still exists as a supplemental/custom-exercise layer merged into `/log` — not replaced by this change, just additive as before.
+
+---
+
+## 2026-09-10 — Date-based progression chart + AI training agent
+**Agent:** Claude
+**Completed:**
+- `commit a76f7c3` (undocumented until now): `LiftProgressChart.tsx` now plots real dates instead of week numbers, with a 30d/60d/90d/all-time range toggle. `workoutsParser.ts`'s `LiftPoint`/`liftProgression()` group by `w.date` instead of week; `WorkoutSet` gained a `date` field, sourced from `getLoggedWorkoutSets()` in `lib/supabase.ts`.
+- Built the requested AI agent feature: `src/lib/agentAnalysis.ts` is the shared core — reads the last 7 days from `workout_sessions`/`workout_sets` and `garmin_daily_stats` (sleep_score, resting_hr, stress, body battery, steps) via `createServiceClient()`, then calls Claude (`claude-opus-5`, `messages.parse` + `zodOutputFormat`) for a structured `{ overall_status, key_insights[], top_recommendation }`. Added `@anthropic-ai/sdk` + `zod` deps.
+- `src/app/api/agent/analyze/route.ts` — thin `GET` wrapper around `getAgentAnalysis()`, returns the analysis or a `{ error }` JSON on failure (never crashes the route).
+- `src/components/dashboard/AgentRecap.tsx` — small client-side dashboard card, fetches the route on mount, shows the status + top 3 insights, links to the new `/agent` full page. Wired into `src/app/page.tsx` right above the charts row.
+- `src/app/agent/page.tsx` — dedicated full-page view with all insights, the top recommendation, and a manual "Refresh analysis" button.
+- Added a 15-minute in-memory cache inside `agentAnalysis.ts` so repeated dashboard/page loads don't each trigger a fresh (paid) Claude call.
+- **`ANTHROPIC_API_KEY` was not present in `.env.local` — added an empty placeholder line there and to `.env.local.example`.** The user needs to fill in a real key locally *and* add it to Vercel's env vars for this to work in production; until then the route returns a clean `{ error: "ANTHROPIC_API_KEY is not set..." }` (verified via dev server — no crash, dashboard/`/agent` still render 200).
+- Verified `npm run build` passes (21 routes now) and smoke-tested `/`, `/agent`, and `/api/agent/analyze` on the dev server.
+
+**Next agent needs to:**
+- User still needs to add a real `ANTHROPIC_API_KEY` to `.env.local` and to Vercel before the agent recap will show real analysis instead of the "not configured" error.
+- This is intentionally unstyled/functional — the user's plan is to hand this off to Codex for a design pass next (styling only, per CLAUDE.md's role split).
+- No thinking/effort tuning was requested beyond `effort: "low"` (this is a short structured-summary task, not something that benefits from deep reasoning) — revisit if the user wants richer analysis.
