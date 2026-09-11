@@ -1,15 +1,17 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
+import OpenAI from 'openai'
 import { z } from 'zod'
 import { createServiceClient } from './supabase'
 
-const AgentAnalysisSchema = z.object({
-  overall_status: z.string(),
-  key_insights: z.array(z.string()),
-  top_recommendation: z.string(),
+const CoachingAnalysisSchema = z.object({
+  final_recommendation: z.string(),
+  today_action: z.string(),
+  debate_summary: z.string(),
+  confidence: z.number().min(0).max(100),
 })
 
-export type AgentAnalysis = z.infer<typeof AgentAnalysisSchema>
+export type CoachingAnalysis = z.infer<typeof CoachingAnalysisSchema>
 
 interface WorkoutSetRow {
   session_id: string
@@ -19,19 +21,28 @@ interface WorkoutSetRow {
   rpe: string | null
 }
 
-// Cache the last analysis briefly — the dashboard recap and the /agent page
-// both call this, and there's no reason to pay for a fresh Claude call on
-// every page load.
-let cached: { at: number; data: AgentAnalysis } | null = null
-const CACHE_MS = 15 * 60 * 1000
+interface WorkoutSummary {
+  date: string
+  type: string
+  notes: string | null
+  sets: { exercise: string; load: number | null; reps_hit: string | null; rpe: string | null }[]
+}
 
-export async function getAgentAnalysis(): Promise<AgentAnalysis> {
-  if (cached && Date.now() - cached.at < CACHE_MS) return cached.data
+interface DailyStatRow {
+  date: string
+  resting_hr: number | null
+  sleep_score: number | null
+  stress_avg: number | null
+  body_battery_min: number | null
+  body_battery_max: number | null
+  steps: number | null
+}
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY is not set — add it to .env.local (and to Vercel env vars) to enable agent analysis')
-  }
+function todayStr(): string {
+  return new Date().toISOString().split('T')[0]
+}
 
+async function fetchLast7Days(): Promise<{ workouts: WorkoutSummary[]; sleep: DailyStatRow[] }> {
   const sb = createServiceClient()
   const since = new Date()
   since.setDate(since.getDate() - 7)
@@ -59,44 +70,120 @@ export async function getAgentAnalysis(): Promise<AgentAnalysis> {
     setsBySession[s.session_id].push(s)
   }
 
-  const workouts = (sessions ?? []).map((s: { id: string; date: string; type: string; notes: string | null }) => ({
+  const workouts: WorkoutSummary[] = (sessions ?? []).map((s: { id: string; date: string; type: string; notes: string | null }) => ({
     date: s.date,
     type: s.type,
     notes: s.notes,
     sets: (setsBySession[s.id] ?? []).map(x => ({ exercise: x.exercise, load: x.load, reps_hit: x.reps_hit, rpe: x.rpe })),
   }))
 
-  const sleep = dailyStats ?? []
+  return { workouts, sleep: (dailyStats ?? []) as DailyStatRow[] }
+}
 
-  if (workouts.length === 0 && sleep.length === 0) {
-    const empty: AgentAnalysis = {
-      overall_status: 'No data logged in the last 7 days',
-      key_insights: [],
-      top_recommendation: 'Log a workout or run the Garmin sync to get an analysis.',
-    }
-    cached = { at: Date.now(), data: empty }
-    return empty
+async function readCache(date: string): Promise<CoachingAnalysis | null> {
+  const sb = createServiceClient()
+  const { data } = await sb.from('agent_analysis_cache').select('*').eq('date', date).maybeSingle()
+  if (!data) return null
+  return {
+    final_recommendation: data.final_recommendation,
+    today_action: data.today_action,
+    debate_summary: data.debate_summary,
+    confidence: data.confidence,
   }
+}
+
+async function writeCache(date: string, analysis: CoachingAnalysis): Promise<void> {
+  const sb = createServiceClient()
+  await sb.from('agent_analysis_cache').upsert({ date, ...analysis }, { onConflict: 'date' })
+}
+
+// Three-step coaching loop: Claude drafts an analysis, GPT-4 critiques it,
+// Claude refines the draft into the final structured recommendation.
+async function runCoachingLoop(workouts: WorkoutSummary[], sleep: DailyStatRow[]): Promise<CoachingAnalysis> {
+  const dataBlock = `Last 7 days of logged workouts (JSON):\n${JSON.stringify(workouts)}\n\nLast 7 days of Garmin daily recovery/sleep stats (JSON):\n${JSON.stringify(sleep)}`
 
   const anthropic = new Anthropic()
+  const openai = new OpenAI()
 
-  const response = await anthropic.messages.parse({
+  // Step 1 — Claude drafts an initial analysis
+  const draftResponse = await anthropic.messages.create({
     model: 'claude-opus-5',
-    max_tokens: 2048,
-    output_config: {
-      effort: 'low',
-      format: zodOutputFormat(AgentAnalysisSchema),
-    },
-    system: "You are a training analyst for a triathlete who lifts weights and does swim/bike/run endurance training. Review the last 7 days of logged workouts and Garmin recovery/sleep stats and give a concise, actionable summary. Reference specific exercises, loads, or recovery metrics by name where relevant. Do not invent data that isn't present — if a category (e.g. sleep) has no data, say so instead of guessing.",
+    max_tokens: 1024,
+    output_config: { effort: 'medium' },
+    system: "You are a training coach for a triathlete who lifts weights and does swim/bike/run endurance training. Write a concise initial analysis of their last 7 days of workouts and recovery/sleep data: what's going well, what's concerning, and a draft recommendation. This draft will be critiqued by a second reviewer before being finalized, so be specific and cite the data, but flag any uncertainty. Do not invent data that isn't present.",
     messages: [{
       role: 'user',
-      content: `Last 7 days of logged workouts (JSON):\n${JSON.stringify(workouts)}\n\nLast 7 days of Garmin daily recovery/sleep stats (JSON):\n${JSON.stringify(sleep)}\n\nAnalyze training load, recovery trends, and consistency. Respond with overall_status (one sentence), key_insights (3-5 short, specific bullet points), and top_recommendation (one concrete action for the next few days).`,
+      content: `${dataBlock}\n\nProvide your initial analysis and a draft recommendation.`,
+    }],
+  })
+  const draft = draftResponse.content.find(b => b.type === 'text')?.text ?? ''
+
+  // Step 2 — GPT-4 critiques the draft
+  const critique = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    max_tokens: 600,
+    messages: [
+      {
+        role: 'system',
+        content: 'You are a skeptical second-opinion reviewer for an AI training coach. You will be given raw 7-day training/recovery data and a draft analysis + recommendation from another AI coach. Critique the draft directly and concisely: point out anything unsupported by the data, contradictions, missed risks (overtraining, poor recovery, inconsistent logging), or alternative interpretations worth considering.',
+      },
+      {
+        role: 'user',
+        content: `${dataBlock}\n\nDraft analysis from the other coach:\n${draft}\n\nCritique this draft.`,
+      },
+    ],
+  })
+  const critiqueText = critique.choices[0]?.message?.content ?? 'No critique returned.'
+
+  // Step 3 — Claude refines the draft using the critique into the final structured output
+  const finalResponse = await anthropic.messages.parse({
+    model: 'claude-opus-5',
+    max_tokens: 1024,
+    output_config: {
+      effort: 'medium',
+      format: zodOutputFormat(CoachingAnalysisSchema),
+    },
+    system: 'You are the lead coach. You wrote an initial draft analysis of a triathlete\'s last 7 days, and a second reviewer critiqued it. Incorporate valid critique points, disregard invalid ones, and produce the final coaching output.',
+    messages: [{
+      role: 'user',
+      content: `${dataBlock}\n\nYour draft analysis:\n${draft}\n\nSecond reviewer's critique:\n${critiqueText}\n\nProduce the final output: final_recommendation (2-3 sentences, the overall verdict incorporating the critique), today_action (one concrete, specific action for today), debate_summary (1-2 sentences on what the critique caught, confirmed, or changed), and confidence (0-100 — how confident you are given data completeness and agreement between the draft and critique).`,
     }],
   })
 
-  const parsed = response.parsed_output
-  if (!parsed) throw new Error('Claude did not return valid structured output')
-
-  cached = { at: Date.now(), data: parsed }
+  const parsed = finalResponse.parsed_output
+  if (!parsed) throw new Error('Claude did not return valid structured output for the final coaching analysis')
   return parsed
+}
+
+export async function getAgentAnalysis(forceRefresh = false): Promise<CoachingAnalysis> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error('ANTHROPIC_API_KEY is not set — add it to .env.local (and to Vercel env vars) to enable the coaching agent')
+  }
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error('OPENAI_API_KEY is not set — add it to .env.local (and to Vercel env vars) to enable the coaching agent\'s critique step')
+  }
+
+  const date = todayStr()
+
+  if (!forceRefresh) {
+    const cached = await readCache(date)
+    if (cached) return cached
+  }
+
+  const { workouts, sleep } = await fetchLast7Days()
+
+  if (workouts.length === 0 && sleep.length === 0) {
+    const empty: CoachingAnalysis = {
+      final_recommendation: 'No data logged in the last 7 days — nothing to analyze yet.',
+      today_action: 'Log a workout or run the Garmin sync so the coaching agent has something to work with.',
+      debate_summary: 'Skipped — no data to critique.',
+      confidence: 0,
+    }
+    await writeCache(date, empty)
+    return empty
+  }
+
+  const analysis = await runCoachingLoop(workouts, sleep)
+  await writeCache(date, analysis)
+  return analysis
 }

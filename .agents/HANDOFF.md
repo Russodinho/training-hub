@@ -279,3 +279,19 @@ redesign "complete":**
 - User still needs to add a real `ANTHROPIC_API_KEY` to `.env.local` and to Vercel before the agent recap will show real analysis instead of the "not configured" error.
 - This is intentionally unstyled/functional — the user's plan is to hand this off to Codex for a design pass next (styling only, per CLAUDE.md's role split).
 - No thinking/effort tuning was requested beyond `effort: "low"` (this is a short structured-summary task, not something that benefits from deep reasoning) — revisit if the user wants richer analysis.
+
+---
+
+## 2026-09-10 — Coaching agent: 3-step Claude/GPT-4 critique loop + daily Supabase cache
+**Agent:** Claude
+**Completed:**
+- User provided real `ANTHROPIC_API_KEY` and `OPENAI_API_KEY` values directly in chat and asked for the agent to be rebuilt as a 3-step debate loop instead of the single-call version from the previous entry. Both keys were written to `.env.local` (gitignored, never committed) and placeholders added to `.env.local.example`. **Flagged to the user once that pasting live API keys into chat isn't great practice** — up to them whether to rotate.
+- Rewrote `src/lib/agentAnalysis.ts` entirely: response shape changed from `{overall_status, key_insights, top_recommendation}` to `{final_recommendation, today_action, debate_summary, confidence}` per the new spec. Flow is now: Claude drafts an initial analysis (`effort: medium`) → GPT-4o critiques it (`openai` SDK, new dependency) → Claude refines both into the final structured output (`zodOutputFormat`, `effort: medium`). Dropped the old 15-minute in-memory cache in favor of a real daily cache (see below).
+- Added `supabase/migrations/0005_agent_analysis_cache.sql` — new `agent_analysis_cache` table (`date` primary key + the 4 result fields), RLS disabled inline this time since every table in this project comes up RLS-on-no-policy by default. **User has not run this migration yet** — confirmed via a live dev-server test: two consecutive calls to `/api/agent/analyze` both took ~35s (full 3-step loop re-ran each time) instead of the second being instant, meaning the cache read/write is silently no-op-ing against a table that doesn't exist yet. Nothing crashes either way (Supabase JS returns `{data: null, error}` rather than throwing), but caching won't actually save API calls until this migration is run.
+- Updated `AgentRecap.tsx` and `src/app/agent/page.tsx` for the new field names; `/agent` still has manual refresh, now passing `?refresh=1` to bypass the daily cache on demand.
+- Verified end-to-end against the real APIs on the dev server (not just build/type-check) — the loop genuinely works: Claude's draft, GPT-4's critique, and Claude's refined answer correctly caught that the seeded lift sessions (from last session's heaviest-lift migration) have empty `sets` and that the Garmin window doesn't overlap the workout window, and returned a properly hedged `confidence: 35` instead of fabricating a confident verdict.
+
+**Next agent needs to:**
+- **Run `supabase/migrations/0005_agent_analysis_cache.sql`** — without it, every dashboard/`/agent` load re-runs the full Claude+GPT-4 loop (real cost, ~35s latency) instead of hitting the cache once/day.
+- The underlying training/recovery data is currently pretty sparse (seeded lift sessions have no real sets logged day-to-day; Garmin sync hasn't been run recently) — the agent is behaving correctly by hedging, but it'll get much more useful once `/log` is used regularly and Garmin sync runs again.
+- Still unstyled/functional by design — next step is Codex's pass.

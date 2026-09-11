@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import type { AgentAnalysis } from '@/lib/agentAnalysis'
+import type { CoachingAnalysis } from '@/lib/agentAnalysis'
 
 export default function AgentRecap() {
-  const [data, setData] = useState<AgentAnalysis | null>(null)
+  const [data, setData] = useState<CoachingAnalysis | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -15,7 +15,7 @@ export default function AgentRecap() {
       .then(async res => {
         const json = await res.json()
         if (!res.ok) throw new Error(json.error ?? 'Analysis failed')
-        return json as AgentAnalysis
+        return json as CoachingAnalysis
       })
       .then(json => { if (alive) setData(json) })
       .catch((err: Error) => { if (alive) setError(err.message) })
@@ -26,7 +26,7 @@ export default function AgentRecap() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <div className="chart-card-title" style={{ marginBottom: 0 }}>AI training recap</div>
+        <div className="chart-card-title" style={{ marginBottom: 0 }}>AI coaching recap</div>
         <Link href="/agent" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: 'var(--muted)', textDecoration: 'none' }}>
           Full report →
         </Link>
@@ -34,7 +34,7 @@ export default function AgentRecap() {
 
       {loading && (
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
-          Analyzing the last 7 days…
+          Coach is reviewing the last 7 days…
         </div>
       )}
 
@@ -46,16 +46,20 @@ export default function AgentRecap() {
 
       {data && (
         <div>
-          <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-            {data.overall_status}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, marginBottom: 8 }}>
+            <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 14, fontWeight: 600 }}>
+              {data.final_recommendation}
+            </div>
+            <span style={{
+              fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, fontWeight: 600,
+              color: 'var(--accent)', whiteSpace: 'nowrap',
+            }}>
+              {data.confidence}% conf.
+            </span>
           </div>
-          {data.key_insights.length > 0 && (
-            <ul style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: 'var(--muted)' }}>
-              {data.key_insights.slice(0, 3).map((insight, i) => (
-                <li key={i} style={{ marginBottom: 4 }}>{insight}</li>
-              ))}
-            </ul>
-          )}
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)' }}>
+            Today: {data.today_action}
+          </div>
         </div>
       )}
     </div>
