@@ -316,24 +316,29 @@ export interface NutritionDay {
 }
 
 export const NUTRITION_TARGETS: NutritionDay[] = [
-  { day: 'Monday',    activity: 'Upper A + Soccer',   calories: 2290, protein: 200, carbs: 230, fat: 65, notes: 'HIGH — Baseline + rice cakes at lunch' },
-  { day: 'Tuesday',   activity: 'Lower A',            calories: 2100, protein: 200, carbs: 150, fat: 60, notes: 'LOW — Baseline minus banana' },
-  { day: 'Wednesday', activity: 'Swim',               calories: 2100, protein: 195, carbs: 150, fat: 58, notes: 'LOW — Baseline minus banana' },
-  { day: 'Thursday',  activity: 'Upper B + Run',      calories: 2290, protein: 200, carbs: 210, fat: 62, notes: 'HIGH — Baseline + rice cakes at lunch' },
-  { day: 'Friday',    activity: 'Lower B',            calories: 2100, protein: 200, carbs: 150, fat: 60, notes: 'LOW — Baseline minus banana' },
-  { day: 'Saturday',  activity: 'Bike / Surf',        calories: 0,    protein: 0,   carbs: 0,   fat: 0,  notes: 'Breakfast + lunch on plan. One cheat meal (dinner/going out). No tracking cheat meal. No cheat snacking before or after.' },
-  { day: 'Sunday',    activity: 'Rest / Hike / Garden', calories: 2100, protein: 195, carbs: 150, fat: 58, notes: 'LOW — Baseline minus banana. Soccer returns ~Aug 15 — same targets.' },
+  { day: 'Monday',    activity: 'Upper A + Soccer',   calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
+  { day: 'Tuesday',   activity: 'Lower A',            calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
+  { day: 'Wednesday', activity: 'Swim',               calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
+  { day: 'Thursday',  activity: 'Upper B + Run',      calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
+  { day: 'Friday',    activity: 'Lower B',            calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
+  { day: 'Saturday',  activity: 'Bike / Surf',        calories: 0,    protein: 0,   carbs: 0,   fat: 0,  notes: '~1,800 clean through breakfast and lunch + cheat dinner (not tracked)' },
+  { day: 'Sunday',    activity: 'Rest / Hike / Garden', calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
 ]
 
+// Maintenance-calorie approach: real TDEE with full training (soccer 3x/week
+// included) runs ~2,700–2,800, so fixed targets at 2,650 produce a small
+// natural deficit without actively cutting. Cronometer's own fixed targets
+// total 2,565 — the ~85 cal buffer fills naturally from cooking oils,
+// supplements, and rounding.
 export const NUTRITION_BASELINE = {
-  calories: 2130,
-  baseCalories: 2222,
-  protein: 198,
-  carbs: 165,
-  fat: 60,
-  tdee: 2600,
-  deficit: 470,
-  lossPerWeek: 0.9,
-  weight: 198,
+  calories: 2650,
+  baseCalories: 2650,
+  protein: 200,
+  carbs: 250,
+  fat: 85,
+  tdee: 2750,
+  deficit: 100,
+  lossPerWeek: 0.2,
+  weight: 195, // static fallback only — the Fuel page shows live weight from Supabase `biometrics` when available
   goalBf: '14–16%',
 }

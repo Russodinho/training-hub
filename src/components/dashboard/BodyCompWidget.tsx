@@ -33,9 +33,10 @@ export default function BodyCompWidget() {
       sb.from('biometrics').select('date, weight_lbs, body_fat_pct').gte('date', sinceStr),
       sb.from('garmin_daily_stats').select('date, weight_kg').gte('date', sinceStr),
     ]).then(([bio, garmin]) => {
-      // Cronometer (manual upload) is the primary source; fall back to the
-      // Garmin Connect scale sync for any date without a Cronometer entry,
-      // so the automated garmin_sync.py weight data isn't captured for nothing.
+      // Cronometer (auto-synced via scripts/cronometer-sync.ts) is the
+      // primary source; fall back to the Garmin Connect scale sync for any
+      // date without a Cronometer entry, so garmin_sync.py's weight data
+      // isn't captured for nothing.
       const byDate = new Map<string, BiometricRow>()
       for (const row of garmin.data || []) {
         if (!row.weight_kg) continue
@@ -61,7 +62,7 @@ export default function BodyCompWidget() {
       <div className="empty-state" style={{ padding: '32px 16px' }}>
         <div className="empty-icon">⚖️</div>
         <div className="empty-title">No biometric data yet</div>
-        <div>Upload Cronometer biometrics CSV in the <a href="/progress" className="empty-cta" style={{ display: 'inline' }}>Progress page</a>.</div>
+        <div>Weight and body fat % sync automatically from Cronometer — run <code>cronometer-sync.ps1</code> to backfill.</div>
       </div>
     )
   }
