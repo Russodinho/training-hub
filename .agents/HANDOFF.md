@@ -573,4 +573,17 @@ redesign "complete":**
 - Once run, do one real generate-and-reload cycle to confirm the plan persists and Race Day actually picks up the written-back timeline/strategy.
 
 ---
+
+## 2026-09-11 — Handoff to Codex: Injuries body-map overlay
+**Agent:** Claude
+**Completed:**
+- User wants the Injuries page (`src/app/injuries/page.tsx`) to show a body diagram with transparent yellow/red layered highlights over the injured areas, scaled by severity (they referenced a ChatGPT-generated image they liked the look of — layered transparent color regions on top of a body silhouette, presumably via `z-index`ed overlay divs/SVG shapes positioned over a base image).
+- This is entirely Codex's territory per CLAUDE.md (image asset, color/opacity layering, visual styling) — explicitly not building anything here. Per the user's direction, handing this off as-is with no data-model changes on my end.
+- Current data shape Codex has to work with, so no schema change is required to start: each injury (`InjuryCard`/`InjuryRow` in `injuries/page.tsx`) has `location` (free text, e.g. `"Left Achilles tendon · insertion and mid-body"`) and `pain` (a string, currently used as a 0-10-ish scale, e.g. `"2"`). The three built-in injuries (`BUILTIN_INJURIES`, lines ~69-112) are Left Achilles, Right Knee (IT Band), Left Ankle — real, current, non-hypothetical, so a first version could hardcode their approximate body-map coordinates against those three and layer in custom injuries generically (e.g. a labeled pin/list, or a generic "torso/leg/arm" fallback region) since custom injury `location` text isn't structured.
+
+**Next agent needs to:**
+- Codex: build the body-silhouette image/SVG + positioned transparent overlay regions (yellow = mild, red = more severe, keyed off `pain`), sized/positioned for the three built-in injuries at minimum.
+- If mapping free-text `location` to a diagram region turns out to need structure (e.g. a `body_region` enum + x/y coordinates) rather than being feasible to eyeball/hardcode, flag that back — Claude can add that as a data-layer follow-up rather than Codex touching Supabase/TypeScript logic.
+
+---
 - If the user ever wants those deactivated stale entries gone for good rather than just hidden, that's a manual "permanently delete" they'd do themselves — left them deactivated-not-deleted on purpose.
