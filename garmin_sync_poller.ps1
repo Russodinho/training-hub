@@ -6,6 +6,7 @@
 # unless a request is actually pending.
 
 $root       = "C:\Users\mjrus\Documents\Training Website HTML"
+Set-Location $root  # Task Scheduler defaults to C:\Windows\System32 otherwise — see garmin_sync_daily.ps1's header comment
 $envFile    = Join-Path $root ".env.local"
 $syncScript = Join-Path $root "garmin_sync_daily.ps1"
 $logFile    = Join-Path $root "garmin_sync_poller.log"
