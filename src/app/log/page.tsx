@@ -20,6 +20,7 @@ interface DbExercise {
   default_rpe: string | null
   rest_seconds: number | null
   is_active: boolean
+  sort_order: number
 }
 
 // Monday=Upper A, Tuesday=Lower A, Thursday=Upper B, Friday=Lower B — matches
@@ -219,27 +220,31 @@ export default function LogWorkoutPage() {
   useEffect(() => {
     async function fetchCustomExercises() {
       const sb = getSupabaseClient()
-      const { data } = await sb.from('exercises').select('*').eq('is_active', true)
+      const { data } = await sb.from('exercises').select('*').eq('is_active', true).order('sort_order').order('name')
       if (data) setDbExercises(data)
     }
     fetchCustomExercises()
   }, [])
 
+  // Exercises table (Settings -> Exercises) is the source of truth — the
+  // built-in lifts were seeded in there too (scripts/seed-plan-exercises.mjs),
+  // so editing one in Settings changes what shows up here. PLAN's hardcoded
+  // exercises only serve as a fallback if the DB has nothing yet for a
+  // category (e.g. before that seed has run), so this page never shows a
+  // workout with zero exercises.
   const plan = useMemo(() => {
     const base = PLAN[workoutType]
     const categories = CATEGORY_MAP[workoutType] ?? []
-    const builtinNames = new Set(base.exercises.map(e => e.name.toLowerCase()))
-    const extra: Exercise[] = dbExercises
-      .filter(ex => categories.includes(ex.category) && !builtinNames.has(ex.name.toLowerCase()))
-      .map(ex => ({
-        name: ex.name,
-        sets: ex.default_sets ?? 3,
-        reps: ex.default_reps ?? '10-12',
-        rpe: ex.default_rpe ?? '8-9',
-        rest: ex.rest_seconds ?? 60,
-        isCore: ex.category === 'core',
-      }))
-    return extra.length ? { ...base, exercises: [...base.exercises, ...extra] } : base
+    const dbForDay = dbExercises.filter(ex => categories.includes(ex.category))
+    const exercises: Exercise[] = dbForDay.map(ex => ({
+      name: ex.name,
+      sets: ex.default_sets ?? 3,
+      reps: ex.default_reps ?? '10-12',
+      rpe: ex.default_rpe ?? '8-9',
+      rest: ex.rest_seconds ?? 60,
+      isCore: ex.category === 'core',
+    }))
+    return { ...base, exercises: exercises.length ? exercises : base.exercises }
   }, [workoutType, dbExercises])
 
   useEffect(() => {

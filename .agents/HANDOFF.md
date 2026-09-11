@@ -538,3 +538,19 @@ redesign "complete":**
 
 **Next agent needs to:**
 - None outstanding on this batch — all verified via a clean build; the races fix specifically was verified against the real `race_results` row that had been orphaned.
+
+---
+
+## 2026-09-11 — Exercises table is now /log's real source of truth; found and fixed real name-drift data damage in the process
+**Agent:** Claude
+**Completed:**
+- User wanted Settings → Exercises pre-populated with the same exercises `/log` actually uses, and editing one there to actually change the workout log (they weren't the same data before — `/log` used a hardcoded `PLAN` constant; the `exercises` table only ever supplied *additional* exercises layered on top).
+- `scripts/seed-plan-exercises.mjs` (new) inserts `PLAN`'s 28 exercises into `exercises` with the right category mapping, skipping exact-name matches so it's safely re-runnable. `src/app/log/page.tsx`'s `plan` builder now sources exercises **from the DB** (filtered by category, `is_active`, sorted) with `PLAN` only as a same-category fallback if the DB has nothing yet — so Settings edits actually flow through now.
+- **Running the seed surfaced real, pre-existing data damage — not something this session caused, but it would have gotten worse if I'd left it.** The `exercises` table already had ~20 rows added on 2026-09-10 with names that were *close but not identical* to `PLAN`'s (`"Hack Squat"` vs `"Hack squat (quad)"`, `"Incline DB/BB Press"` vs `"Incline DB or BB Press"`, etc.) — apparently pre-dating the exercise-name reconciliation done earlier this session (see the "Retired Google Sheets" entry). My first seed pass inserted `PLAN`'s exact names for the ones that didn't case-insensitive-match, which would have shown near-duplicate rows in both Settings and the actual workout log.
+- **Caught it by checking real `workout_sets.exercise_name` history before trusting either version**: every logged set uses `PLAN`'s exact strings, never the pre-existing alternates — meaning the alternates have zero real usage and, worse, `/log`'s weight-prefill feature (built earlier today) keys off an *exact* string match against history, so leaving the wrong version active would have silently broken that feature per-exercise with no visible error. Fixed in three passes: re-inserted the correct `PLAN`-matching names, deactivated (not deleted — reversible via Settings' own Enable/Disable) the confirmed-unused alternates including two miscategorized ones (`"Incline DB Press (Pull Day)"`, `"Lateral Raise (Pull Day)"` — push movements mistakenly filed under the pull category), and separately fixed 3 pure **case** mismatches (`"Leg Press"` vs. logged `"Leg press"`, etc.) that wouldn't have shown up as visible duplicates but would have broken exact-string matching all the same.
+- Final state verified directly: every category's active exercise list now matches `PLAN` exactly (case included) for anything with real history, plus a handful of genuinely new, never-yet-logged custom additions (kettlebell conditioning work, `"Lateral Step-Downs (left bias)"`, etc.) left untouched since they're real, just unused so far.
+- `npm run build` passes; smoke-tested `/log` and `/settings/exercises` render (200) on the dev server.
+
+**Next agent needs to:**
+- Nothing outstanding — this was fully verified against real logged history, not just a build check, specifically because the failure mode (silent exact-string mismatch) doesn't throw an error or look wrong in the UI.
+- If the user ever wants those deactivated stale entries gone for good rather than just hidden, that's a manual "permanently delete" they'd do themselves — left them deactivated-not-deleted on purpose.
