@@ -245,3 +245,18 @@ redesign "complete":**
 - If Codex does another visual pass, it needs fresh screenshots taken after this commit to be accurate — the ones in `review-2/` predate these fixes and are also gitignored now (regenerate locally, don't rely on git history for them).
 - Work the remaining items above, prioritizing per-route structure (finding #8/#9's table) now that the cross-cutting defects are fixed.
 - `supabase/migrations/0001_manual_logs.sql` was actually run this session (confirmed via direct Supabase queries) along with `0002`/`0003` — the outstanding-migration note in earlier entries is now resolved.
+
+---
+
+## 2026-09-10 — Retired Google Sheets workout tracking
+**Agent:** Claude
+**Completed:**
+- At the user's request: extracted the heaviest-ever load per exercise from the workouts Google Sheet's 19 weeks of real history (independently verified against values the user separately provided — matched exactly), reconciled `/log`'s hardcoded `PLAN` exercise list against that real history (names had drifted, and `DAY_WORKOUT` had Lower A on Wednesday when it's actually Tuesday — fixed), seeded 4 baseline `workout_sessions`/28 `workout_sets` rows with those heaviest loads on their real weekdays, then cut `/training-log`'s Lifts tab over to read `workout_sessions`/`workout_sets` via a new `getLoggedWorkoutSets()` (`lib/supabase.ts`) instead of the Google Sheet.
+- **Found a significant pre-existing bug** (not introduced this session): `workout_sessions`/`workout_sets` also had RLS enabled with no policy — same root cause as the garmin_* tables earlier. This means `/log`'s "Save Workout" had likely never actually persisted anything via the deployed app until `supabase/migrations/0004_disable_workout_rls.sql` was run.
+- Removed the now fully-dead Google Sheets integration: `lib/sheets.ts`, `lib/sheets-server.ts`, `/api/sheets/write`, `parseWorkoutsCSV`, the `googleapis`/`google-auth-library` deps, and the sheet env vars from `.env.local.example`. Nothing in the app reads a Google Sheet anymore.
+- The actual Google Sheet itself (real spreadsheet, 19 weeks of history) was **not** touched/deleted — the app just stopped reading it. It's safe to archive whenever the user wants.
+- Verified end-to-end on the dev server: `/training-log` renders all 28 seeded lifts grouped correctly by week/day, `npm run build` passes (19 routes, one fewer than before since `/api/sheets/write` is gone).
+
+**Next agent needs to:**
+- If a next redesign pass touches `/log` or `/training-log`, note the exercise lists in `PLAN` (log/page.tsx) are now the source of truth for Upper A/Lower A/Upper B/Lower B — don't reintroduce the old divergent names.
+- The `exercises` Supabase table (Settings → Exercises) still exists as a supplemental/custom-exercise layer merged into `/log` — not replaced by this change, just additive as before.
