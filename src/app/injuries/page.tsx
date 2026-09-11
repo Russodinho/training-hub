@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import InjuryBodyMap from '@/components/InjuryBodyMap'
 import { getSupabaseClient, migrateLocalStorage } from '@/lib/supabase'
 
 interface InjuryUpdate {
@@ -258,7 +259,7 @@ export default function InjuriesPage() {
     const form = updateForms[inj.key] || { note: '', status: currentStatus, pain: '', date: '' }
 
     return (
-      <div key={inj.key} className="inj-card">
+      <div key={inj.key} id={`injury-${inj.key}`} className="inj-card">
         <div className="inj-header">
           <span className={`inj-badge ${STATUS_CLS[currentStatus] || 'inj-monitoring'}`}>{currentStatus}</span>
           <span className="inj-name">{inj.name}</span>
@@ -358,6 +359,8 @@ export default function InjuriesPage() {
           {archivedInjuries.length} archived
         </div>
       </div>
+
+      <InjuryBodyMap injuries={activeInjuries.map(inj => ({ ...inj, pain: updates[inj.key]?.length ? updates[inj.key][0].pain : inj.pain }))} />
 
       <div className="inj-grid">
         {activeInjuries.map(renderCard)}

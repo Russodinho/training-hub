@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1050" height="820" viewBox="0 0 1050 820">
+<rect width="1050" height="820" fill="#091319"/>
+<style>text{font-family:Arial,sans-serif;fill:#f3f7fa;font-size:15px}.muted{fill:#afbec8;font-size:12px}.accent{fill:#28e5dc}.title{font-size:24px;font-weight:bold}</style>
+<text x="32" y="40" class="title">Training Hub · navigation proposal</text><text x="32" y="66" class="muted">Grouped desktop sidebar + mobile section menu · existing routes preserved</text>
+<rect x="32" y="90" width="224" height="696" rx="10" fill="#14232d" stroke="#304653"/>
+<text x="52" y="125" font-weight="bold">Training Hub <tspan class="accent">2026</tspan></text>
+<text x="52" y="176">⌂  Home</text><text x="52" y="220">Coaches</text>
+<text x="52" y="276">Plan</text><text x="224" y="276">›</text>
+<text x="52" y="320">Train</text><text x="224" y="320">›</text>
+<text x="52" y="364" class="accent">Recover</text><text x="224" y="364" class="accent">⌄</text>
+<path d="M62 385V585" stroke="#304653"/>
+<text x="78" y="408">Overview</text>
+<rect x="72" y="423" width="172" height="40" rx="8" fill="#19494f"/><text x="84" y="449" class="accent">Injuries</text>
+<text x="78" y="496">Mobility</text><text x="78" y="540">Wind-Down</text><text x="78" y="584">Sleep</text>
+<text x="52" y="634">Fuel</text><path d="M52 677H236" stroke="#304653"/><text x="52" y="712" class="muted">Exercise Library</text><text x="52" y="755" class="accent">Next race · 2 days</text>
+<text x="284" y="125" class="title">Injuries</text><text x="284" y="153" class="muted">Recover / Injuries</text>
+<rect x="284" y="177" width="318" height="180" rx="10" fill="#14232d" stroke="#304653"/>
+<text x="304" y="211">Your body at a glance</text><text x="304" y="244" class="muted">Body map + current pain summary</text><text x="304" y="324" class="accent">View injury details →</text>
+<text x="284" y="403">Desktop behavior</text><text x="284" y="433" class="muted">Current section opens on deep links.</text><text x="284" y="458" class="muted">One nesting level. 44px navigation rows.</text><text x="284" y="483" class="muted">Home and Coaches stay directly visible.</text>
+<rect x="634" y="90" width="384" height="696" rx="20" fill="#091319" stroke="#48616e"/>
+<text x="654" y="125" font-weight="bold">Training Hub</text><text x="946" y="125" class="accent">Menu</text>
+<path d="M634 144H1018" stroke="#304653"/>
+<rect x="654" y="162" width="218" height="44" rx="9" fill="#1b2d38"/><text x="668" y="190">Recover / Injuries  ⌄</text>
+<text x="654" y="248" class="title">Injuries</text><text x="654" y="277" class="muted">Active · monitoring · recovery log</text>
+<rect x="644" y="318" width="364" height="389" rx="16" fill="#1b2d38" stroke="#48616e"/>
+<text x="664" y="351" font-weight="bold">Recover</text><text x="943" y="351" class="muted">Close</text>
+<text x="670" y="402">Overview</text>
+<rect x="658" y="422" width="336" height="48" rx="8" fill="#19494f"/><text x="670" y="451" class="accent">Injuries                                      ✓</text>
+<text x="670" y="505">Mobility</text><text x="670" y="557">Wind-Down</text><text x="670" y="609">Sleep</text><text x="670" y="672" class="muted">Section menu · all siblings visible</text>
+<path d="M634 723H1018" stroke="#304653"/><text x="653" y="758" class="muted">Home</text><text x="723" y="758" class="muted">Plan</text><text x="786" y="758" class="muted">Train</text><text x="856" y="758" class="accent">Recover</text><text x="956" y="758" class="muted">Fuel</text>
+</svg>

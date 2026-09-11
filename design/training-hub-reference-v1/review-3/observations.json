@@ -1,0 +1,2496 @@
+[
+  {
+    "url": "/",
+    "width": 1100,
+    "scrollWidth": 1085,
+    "bodyWidth": 1085,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Dashboard",
+        "x": 208,
+        "y": 24,
+        "w": 137,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [
+      {
+        "tag": "g",
+        "cls": "recharts-layer recharts-line",
+        "text": "",
+        "x": 1528,
+        "y": 1761,
+        "w": 99,
+        "h": 15,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "path",
+        "cls": "recharts-curve recharts-line-curve",
+        "text": "",
+        "x": 1528,
+        "y": 1761,
+        "w": 99,
+        "h": 15,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "g",
+        "cls": "recharts-layer recharts-line",
+        "text": "",
+        "x": 1528,
+        "y": 1764,
+        "w": 99,
+        "h": 12,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "path",
+        "cls": "recharts-curve recharts-line-curve",
+        "text": "",
+        "x": 1528,
+        "y": 1764,
+        "w": 99,
+        "h": 12,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "g",
+        "cls": "recharts-layer recharts-line",
+        "text": "",
+        "x": 1528,
+        "y": 1761,
+        "w": 99,
+        "h": 15,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "path",
+        "cls": "recharts-curve recharts-line-curve",
+        "text": "",
+        "x": 1528,
+        "y": 1761,
+        "w": 99,
+        "h": 15,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "g",
+        "cls": "recharts-layer recharts-line",
+        "text": "",
+        "x": 1528,
+        "y": 1771,
+        "w": 99,
+        "h": 5,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "path",
+        "cls": "recharts-curve recharts-line-curve",
+        "text": "",
+        "x": 1528,
+        "y": 1771,
+        "w": 99,
+        "h": 5,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "tabs": [],
+    "images": [],
+    "bodyText": "Training Hub 2026\nDashboard\nRace Calendar\nSeason Plan\nWorkout Log\nTraining Log\nCardio\nFuel\nMobility\nSleep Protocol\nRecovery\nWind-Down\nInjuries\nRace Day\nExercises\nWarrington Sprint Tri\n2\ndays\nDashboard\nGood afternoon, Matt\nSync Garmin now\nNEXT RACE\nWarrington Sprint Tri\nSep 13, 2026 · 3:00 AM · Warrington, PA\n01\nDAYS\n12\nHRS\n03\nMIN\n18\nSEC\nRace plan →\nToday's Workout\nGym · Lower B\n5:00–5:45\n›\n▶ Start Workout\nToday's Timeline\nFriday · WFH · Guitar or Climb\nGym · Lower B\n5:00–5:45\nMobility · full routine\n5:45–6:00\nWind-down stretch\n~10 min before bed\nOpen mobility\nWind-down\nLog sleep\nRecovery\nNo recovery data for today yet\nSyncs at 5am and 12pm, or use the dashboard's sync button\nView full recove",
+    "viewport": {
+      "width": 1100,
+      "height": 900
+    }
+  },
+  {
+    "url": "/injuries",
+    "width": 1100,
+    "scrollWidth": 1085,
+    "bodyWidth": 1085,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Injuries",
+        "x": 208,
+        "y": 24,
+        "w": 207,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "H3",
+        "cls": "",
+        "text": "Your body at a glance",
+        "x": 567,
+        "y": 163,
+        "w": 475,
+        "h": 35,
+        "font": "Figtree, sans-serif",
+        "size": "23px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [],
+    "images": [],
+    "bodyText": "Training Hub 2026\nDashboard\nRace Calendar\nSeason Plan\nWorkout Log\nTraining Log\nCardio\nFuel\nMobility\nSleep Protocol\nRecovery\nWind-Down\nInjuries\nRace Day\nExercises\nWarrington Sprint Tri\n2\ndays\nInjuries\nActive · monitoring · recovery log\n3 active\n0 archived\nR\nL\n1\n2\n3\nRECOVERY / INJURIES\nYour body at a glance\n\nReported pain across 3 tracked injuries.\n\n1\nLeft Achilles\nRear tendon · projected on front view\n2\n/10\n2\nRight Knee (IT Band)\nRight knee · lateral aspect · IT band insertion\n1\n/10\n3\nLeft Ankle\nLeft ankle · lateral ligaments\n1\n/10\n🟡 1–3\n🟠 4–6\n🔴 7–10\n0 = no pain\n\nColor reflects your reported pain, not tissue damage. Highlights show approximate areas; overlapping ankle and tendon regions ha",
+    "viewport": {
+      "width": 1100,
+      "height": 900
+    }
+  },
+  {
+    "url": "/agent",
+    "width": 1100,
+    "scrollWidth": 1085,
+    "bodyWidth": 1085,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H1",
+        "cls": "",
+        "text": "Training Agent",
+        "x": 208,
+        "y": 24,
+        "w": 722,
+        "h": 24,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Good afternoon, Matt",
+        "x": 227,
+        "y": 131,
+        "w": 247,
+        "h": 24,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [],
+    "images": [],
+    "bodyText": "Training Hub 2026\nDashboard\nRace Calendar\nSeason Plan\nWorkout Log\nTraining Log\nCardio\nFuel\nMobility\nSleep Protocol\nRecovery\nWind-Down\nInjuries\nRace Day\nExercises\nWarrington Sprint Tri\n2\ndays\nTraining Agent\n12 coaches, each fed the same live data — Claude drafts, GPT-4 critiques, Claude refines. Once per day, per coach.\nGood afternoon, Matt\n\nFriday · Gym · Lower B\n\nTAPER PHASE · SOCCER SEASON ACTIVE\n\n2\ndays to\nWarrington Sprint Tri\n83\nSleep score\n89\nBody Battery\n55 bpm\nRHR\n194.8 lbs\nWeight\n0/6 sessions\nWeek\nLast race: Steelman Racing Triathlon · no result recorded\n▶ Run daily check-in\n0/12 done today\nRacing\n🏆\nRace Day Coach\n\nWaiting to run\n\nTriathlon\n🏊\nSwim Coach\n\nWaiting to run\n\n🚴\nBike Co",
+    "viewport": {
+      "width": 1100,
+      "height": 900
+    }
+  },
+  {
+    "url": "/season-plan",
+    "width": 1100,
+    "scrollWidth": 1100,
+    "bodyWidth": 1100,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Season Plan",
+        "x": 208,
+        "y": 24,
+        "w": 451,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "BUTTON",
+        "cls": "mh-tab-btn active",
+        "text": "Tri Plan",
+        "x": 214,
+        "y": 127,
+        "w": 182,
+        "h": 34,
+        "font": "Figtree, sans-serif",
+        "size": "12px",
+        "bg": "rgb(34, 52, 63)"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "mh-tab-btn",
+        "text": "Stretch Goals",
+        "x": 400,
+        "y": 127,
+        "w": 182,
+        "h": 34,
+        "font": "Figtree, sans-serif",
+        "size": "12px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\nDashboard\nRace Calendar\nSeason Plan\nWorkout Log\nTraining Log\nCardio\nFuel\nMobility\nSleep Protocol\nRecovery\nWind-Down\nInjuries\nRace Day\nExercises\nWarrington Sprint Tri\n2\ndays\nSeason Plan\nTraining plan · stretch goals — built by the tri coaches for your next race\nTri Plan\nStretch Goals\nChecking…\nBuilt with Next.js · Data from Garmin, Google Sheets, Cronometer",
+    "viewport": {
+      "width": 1100,
+      "height": 900
+    }
+  },
+  {
+    "url": "/",
+    "width": 390,
+    "scrollWidth": 375,
+    "bodyWidth": 375,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Dashboard",
+        "x": 20,
+        "y": 72,
+        "w": 137,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "A",
+        "cls": "mobile-tab active",
+        "text": "Home",
+        "x": 4,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Plan",
+        "x": 77,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Train",
+        "x": 151,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Recover",
+        "x": 224,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Fuel",
+        "x": 298,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\n2\nd\nHome\nPlan\nTrain\nRecover\nFuel\nDashboard\nGood afternoon, Matt\nSync Garmin now\nNEXT RACE\nWarrington Sprint Tri\nSep 13, 2026 · 3:00 AM · Warrington, PA\n01\nDAYS\n12\nHRS\n03\nMIN\n08\nSEC\nRace plan →\nToday's Workout\nGym · Lower B\n5:00–5:45\n›\n▶ Start Workout\nToday's Timeline\nFriday · WFH · Guitar or Climb\nGym · Lower B\n5:00–5:45\nMobility · full routine\n5:45–6:00\nWind-down stretch\n~10 min before bed\nOpen mobility\nWind-down\nLog sleep\nRecovery\nNo recovery data for today yet\nSyncs at 5am and 12pm, or use the dashboard's sync button\nView full recovery →\nWeekly Progress\n0\n/ 5 workouts\nM\nT\nW\nT\nF\nS\nS\nTraining week\n—\nOff-season\nMobility\n—\nstreak\nTraining snapshot\nFull coaching report →\nGym ",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  {
+    "url": "/injuries",
+    "width": 390,
+    "scrollWidth": 375,
+    "bodyWidth": 375,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Injuries",
+        "x": 20,
+        "y": 114,
+        "w": 207,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "H3",
+        "cls": "",
+        "text": "Your body at a glance",
+        "x": 39,
+        "y": 580,
+        "w": 297,
+        "h": 32,
+        "font": "Figtree, sans-serif",
+        "size": "21px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Home",
+        "x": 4,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Plan",
+        "x": 77,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Train",
+        "x": 151,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab active",
+        "text": "Recover",
+        "x": 224,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Fuel",
+        "x": 298,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\n2\nd\nHome\nPlan\nTrain\nRecover\nFuel\nRecover pages\n▼\nInjuries\nActive · monitoring · recovery log\n3 active\n0 archived\nR\nL\n1\n2\n3\nRECOVERY / INJURIES\nYour body at a glance\n\nReported pain across 3 tracked injuries.\n\n1\nLeft Achilles\nRear tendon · projected on front view\n2\n/10\n2\nRight Knee (IT Band)\nRight knee · lateral aspect · IT band insertion\n1\n/10\n3\nLeft Ankle\nLeft ankle · lateral ligaments\n1\n/10\n🟡 1–3\n🟠 4–6\n🔴 7–10\n0 = no pain\n\nColor reflects your reported pain, not tissue damage. Highlights show approximate areas; overlapping ankle and tendon regions have separate labels.\n\nmonitoring\nLeft Achilles\nPain: 2/10\n✕\nSINCE\n2024-09-01\nLOCATION\nLeft Achilles tendon · insertion and mi",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  {
+    "url": "/agent",
+    "width": 390,
+    "scrollWidth": 375,
+    "bodyWidth": 375,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H1",
+        "cls": "",
+        "text": "Training Agent",
+        "x": 20,
+        "y": 72,
+        "w": 335,
+        "h": 24,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Good afternoon, Matt",
+        "x": 39,
+        "y": 221,
+        "w": 247,
+        "h": 24,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Home",
+        "x": 4,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Plan",
+        "x": 77,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Train",
+        "x": 151,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Recover",
+        "x": 224,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Fuel",
+        "x": 298,
+        "y": 781,
+        "w": 73,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\n2\nd\nHome\nPlan\nTrain\nRecover\nFuel\nTraining Agent\n12 coaches, each fed the same live data — Claude drafts, GPT-4 critiques, Claude refines. Once per day, per coach.\nGood afternoon, Matt\n\nFriday · Gym · Lower B\n\nTAPER PHASE · SOCCER SEASON ACTIVE\n\n2\ndays to\nWarrington Sprint Tri\n83\nSleep score\n89\nBody Battery\n55 bpm\nRHR\n194.8 lbs\nWeight\n0/6 sessions\nWeek\nLast race: Steelman Racing Triathlon · no result recorded\n▶ Run daily check-in\n0/12 done today\nRacing\n🏆\nRace Day Coach\n\nWaiting to run\n\nTriathlon\n🏊\nSwim Coach\n\nWaiting to run\n\n🚴\nBike Coach\n\nWaiting to run\n\n🏃\nRun Coach\n\nWaiting to run\n\nTraining\n🏋️\nStrength Coach\n\nWaiting to run\n\n🧘\nRecovery Coach\n\nWaiting to run\n\n⚽\nSoccer ",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  {
+    "url": "/season-plan",
+    "width": 390,
+    "scrollWidth": 390,
+    "bodyWidth": 390,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Season Plan",
+        "x": 20,
+        "y": 114,
+        "w": 350,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Home",
+        "x": 4,
+        "y": 781,
+        "w": 76,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab active",
+        "text": "Plan",
+        "x": 80,
+        "y": 781,
+        "w": 76,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Train",
+        "x": 157,
+        "y": 781,
+        "w": 76,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Recover",
+        "x": 233,
+        "y": 781,
+        "w": 76,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Fuel",
+        "x": 310,
+        "y": 781,
+        "w": 76,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "mh-tab-btn active",
+        "text": "Tri Plan",
+        "x": 26,
+        "y": 303,
+        "w": 167,
+        "h": 34,
+        "font": "Figtree, sans-serif",
+        "size": "12px",
+        "bg": "rgb(34, 52, 63)"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "mh-tab-btn",
+        "text": "Stretch Goals",
+        "x": 197,
+        "y": 303,
+        "w": 167,
+        "h": 34,
+        "font": "Figtree, sans-serif",
+        "size": "12px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\n2\nd\nHome\nPlan\nTrain\nRecover\nFuel\nPlan pages\n▼\nSeason Plan\nTraining plan · stretch goals — built by the tri coaches for your next race\nWarrington in\n2 days\nTri Plan\nStretch Goals\nNo training plan generated yet for Warrington Sprint Tri (tri, 300m swim / 10 mi bike / 5K run).\n▶ Generate training plan\nBuilt with Next.js · Data from Garmin, Google Sheets, Cronometer",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    }
+  },
+  {
+    "url": "/",
+    "width": 320,
+    "scrollWidth": 305,
+    "bodyWidth": 305,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Dashboard",
+        "x": 16,
+        "y": 72,
+        "w": 137,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "A",
+        "cls": "mobile-tab active",
+        "text": "Home",
+        "x": 4,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Plan",
+        "x": 63,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Train",
+        "x": 123,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Recover",
+        "x": 182,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Fuel",
+        "x": 242,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\n2\nd\nHome\nPlan\nTrain\nRecover\nFuel\nDashboard\nGood afternoon, Matt\nSync Garmin now\nNEXT RACE\nWarrington Sprint Tri\nSep 13, 2026 · 3:00 AM · Warrington, PA\n01\nDAYS\n12\nHRS\n03\nMIN\n02\nSEC\nRace plan →\nToday's Workout\nGym · Lower B\n5:00–5:45\n›\n▶ Start Workout\nToday's Timeline\nFriday · WFH · Guitar or Climb\nGym · Lower B\n5:00–5:45\nMobility · full routine\n5:45–6:00\nWind-down stretch\n~10 min before bed\nOpen mobility\nWind-down\nLog sleep\nRecovery\nNo recovery data for today yet\nSyncs at 5am and 12pm, or use the dashboard's sync button\nView full recovery →\nWeekly Progress\n0\n/ 5 workouts\nM\nT\nW\nT\nF\nS\nS\nTraining week\n—\nOff-season\nMobility\n—\nstreak\nTraining snapshot\nFull coaching report →\nGym ",
+    "viewport": {
+      "width": 320,
+      "height": 800
+    }
+  },
+  {
+    "url": "/injuries",
+    "width": 320,
+    "scrollWidth": 305,
+    "bodyWidth": 305,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Injuries",
+        "x": 16,
+        "y": 114,
+        "w": 207,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "H3",
+        "cls": "",
+        "text": "Your body at a glance",
+        "x": 35,
+        "y": 630,
+        "w": 235,
+        "h": 32,
+        "font": "Figtree, sans-serif",
+        "size": "21px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Home",
+        "x": 4,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Plan",
+        "x": 63,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Train",
+        "x": 123,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab active",
+        "text": "Recover",
+        "x": 182,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Fuel",
+        "x": 242,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\n2\nd\nHome\nPlan\nTrain\nRecover\nFuel\nRecover pages\n▼\nInjuries\nActive · monitoring · recovery log\n3 active\n0 archived\nR\nL\n1\n2\n3\nRECOVERY / INJURIES\nYour body at a glance\n\nReported pain across 3 tracked injuries.\n\n1\nLeft Achilles\nRear tendon · projected on front view\n2\n/10\n2\nRight Knee (IT Band)\nRight knee · lateral aspect · IT band insertion\n1\n/10\n3\nLeft Ankle\nLeft ankle · lateral ligaments\n1\n/10\n🟡 1–3\n🟠 4–6\n🔴 7–10\n0 = no pain\n\nColor reflects your reported pain, not tissue damage. Highlights show approximate areas; overlapping ankle and tendon regions have separate labels.\n\nmonitoring\nLeft Achilles\nPain: 2/10\n✕\nSINCE\n2024-09-01\nLOCATION\nLeft Achilles tendon · insertion and mi",
+    "viewport": {
+      "width": 320,
+      "height": 800
+    }
+  },
+  {
+    "url": "/agent",
+    "width": 320,
+    "scrollWidth": 305,
+    "bodyWidth": 305,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H1",
+        "cls": "",
+        "text": "Training Agent",
+        "x": 16,
+        "y": 72,
+        "w": 273,
+        "h": 24,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Good afternoon, Matt",
+        "x": 35,
+        "y": 221,
+        "w": 235,
+        "h": 24,
+        "font": "Figtree, sans-serif",
+        "size": "16px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Home",
+        "x": 4,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Plan",
+        "x": 63,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Train",
+        "x": 123,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Recover",
+        "x": 182,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Fuel",
+        "x": 242,
+        "y": 737,
+        "w": 59,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\n2\nd\nHome\nPlan\nTrain\nRecover\nFuel\nTraining Agent\n12 coaches, each fed the same live data — Claude drafts, GPT-4 critiques, Claude refines. Once per day, per coach.\nGood afternoon, Matt\n\nFriday · Gym · Lower B\n\nTAPER PHASE · SOCCER SEASON ACTIVE\n\n2\ndays to\nWarrington Sprint Tri\n83\nSleep score\n89\nBody Battery\n55 bpm\nRHR\n194.8 lbs\nWeight\n0/6 sessions\nWeek\nLast race: Steelman Racing Triathlon · no result recorded\n▶ Run daily check-in\n0/12 done today\nRacing\n🏆\nRace Day Coach\n\nWaiting to run\n\nTriathlon\n🏊\nSwim Coach\n\nWaiting to run\n\n🚴\nBike Coach\n\nWaiting to run\n\n🏃\nRun Coach\n\nWaiting to run\n\nTraining\n🏋️\nStrength Coach\n\nWaiting to run\n\n🧘\nRecovery Coach\n\nWaiting to run\n\n⚽\nSoccer ",
+    "viewport": {
+      "width": 320,
+      "height": 800
+    }
+  },
+  {
+    "url": "/season-plan",
+    "width": 320,
+    "scrollWidth": 320,
+    "bodyWidth": 320,
+    "title": "Training Hub · 2026",
+    "fonts": [
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "unloaded"
+      },
+      {
+        "family": "Figtree",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "IBM Plex Mono",
+        "status": "loaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist",
+        "status": "unloaded"
+      },
+      {
+        "family": "__nextjs-Geist Mono",
+        "status": "unloaded"
+      }
+    ],
+    "headings": [
+      {
+        "tag": "H2",
+        "cls": "",
+        "text": "Season Plan",
+        "x": 16,
+        "y": 114,
+        "w": 288,
+        "h": 31,
+        "font": "Figtree, sans-serif",
+        "size": "26px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "overflow": [],
+    "tabs": [
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Home",
+        "x": 4,
+        "y": 737,
+        "w": 62,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab active",
+        "text": "Plan",
+        "x": 66,
+        "y": 737,
+        "w": 62,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Train",
+        "x": 129,
+        "y": 737,
+        "w": 62,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Recover",
+        "x": 191,
+        "y": 737,
+        "w": 62,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "A",
+        "cls": "mobile-tab",
+        "text": "Fuel",
+        "x": 254,
+        "y": 737,
+        "w": 62,
+        "h": 63,
+        "font": "Figtree, sans-serif",
+        "size": "11px",
+        "bg": "rgba(0, 0, 0, 0)"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "mh-tab-btn active",
+        "text": "Tri Plan",
+        "x": 22,
+        "y": 303,
+        "w": 136,
+        "h": 34,
+        "font": "Figtree, sans-serif",
+        "size": "12px",
+        "bg": "rgb(34, 52, 63)"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "mh-tab-btn",
+        "text": "Stretch Goals",
+        "x": 162,
+        "y": 303,
+        "w": 136,
+        "h": 34,
+        "font": "Figtree, sans-serif",
+        "size": "12px",
+        "bg": "rgba(0, 0, 0, 0)"
+      }
+    ],
+    "images": [],
+    "bodyText": "Training Hub 2026\n2\nd\nHome\nPlan\nTrain\nRecover\nFuel\nPlan pages\n▼\nSeason Plan\nTraining plan · stretch goals — built by the tri coaches for your next race\nWarrington in\n2 days\nTri Plan\nStretch Goals\nNo training plan generated yet for Warrington Sprint Tri (tri, 300m swim / 10 mi bike / 5K run).\n▶ Generate training plan\nBuilt with Next.js · Data from Garmin, Google Sheets, Cronometer",
+    "viewport": {
+      "width": 320,
+      "height": 800
+    }
+  }
+]

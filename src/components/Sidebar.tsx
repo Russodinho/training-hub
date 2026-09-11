@@ -2,9 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { getActiveRace } from '@/lib/supabase'
-import { NAV_ITEMS, MOBILE_TABS, linkActive, tabActive } from './navConfig'
+import {
+  DESKTOP_NAV, UTILITY_NAV, MOBILE_TABS,
+  linkActive, tabActive, groupActive, groupForPath,
+} from './navConfig'
+import { useOverlay } from './useOverlay'
 
 // ── Icons (16×16, stroke-based) ────────────────────────────────────────────
 function Icon({ d, vb = '0 0 16 16' }: { d: string; vb?: string }) {
@@ -19,6 +23,13 @@ function Icon({ d, vb = '0 0 16 16' }: { d: string; vb?: string }) {
 
 const ICONS: Record<string, React.ReactNode> = {
   '/': <Icon d="M2 6.5 8 2l6 4.5V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />,
+  '/agent': (
+    <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+      strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+      <path d="M2 3.5h12a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H6.5L3.5 14v-2.5H2a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1z" />
+      <path d="M5 7h6M5 9h3.5" />
+    </svg>
+  ),
   '/race-calendar': (
     <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor"
       strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
@@ -104,6 +115,23 @@ const ICONS: Record<string, React.ReactNode> = {
   ),
 }
 
+// Representative icon for each collapsible desktop group's toggle button.
+const GROUP_ICONS: Record<string, React.ReactNode> = {
+  plan: ICONS['/race-calendar'],
+  train: ICONS['/log'],
+  recover: ICONS['/recovery'],
+}
+
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="currentColor"
+      strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"
+      style={{ flexShrink: 0, marginLeft: 'auto', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }}>
+      <polyline points="4,6 8,10 12,6" />
+    </svg>
+  )
+}
+
 export default function Sidebar() {
   const pathname = usePathname()
   const [daysOut, setDaysOut] = useState<number | string>('—')
@@ -120,6 +148,38 @@ export default function Sidebar() {
     })
   }, [])
 
+  // Which desktop groups are expanded. The current route's group always
+  // gets added (on load, on deep link, on navigation) without collapsing
+  // any group the user opened by hand.
+  const [openGroups, setOpenGroups] = useState<Set<string>>(() => {
+    const g = groupForPath(pathname)
+    return g ? new Set([g.key]) : new Set()
+  })
+  useEffect(() => {
+    const g = groupForPath(pathname)
+    if (g) setOpenGroups(prev => (prev.has(g.key) ? prev : new Set(prev).add(g.key)))
+  }, [pathname])
+  const toggleGroup = useCallback((key: string) => {
+    setOpenGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }, [])
+
+  // Full mobile menu (all 15 routes, opened from the top bar's Menu button).
+  const [menuOpen, setMenuOpen] = useState(false)
+  const closeMenu = useCallback(() => setMenuOpen(false), [])
+  const menuRef = useOverlay<HTMLDivElement>(menuOpen, closeMenu)
+  useEffect(() => { setMenuOpen(false) }, [pathname])
+  useEffect(() => {
+    if (!menuOpen) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prevOverflow }
+  }, [menuOpen])
+
   return (
     <>
       {/* ── Desktop sidebar ── */}
@@ -131,23 +191,63 @@ export default function Sidebar() {
         </div>
 
         <nav className="sidebar-nav">
-          {NAV_ITEMS.map(({ href, label }) => {
-            const active = linkActive(pathname, href)
+          {DESKTOP_NAV.map(entry => {
+            if (entry.type === 'link') {
+              const active = linkActive(pathname, entry.href)
+              return (
+                <Link key={entry.href} href={entry.href} className={`sidebar-link${active ? ' active' : ''}`}>
+                  <span style={{ color: active ? 'var(--accent)' : 'inherit', display: 'flex', alignItems: 'center' }}>
+                    {ICONS[entry.href] ?? null}
+                  </span>
+                  {entry.label}
+                </Link>
+              )
+            }
+            const active = groupActive(pathname, entry)
+            const open = openGroups.has(entry.key)
             return (
-              <Link
-                key={href}
-                href={href}
-                className={`sidebar-link${active ? ' active' : ''}`}
-              >
-                <span style={{ color: active ? 'var(--accent)' : 'inherit',
-                  display: 'flex', alignItems: 'center' }}>
-                  {ICONS[href] ?? null}
-                </span>
-                {label}
-              </Link>
+              <div key={entry.key} className="sidebar-group">
+                <button
+                  type="button"
+                  className={`sidebar-group-toggle${active ? ' active' : ''}`}
+                  aria-expanded={open}
+                  aria-controls={`sidebar-group-${entry.key}`}
+                  onClick={() => toggleGroup(entry.key)}
+                >
+                  <span style={{ color: active ? 'var(--accent)' : 'inherit', display: 'flex', alignItems: 'center' }}>
+                    {GROUP_ICONS[entry.key] ?? null}
+                  </span>
+                  {entry.label}
+                  <Chevron open={open} />
+                </button>
+                <div id={`sidebar-group-${entry.key}`} className="sidebar-group-children" hidden={!open}>
+                  {entry.children.map(child => {
+                    const childActive = linkActive(pathname, child.href)
+                    return (
+                      <Link key={child.href} href={child.href} className={`sidebar-link sidebar-link-child${childActive ? ' active' : ''}`}>
+                        {child.label}
+                      </Link>
+                    )
+                  })}
+                </div>
+              </div>
             )
           })}
         </nav>
+
+        <div className="sidebar-utility">
+          {UTILITY_NAV.map(link => {
+            const active = linkActive(pathname, link.href)
+            return (
+              <Link key={link.href} href={link.href} className={`sidebar-link${active ? ' active' : ''}`}>
+                <span style={{ color: active ? 'var(--accent)' : 'inherit', display: 'flex', alignItems: 'center' }}>
+                  {ICONS[link.href] ?? null}
+                </span>
+                {link.label}
+              </Link>
+            )
+          })}
+        </div>
 
         {raceName && (
           <div className="sidebar-race">
@@ -167,14 +267,25 @@ export default function Sidebar() {
         <Link href="/" className="sidebar-brand-link" style={{ fontSize: 14 }}>
           Training Hub <span className="sidebar-brand-year">2026</span>
         </Link>
-        {raceName && (
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'baseline', gap: 3 }}>
-            <span className="sidebar-race-num" style={{ fontSize: 20 }}>{daysOut}</span>
-            {typeof daysOut === 'number' && (
-              <span className="sidebar-race-unit">d</span>
-            )}
-          </div>
-        )}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button
+            type="button"
+            className="mobile-menu-btn"
+            aria-haspopup="dialog"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen(true)}
+          >
+            Menu
+          </button>
+          {raceName && (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+              <span className="sidebar-race-num" style={{ fontSize: 20 }}>{daysOut}</span>
+              {typeof daysOut === 'number' && (
+                <span className="sidebar-race-unit">d</span>
+              )}
+            </div>
+          )}
+        </div>
       </header>
 
       {/* ── Mobile bottom nav ── */}
@@ -193,6 +304,79 @@ export default function Sidebar() {
           )
         })}
       </nav>
+
+      {/* ── Full mobile menu (all 15 routes) ── */}
+      {menuOpen && (
+        <div className="mobile-fullmenu-backdrop" onMouseDown={e => { if (e.target === e.currentTarget) closeMenu() }}>
+          <div
+            className="mobile-fullmenu-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation menu"
+            ref={menuRef}
+          >
+            <div className="mobile-fullmenu-header">
+              <span className="mobile-fullmenu-title">Menu</span>
+              <button type="button" className="mobile-fullmenu-close" aria-label="Close menu" onClick={closeMenu}>✕</button>
+            </div>
+            <nav className="mobile-fullmenu-nav">
+              {DESKTOP_NAV.map(entry => {
+                if (entry.type === 'link') {
+                  const active = linkActive(pathname, entry.href)
+                  return (
+                    <Link
+                      key={entry.href}
+                      href={entry.href}
+                      className={`mobile-fullmenu-link${active ? ' active' : ''}`}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      <span style={{ display: 'flex' }}>{ICONS[entry.href] ?? null}</span>
+                      {entry.label}
+                      {active && <span className="mobile-fullmenu-check">✓</span>}
+                    </Link>
+                  )
+                }
+                return (
+                  <div key={entry.key} className="mobile-fullmenu-group">
+                    <div className="mobile-fullmenu-group-label">{entry.label}</div>
+                    {entry.children.map(child => {
+                      const active = linkActive(pathname, child.href)
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className={`mobile-fullmenu-link child${active ? ' active' : ''}`}
+                          aria-current={active ? 'page' : undefined}
+                        >
+                          {child.label}
+                          {active && <span className="mobile-fullmenu-check">✓</span>}
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )
+              })}
+              <div className="mobile-fullmenu-group">
+                <div className="mobile-fullmenu-group-label">More</div>
+                {UTILITY_NAV.map(link => {
+                  const active = linkActive(pathname, link.href)
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={`mobile-fullmenu-link child${active ? ' active' : ''}`}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      {link.label}
+                      {active && <span className="mobile-fullmenu-check">✓</span>}
+                    </Link>
+                  )
+                })}
+              </div>
+            </nav>
+          </div>
+        </div>
+      )}
     </>
   )
 }

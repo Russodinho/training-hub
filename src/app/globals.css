@@ -1060,6 +1060,48 @@ td.ing-name { color: var(--text); }
   background: #164951;
 }
 
+/* ── Collapsible desktop groups (Plan / Train / Recover) ── */
+.sidebar-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: calc(100% - 20px);
+  margin: 1px 10px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font-family: 'Figtree', sans-serif;
+  font-size: 13.5px;
+  font-weight: 400;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+.sidebar-group-toggle:hover {
+  color: var(--text);
+  background: var(--s2);
+}
+.sidebar-group-toggle.active {
+  color: var(--text);
+  font-weight: 600;
+}
+.sidebar-group-children {
+  display: flex;
+  flex-direction: column;
+}
+.sidebar-link-child {
+  padding-left: 40px;
+  font-size: 13px;
+}
+
+.sidebar-utility {
+  padding: 8px 0;
+  border-top: 0.5px solid var(--border);
+  flex-shrink: 0;
+}
+
 .sidebar-race {
   padding: 16px 20px;
   border-top: 0.5px solid var(--border);
@@ -1104,6 +1146,90 @@ td.ing-name { color: var(--text); }
   align-items: center;
   z-index: 100;
 }
+.mobile-menu-btn {
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Figtree', sans-serif; font-size: 12px; font-weight: 600;
+  color: var(--muted); background: var(--s2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 0 14px; min-height: 36px; cursor: pointer;
+}
+
+/* ── Full mobile menu (all 15 routes) — bottom sheet opened from the
+   top bar's Menu button. Modal: backdrop dismiss, Escape, focus trap and
+   focus restore all come from useOverlay(); this file only owns look. ── */
+.mobile-fullmenu-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(7,15,20,0.6);
+  z-index: 200;
+  align-items: flex-end;
+  justify-content: center;
+}
+.mobile-fullmenu-panel {
+  width: 100%;
+  max-height: 82vh;
+  overflow-y: auto;
+  background: var(--s1);
+  border-top: 1px solid var(--border);
+  border-radius: 16px 16px 0 0;
+  padding: 10px 6px calc(16px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -8px 24px rgba(0,0,0,0.35);
+}
+.mobile-fullmenu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px 10px;
+  margin-bottom: 4px;
+  border-bottom: 0.5px solid var(--border);
+}
+.mobile-fullmenu-title {
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+.mobile-fullmenu-close {
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--s2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+}
+.mobile-fullmenu-nav { display: flex; flex-direction: column; }
+.mobile-fullmenu-group { margin-top: 6px; }
+.mobile-fullmenu-group-label {
+  font-family: 'Figtree', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--faint);
+  padding: 8px 12px 4px;
+}
+.mobile-fullmenu-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: 'Figtree', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+}
+.mobile-fullmenu-link.child { padding-left: 32px; }
+.mobile-fullmenu-link.active {
+  color: var(--text);
+  font-weight: 600;
+  background: #164951;
+}
+.mobile-fullmenu-check { color: var(--accent); margin-left: auto; font-size: 13px; }
 
 /* ── Mobile group sub-nav — closed-by-default menu exposing the current
    bottom tab's sibling routes (Plan/Train/Recover cover several pages each).
@@ -1117,15 +1243,29 @@ td.ing-name { color: var(--text); }
   display: flex; align-items: center; gap: 6px;
   font-family: 'Figtree', sans-serif; font-size: 12px; font-weight: 600;
   color: var(--muted); background: var(--s2); border: 1px solid var(--border);
-  border-radius: 20px; padding: 6px 14px; min-height: 32px; cursor: pointer;
+  border-radius: 20px; padding: 6px 14px; min-height: 44px; cursor: pointer;
 }
 .mobile-subnav-chevron { font-size: 9px; }
 .mobile-subnav-menu {
   position: absolute; top: calc(100% + 4px); left: 0; z-index: 90;
   display: flex; flex-direction: column; gap: 2px;
   background: var(--s1); border: 1px solid var(--border); border-radius: 10px;
-  padding: 6px; min-width: 200px;
+  padding: 6px; min-width: 220px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+.mobile-subnav-menu-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 4px 6px 8px;
+  margin-bottom: 2px;
+  border-bottom: 0.5px solid var(--border);
+  font-family: 'Figtree', sans-serif; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase; color: var(--faint);
+}
+.mobile-subnav-close {
+  display: flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--s2); border: 1px solid var(--border);
+  color: var(--muted); font-size: 10px; cursor: pointer;
 }
 .mobile-subnav-link {
   padding: 9px 12px;
@@ -1135,7 +1275,7 @@ td.ing-name { color: var(--text); }
   font-weight: 500;
   color: var(--muted);
   text-decoration: none;
-  min-height: 40px;
+  min-height: 44px;
   display: flex;
   align-items: center;
 }
@@ -1143,6 +1283,7 @@ td.ing-name { color: var(--text); }
   color: var(--text);
   background: #164951;
 }
+.mobile-subnav-check { color: var(--accent); margin-left: auto; font-size: 12px; }
 
 /* ── Mobile bottom nav ── */
 .mobile-bottom-nav {
@@ -1285,6 +1426,7 @@ td.ing-name { color: var(--text); }
   .mobile-topbar    { display: flex; }
   .mobile-subnav-wrap { display: block; }
   .mobile-bottom-nav{ display: flex; }
+  .mobile-fullmenu-backdrop { display: flex; }
 }
 
 /* ── Mobile overflow fixes — these grids' desktop minmax() column widths
@@ -1352,3 +1494,21 @@ td.ing-name { color: var(--text); }
 @media (max-width: 360px) {
   .hub-page { padding-left: 16px; padding-right: 16px; }
 }
+.inj-map { display:grid; grid-template-columns:minmax(180px, .8fr) minmax(0, 1.2fr); gap:24px; margin-bottom:24px; align-items:center; }
+.inj-map-art { max-width:280px; width:100%; margin:auto; }
+.inj-map-art svg { width:100%; height:auto; display:block; }
+.inj-map-eyebrow { color:var(--accent); font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
+.inj-map h3 { font-size:23px; margin:8px 0; }
+.inj-map p { color:var(--muted); font-size:13px; line-height:1.6; }
+.inj-map-list { list-style:none; padding:0; margin:20px 0; }
+.inj-map-list li + li { border-top:1px solid var(--border); }
+.inj-map-list a { display:flex; align-items:center; gap:12px; padding:14px 0; min-height:60px; color:var(--text); text-decoration:none; }
+.inj-map-list a:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
+.inj-map-number { border:1px solid var(--border); border-radius:8px; padding:7px 10px; color:var(--accent); }
+.inj-map-list strong { font-size:14px; }
+.inj-map-list small { display:block; color:var(--muted); font-size:11px; margin-top:4px; line-height:1.5; }
+.inj-map-pain { margin-left:auto; font-size:22px; white-space:nowrap; }
+.inj-map-legend { display:flex; flex-wrap:wrap; gap:12px; color:var(--muted); font-size:11px; }
+.inj-map .inj-map-note { font-size:11px; }
+.inj-card[id] { scroll-margin-top:100px; }
+@media(max-width:600px) { .inj-map { grid-template-columns:minmax(0,1fr); gap:12px; } .inj-map-art { max-width:210px; } .inj-map h3 { font-size:21px; } }
