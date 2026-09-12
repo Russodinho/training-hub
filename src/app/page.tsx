@@ -13,6 +13,11 @@ import ActivityIcon, { iconForBlockClass } from '@/components/dashboard/Activity
 import { TrainingSummary } from '@/components/TrainingSummary'
 import GarminSyncButton from '@/components/dashboard/GarminSyncButton'
 
+// Dashboard is date- and user-data-dependent (today's workout, recovery,
+// greeting) — without this it can be statically cached at build/deploy
+// time and "today" freezes on whatever day it was last deployed.
+export const dynamic = 'force-dynamic'
+
 const WORKOUT_CLASSES = ['bl-gym', 'bl-swim', 'bl-bike', 'bl-run', 'bl-brick', 'bl-soccer']
 const TIMELINE_CLASSES = [...WORKOUT_CLASSES, 'bl-mob', 'bl-wind']
 
