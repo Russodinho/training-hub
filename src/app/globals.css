@@ -55,9 +55,12 @@
   --swim:    #56c8ee;
   --swim-bg: rgba(86,200,238,0.12);
   --swim-bd: rgba(86,200,238,0.32);
-  --soccer:    #b18afa;
-  --soccer-bg: rgba(177,138,250,0.12);
-  --soccer-bd: rgba(177,138,250,0.32);
+  --soccer:    #f58bc5;
+  --soccer-bg: rgba(245,139,197,0.12);
+  --soccer-bd: rgba(245,139,197,0.32);
+  --surfing-t: #ff9364;
+  --snowboarding-t: #8a9fff;
+  --yoga-t: #b9df65;
   --neutral-bg: rgba(175,190,200,0.08);
 
   /* Legacy aliases — keep old class names working */
@@ -66,7 +69,7 @@
   --bike-t:  #ffc45a;
   --run-t:   #28e5dc;
   --brick-bg: rgba(255,196,90,0.12); --brick-t: #ffc45a;
-  --soc-bg:   rgba(177,138,250,0.12); --soc-t:   #b18afa;
+  --soc-bg:   var(--soccer-bg); --soc-t: var(--soccer);
   --race-bg:  rgba(255,120,119,0.12); --race-t:  #ff7877;
   --rest-bg:  #1b2d38;                --rest-t:  #afbec8;
 
@@ -93,7 +96,7 @@
   --dinner-c: rgba(255,196,90,0.12);  --dinner-t:   #ffc45a;
   --clean:    #1b2d38;                --clean-t:    #afbec8;
   --guitar:   rgba(177,138,250,0.12); --guitar-t:   #b18afa;
-  --soccer-c: rgba(177,138,250,0.12); --soccer-t:   #b18afa;
+  --soccer-c: var(--soccer-bg); --soccer-t: var(--soccer);
   --free:     #14232d;                --free-t:     #afbec8;
   --sleep-c:  rgba(177,138,250,0.12); --sleep-t:    #b18afa;
   --wake:     #1b2d38;                --wake-t:     #afbec8;

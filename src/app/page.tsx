@@ -104,9 +104,9 @@ export default async function DashboardPage() {
     { name: 'Run', value: typeCounts.run || 0, color: 'var(--run-t)' },
     { name: 'Lift', value: typeCounts.lift || 0, color: 'var(--lift-t)' },
     { name: 'Soccer', value: typeCounts.soccer || 0, color: 'var(--soccer-t)' },
-    { name: 'Surfing', value: typeCounts.surfing || 0, color: 'var(--danger)' },
-    { name: 'Snowboarding', value: typeCounts.snowboarding || 0, color: 'var(--violet)' },
-    { name: 'Yoga', value: typeCounts.yoga || 0, color: 'var(--mobility)' },
+    { name: 'Surfing', value: typeCounts.surfing || 0, color: 'var(--surfing-t)' },
+    { name: 'Snowboarding', value: typeCounts.snowboarding || 0, color: 'var(--snowboarding-t)' },
+    { name: 'Yoga', value: typeCounts.yoga || 0, color: 'var(--yoga-t)' },
   ].filter(d => d.value > 0)
 
   const recentActivities = allActivities.slice(0, 8)

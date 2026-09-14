@@ -772,3 +772,10 @@ The user explicitly requires detailed updates in this handoff after every work s
 **Next agent needs to:**
 - If the user wants Snowboarding visually distinguishable from Soccer/Lift, a new color token needs to be added to `globals.css` — that's a styling decision outside this role, flag to Codex or ask the user directly.
 - Nothing else outstanding — no migrations, no data backfill needed for these 3 (no matching activities exist yet).
+
+
+## 2026-09-14 - Codex: unique activity colors
+- Reviewed latest commit 1af796b and handoff. User explicitly requested activity color changes, overriding the usual role restriction for this task.
+- All eight dashboard sports now resolve to unique colors: Swim #56c8ee, Bike #ffc45a, Run #28e5dc, Lift #b18afa, Soccer #f58bc5, Surfing #ff9364, Snowboarding #8a9fff, Yoga #b9df65.
+- Added dedicated surfing/snowboarding/yoga tokens used by both Weekly Volume and Training Distribution; updated soccer base/background/border and legacy aliases so schedule blocks and badges match.
+- Verified npm run build (including lint/types and all 19 generated pages), git diff --check, and resolved-token uniqueness for all eight sports. No browser visual verification performed. No data changes, commit, push, or deployment.
