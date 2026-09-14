@@ -81,20 +81,40 @@ _SPORT_MAP = {
     'training':                'strength',
     'stand_up_paddleboarding': 'paddleboard',
     'surfing':                 'surfing',
+    'snowboarding':            'snowboarding',
     'yoga':                    'yoga',
     'generic':                 'other',
     'transition':              'other',
     'multi_sport':             'other',
 }
 
-def _normalize_sport(sport, sub_sport=None) -> str:
+def _normalize_sport(sport, sub_sport=None, name=None) -> str:
+    mapped = None
     for val in [sport, sub_sport]:
         if not val:
             continue
         key = str(val).lower().replace(' ', '_').replace('-', '_')
         mapped = _SPORT_MAP.get(key)
         if mapped:
-            return mapped
+            break
+    # Some activity types have no dedicated profile on this watch — Garmin logs
+    # them as sport='generic' (which maps to the 'other' catch-all above, same
+    # as transition/multi_sport), so the sport only ever shows up in the
+    # activity's own name (e.g. "New Britain Soccer"). Only overrides the
+    # ambiguous 'other' bucket, never a sport GarminDB already identified
+    # specifically.
+    if mapped is None or mapped == 'other':
+        name_lower = str(name).lower() if name else ''
+        for keyword, bucket in [
+            ('soccer', 'soccer'),
+            ('surf', 'surfing'),
+            ('snowboard', 'snowboarding'),
+            ('yoga', 'yoga'),
+        ]:
+            if keyword in name_lower:
+                return bucket
+    if mapped:
+        return mapped
     return str(sport or 'other').lower().replace(' ', '_')
 
 
@@ -209,7 +229,7 @@ def sync_activities(since: date, sb) -> int:
         if not act_id:
             continue
 
-        sport      = _normalize_sport(d.get('sport'), d.get('sub_sport'))
+        sport      = _normalize_sport(d.get('sport'), d.get('sub_sport'), d.get('name'))
         elapsed    = _to_minutes(_get(d, 'elapsed_time', 'moving_time', 'duration'))
         dist_km    = _to_km(_get(d, 'distance'))
         avg_speed  = _get(d, 'avg_speed')

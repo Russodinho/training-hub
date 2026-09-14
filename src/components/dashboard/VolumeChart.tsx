@@ -9,6 +9,10 @@ interface WeekVolume {
   swim: number
   bike: number
   run: number
+  soccer: number
+  surfing: number
+  snowboarding: number
+  yoga: number
 }
 
 interface VolumeChartProps {
@@ -57,6 +61,10 @@ export default function VolumeChart({ data }: VolumeChartProps) {
         <Bar dataKey="swim" name="Swim" fill="var(--swim-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
         <Bar dataKey="bike" name="Bike" fill="var(--bike-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
         <Bar dataKey="run" name="Run" fill="var(--run-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
+        <Bar dataKey="soccer" name="Soccer" fill="var(--soccer-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
+        <Bar dataKey="surfing" name="Surfing" fill="var(--danger)" radius={[2, 2, 0, 0]} maxBarSize={32} />
+        <Bar dataKey="snowboarding" name="Snowboarding" fill="var(--violet)" radius={[2, 2, 0, 0]} maxBarSize={32} />
+        <Bar dataKey="yoga" name="Yoga" fill="var(--mobility)" radius={[2, 2, 0, 0]} maxBarSize={32} />
       </BarChart>
     </ResponsiveContainer>
   )

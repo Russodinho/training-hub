@@ -66,16 +66,20 @@ export default async function DashboardPage() {
   const todayMonIdx = toMonIdx(now.getDay())
 
   // Volume chart data
-  const weekBuckets: Record<string, { swim: number; bike: number; run: number }> = {}
+  const weekBuckets: Record<string, { swim: number; bike: number; run: number; soccer: number; surfing: number; snowboarding: number; yoga: number }> = {}
   for (const act of allActivities) {
     if (!act.date) continue
     const wk = getWeekLabel(new Date(act.date + 'T00:00:00'))
-    if (!weekBuckets[wk]) weekBuckets[wk] = { swim: 0, bike: 0, run: 0 }
+    if (!weekBuckets[wk]) weekBuckets[wk] = { swim: 0, bike: 0, run: 0, soccer: 0, surfing: 0, snowboarding: 0, yoga: 0 }
     const mi = (act.distance_km ?? 0) * 0.621371
     const bucket = garminBucket(act.activity_type)
     if (bucket === 'swim') weekBuckets[wk].swim += mi
     else if (bucket === 'bike') weekBuckets[wk].bike += mi
     else if (bucket === 'run') weekBuckets[wk].run += mi
+    else if (bucket === 'soccer') weekBuckets[wk].soccer += mi
+    else if (bucket === 'surfing') weekBuckets[wk].surfing += mi
+    else if (bucket === 'snowboarding') weekBuckets[wk].snowboarding += mi
+    else if (bucket === 'yoga') weekBuckets[wk].yoga += mi
   }
   const volumeData = Object.entries(weekBuckets)
     .sort(([a], [b]) => a.localeCompare(b))
@@ -84,6 +88,10 @@ export default async function DashboardPage() {
       swim: Math.round(v.swim * 10) / 10,
       bike: Math.round(v.bike * 10) / 10,
       run: Math.round(v.run * 10) / 10,
+      soccer: Math.round(v.soccer * 10) / 10,
+      surfing: Math.round(v.surfing * 10) / 10,
+      snowboarding: Math.round(v.snowboarding * 10) / 10,
+      yoga: Math.round(v.yoga * 10) / 10,
     }))
 
   const typeCounts = allActivities.reduce<Record<string, number>>((acc, a) => {
@@ -95,6 +103,10 @@ export default async function DashboardPage() {
     { name: 'Bike', value: typeCounts.bike || 0, color: 'var(--bike-t)' },
     { name: 'Run', value: typeCounts.run || 0, color: 'var(--run-t)' },
     { name: 'Lift', value: typeCounts.lift || 0, color: 'var(--lift-t)' },
+    { name: 'Soccer', value: typeCounts.soccer || 0, color: 'var(--soccer-t)' },
+    { name: 'Surfing', value: typeCounts.surfing || 0, color: 'var(--danger)' },
+    { name: 'Snowboarding', value: typeCounts.snowboarding || 0, color: 'var(--violet)' },
+    { name: 'Yoga', value: typeCounts.yoga || 0, color: 'var(--mobility)' },
   ].filter(d => d.value > 0)
 
   const recentActivities = allActivities.slice(0, 8)
@@ -298,7 +310,7 @@ export default async function DashboardPage() {
       {/* ── Charts ── */}
       <div className="chart-row" style={{ marginBottom: 16 }}>
         <div className="chart-card">
-          <div className="chart-card-title">Weekly volume (swim / bike / run)</div>
+          <div className="chart-card-title">Weekly volume (swim / bike / run / soccer / surfing / snowboarding / yoga)</div>
           <VolumeChart data={volumeData} />
         </div>
         <div className="chart-card">

@@ -94,15 +94,19 @@ export interface GarminActivity {
   avg_pace: string | null
 }
 
-// Collapse garmin_sync.py's sport types into the swim/bike/run/lift buckets
-// the dashboard's volume + distribution charts are built around.
-const GARMIN_BUCKET: Record<string, 'swim' | 'bike' | 'run' | 'lift'> = {
+// Collapse garmin_sync.py's sport types into the buckets the dashboard's
+// volume + distribution charts are built around.
+const GARMIN_BUCKET: Record<string, 'swim' | 'bike' | 'run' | 'lift' | 'soccer' | 'surfing' | 'snowboarding' | 'yoga'> = {
   swimming: 'swim',
   cycling: 'bike',
   running: 'run',
   strength: 'lift',
+  soccer: 'soccer',
+  surfing: 'surfing',
+  snowboarding: 'snowboarding',
+  yoga: 'yoga',
 }
-export function garminBucket(activityType: string): 'swim' | 'bike' | 'run' | 'lift' | 'other' {
+export function garminBucket(activityType: string): 'swim' | 'bike' | 'run' | 'lift' | 'soccer' | 'surfing' | 'snowboarding' | 'yoga' | 'other' {
   return GARMIN_BUCKET[activityType] ?? 'other'
 }
 

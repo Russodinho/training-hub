@@ -742,3 +742,33 @@ The user explicitly requires detailed updates in this handoff after every work s
 - If Garmin data for "today" ever goes missing again, check `C:\Users\mjrus\AppData\Local\Programs\Python\Python312\Scripts\garmindb_cli.py` line ~74 (`__get_date_and_days`) first — confirm the `+ 1` is still there before assuming it's upstream lag again.
 - Consider whether pinning `GarminDb==3.9.0` somewhere version-controlled (there's no `requirements.txt` in this repo currently) is worth doing so a future `pip upgrade` doesn't silently reintroduce this without anyone noticing — not done this session, just flagged.
 - Nothing else outstanding on the mutex or dashboard-caching fixes; both verified live.
+
+---
+
+## 2026-09-14 — Added Soccer to dashboard charts; fixed a real misclassification bug found along the way
+**Agent:** Claude
+**Completed:**
+- User reported a missing 9/14 activity. Investigated end-to-end (local GarminDB SQLite → direct Garmin Connect API query via `garminconnect`/saved `garmin_tokens.json`, same technique as the 9/14 off-by-one entry above) and confirmed **this was not the off-by-one bug** — that patch is still intact and verified working. Garmin Connect's cloud simply didn't have a 9/14 activity yet at the time (watch hadn't synced to the phone app). Not a code issue.
+- In the process, user clarified the real ask: they play soccer often and want it showing in the dashboard's Weekly Volume and Training Distribution charts, which only ever tracked swim/bike/run(+lift) — anything else silently mapped to an `'other'` bucket that neither chart renders (not even as a generic "Other" slice). This was true by original design, not a regression.
+- Added a `soccer` bucket end-to-end: `garminBucket()` in `src/lib/supabase.ts`, the `weekBuckets`/`distributionData` builders in `src/app/page.tsx`, and a new `Bar` series in `VolumeChart.tsx` (`DistributionChart.tsx` needed no change — it already renders whatever `{name,value,color}` array it's given). Reused the existing `--soccer-t` CSS token already used for soccer schedule blocks elsewhere, rather than inventing a new color (styling stays Codex's lane per `CLAUDE.md`).
+- **Found the actual reason soccer needed name-based detection**: queried Supabase directly and confirmed all 3 of the user's real soccer activities are logged by Garmin as `sport: 'generic', sub_sport: 'generic'` — the watch has no dedicated soccer activity profile, so the *only* signal that they're soccer is the activity name ("Soccer" / "New Britain Soccer"). Fixed `garmin_sync.py`'s `_normalize_sport()` to fall back to a name-based `'soccer'` check, but **only when the sport/sub_sport lookup would otherwise land on the ambiguous `'other'` bucket** (`generic`/`transition`/`multi_sport`) — never overriding a sport GarminDB already identified specifically. First attempt at this had a real bug: `_SPORT_MAP['generic'] == 'other'` is truthy, so the original code returned early before ever reaching the name check — caught by testing the function directly against real values before trusting it, not just by reading the diff.
+- Re-ran `garmin_sync.py --all` after the fix; verified via direct Supabase REST query that all 3 soccer activities flipped from `activity_type: 'other'` to `'soccer'`. Started the dev server and visually confirmed in Chrome: Weekly Volume now shows a purple Soccer bar, Training Distribution donut now shows a Soccer wedge alongside Run/Lift.
+- `npx tsc --noEmit` and `npm run build` both clean (same 19 routes).
+
+**Next agent needs to:**
+- Nothing outstanding — this is a live/local-only sync script (`garmin_sync.py`) plus dashboard source, no migrations, no unresolved edge cases. If new sport types show the same "watch logs it as generic" problem in the future, the same name-substring pattern in `_normalize_sport()` is the place to extend.
+
+---
+
+## 2026-09-14 — Added surfing, snowboarding, yoga to the same dashboard charts (follow-up to the soccer entry above)
+**Agent:** Claude
+**Completed:**
+- User asked for the same treatment given to soccer above, for surfing/snowboarding/yoga. Extended the same 5 spots: `_SPORT_MAP`/`_normalize_sport()`'s name-fallback in `garmin_sync.py` (generalized the soccer-only fallback into a keyword→bucket list covering all 4), `GARMIN_BUCKET`/`garminBucket()` in `src/lib/supabase.ts`, both data builders in `src/app/page.tsx`, and 3 new `<Bar>` series in `VolumeChart.tsx` (`DistributionChart.tsx` again needed no change).
+- **Flagged and resolved a real color-token gap before writing any styling**: unlike soccer, surfing/snowboarding/yoga have no existing color token anywhere in the design system. Per `CLAUDE.md`'s role split (color/styling decisions are Codex's, not mine), asked the user rather than inventing new hex values — they said to reuse existing generic tokens. Checked actual hex values first and found `--violet` (`#b18afa`) is identical to `--soccer-t`/`--strength`/`--lift-t`, and `--amber` (`#ffc45a`) is identical to `--bike-t` — using either would make two chart series visually indistinguishable. Landed on the only 2 genuinely unused-in-charts tokens for 3 needed colors: `--mobility` (green) → Yoga, `--danger` (coral) → Surfing, `--violet` → Snowboarding. **Snowboarding therefore renders the same purple as Soccer/Lift** in both charts — legend text still disambiguates them, but they're not visually distinct. Flagged to the user; a real 3rd distinct color for snowboarding needs an actual design decision (Codex, or the user picking one).
+- None of these 3 sports exist in the user's Garmin history yet, so there was nothing to backfill in Supabase this time (unlike soccer, which had 3 real activities misclassified as `'other'`) — verified via local SQLite query before concluding that.
+- Hit a stale leftover dev server from the previous entry's testing still holding port 3005 (`EADDRINUSE`, then serving corrupted/stale webpack chunks once a second instance started) — killed the actual stale PID via `Get-NetTCPConnection`/`Stop-Process`, not just relying on `pkill`, then restarted clean and visually reconfirmed in Chrome: all 7 series show correctly in the Weekly Volume legend with distinct colors (except the noted Snowboarding/Soccer/Lift purple overlap), and the Distribution donut still only renders slices that actually have data.
+- `npx tsc --noEmit` and `npm run build` both clean (same 19 routes).
+
+**Next agent needs to:**
+- If the user wants Snowboarding visually distinguishable from Soccer/Lift, a new color token needs to be added to `globals.css` — that's a styling decision outside this role, flag to Codex or ask the user directly.
+- Nothing else outstanding — no migrations, no data backfill needed for these 3 (no matching activities exist yet).
