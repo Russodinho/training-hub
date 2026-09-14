@@ -16,28 +16,32 @@ interface GarminActivity {
 }
 
 const TYPE_LABELS: Record<string, string> = {
-  running:     'Running',
-  cycling:     'Cycling',
-  swimming:    'Swimming',
-  soccer:      'Soccer',
-  hiking:      'Hiking',
-  walking:     'Walking',
-  strength:    'Strength',
-  paddleboard: 'SUP',
-  surfing:     'Surfing',
-  yoga:        'Yoga',
-  other:       'Other',
+  running:      'Running',
+  cycling:      'Cycling',
+  swimming:     'Swimming',
+  soccer:       'Soccer',
+  hiking:       'Hiking',
+  walking:      'Walking',
+  strength:     'Strength',
+  paddleboard:  'SUP',
+  surfing:      'Surfing',
+  snowboarding: 'Snowboarding',
+  yoga:         'Yoga',
+  other:        'Other',
 }
 
 const TYPE_COLOR: Record<string, string> = {
-  running:  'var(--run)',
-  cycling:  'var(--bike)',
-  swimming: 'var(--swim)',
-  soccer:   'var(--soccer)',
-  hiking:   'var(--strength)',
-  walking:  'var(--muted)',
-  strength: 'var(--strength)',
-  other:    'var(--muted)',
+  running:      'var(--run)',
+  cycling:      'var(--bike)',
+  swimming:     'var(--swim)',
+  soccer:       'var(--soccer)',
+  hiking:       'var(--strength)',
+  walking:      'var(--muted)',
+  strength:     'var(--strength)',
+  surfing:      'var(--surfing-t)',
+  snowboarding: 'var(--snowboarding-t)',
+  yoga:         'var(--yoga-t)',
+  other:        'var(--muted)',
 }
 
 const TYPE_BG: Record<string, string> = {
@@ -49,7 +53,7 @@ const TYPE_BG: Record<string, string> = {
   strength: 'var(--strength-bg)',
 }
 
-const FILTERS = ['All', 'Running', 'Cycling', 'Swimming', 'Soccer', 'Hiking', 'Walking', 'Strength']
+const FILTERS = ['All', 'Running', 'Cycling', 'Swimming', 'Soccer', 'Surfing', 'Snowboarding', 'Yoga', 'Hiking', 'Walking', 'Strength']
 
 function fmt_dur(min: number | null): string {
   if (!min) return '—'
@@ -109,6 +113,12 @@ function ActivityRow({ a }: { a: GarminActivity }) {
           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>{fmt_dur(a.duration_min)}</div>
           {a.distance_km ? <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--muted)' }}>{fmt_dist(a.distance_km)}</div> : null}
         </div>
+        {a.calories ? (
+          <div style={{ textAlign: 'right', minWidth: 40 }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>{a.calories}</div>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: 'var(--faint)' }}>cal</div>
+          </div>
+        ) : <div style={{ minWidth: 40 }} />}
         {a.avg_hr ? (
           <div style={{ textAlign: 'right', minWidth: 40 }}>
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, fontWeight: 500, color: 'var(--run)' }}>{a.avg_hr}</div>
@@ -195,11 +205,12 @@ export default function CardioPage() {
       </div>
 
       {/* Weekly summary tiles */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
         {[
           { label: 'This week', value: fmt_dur(Math.round(thisWeekMins)), sub: `${thisWeekCount} session${thisWeekCount !== 1 ? 's' : ''}`, accent: 'var(--accent)' },
           { label: 'Activities', value: String(filtered.length), sub: `last ${daysBack} days`, accent: 'var(--text)' },
           { label: 'Total time', value: fmt_dur(Math.round(filtered.reduce((s, a) => s + (a.duration_min ?? 0), 0))), sub: `last ${daysBack} days`, accent: 'var(--swim)' },
+          { label: 'Calories', value: filtered.reduce((s, a) => s + (a.calories ?? 0), 0).toLocaleString(), sub: `last ${daysBack} days`, accent: 'var(--bike)' },
         ].map(tile => (
           <div key={tile.label} className="stat-card">
             <div className="stat-card-lbl">{tile.label}</div>
@@ -244,6 +255,7 @@ export default function CardioPage() {
           {weekKeys.map(wk => {
             const acts = byWeek[wk]
             const weekMins = acts.reduce((s, a) => s + (a.duration_min ?? 0), 0)
+            const weekCalories = acts.reduce((s, a) => s + (a.calories ?? 0), 0)
             return (
               <div key={wk} style={{ marginBottom: 20 }}>
                 {/* Week header */}
@@ -252,7 +264,7 @@ export default function CardioPage() {
                     {weekLabel(wk).toUpperCase()}
                   </span>
                   <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)' }}>
-                    {acts.length} session{acts.length !== 1 ? 's' : ''} · {fmt_dur(Math.round(weekMins))}
+                    {acts.length} session{acts.length !== 1 ? 's' : ''} · {fmt_dur(Math.round(weekMins))}{weekCalories > 0 ? ` · ${weekCalories.toLocaleString()} cal` : ''}
                   </span>
                 </div>
                 {/* Activity rows */}

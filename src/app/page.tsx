@@ -65,34 +65,38 @@ export default async function DashboardPage() {
   const thisWeekCount = activeDays.filter(Boolean).length
   const todayMonIdx = toMonIdx(now.getDay())
 
-  // Volume chart data
-  const weekBuckets: Record<string, { swim: number; bike: number; run: number; soccer: number; surfing: number; snowboarding: number; yoga: number }> = {}
+  // Volume chart data — bars are sized by distance, but the tooltip surfaces
+  // duration + calories instead (distance alone isn't a meaningful number for
+  // soccer/yoga/etc.), so each sport tracks all three per week.
+  const VOLUME_SPORTS = ['swim', 'bike', 'run', 'soccer', 'surfing', 'snowboarding', 'yoga'] as const
+  type VolumeSport = typeof VOLUME_SPORTS[number]
+  type SportAgg = { distance: number; duration: number; calories: number }
+  const emptyWeek = (): Record<VolumeSport, SportAgg> =>
+    Object.fromEntries(VOLUME_SPORTS.map(s => [s, { distance: 0, duration: 0, calories: 0 }])) as Record<VolumeSport, SportAgg>
+
+  const weekBuckets: Record<string, Record<VolumeSport, SportAgg>> = {}
   for (const act of allActivities) {
     if (!act.date) continue
-    const wk = getWeekLabel(new Date(act.date + 'T00:00:00'))
-    if (!weekBuckets[wk]) weekBuckets[wk] = { swim: 0, bike: 0, run: 0, soccer: 0, surfing: 0, snowboarding: 0, yoga: 0 }
-    const mi = (act.distance_km ?? 0) * 0.621371
     const bucket = garminBucket(act.activity_type)
-    if (bucket === 'swim') weekBuckets[wk].swim += mi
-    else if (bucket === 'bike') weekBuckets[wk].bike += mi
-    else if (bucket === 'run') weekBuckets[wk].run += mi
-    else if (bucket === 'soccer') weekBuckets[wk].soccer += mi
-    else if (bucket === 'surfing') weekBuckets[wk].surfing += mi
-    else if (bucket === 'snowboarding') weekBuckets[wk].snowboarding += mi
-    else if (bucket === 'yoga') weekBuckets[wk].yoga += mi
+    if (!(VOLUME_SPORTS as readonly string[]).includes(bucket)) continue
+    const wk = getWeekLabel(new Date(act.date + 'T00:00:00'))
+    if (!weekBuckets[wk]) weekBuckets[wk] = emptyWeek()
+    const agg = weekBuckets[wk][bucket as VolumeSport]
+    agg.distance += (act.distance_km ?? 0) * 0.621371
+    agg.duration += act.duration_min ?? 0
+    agg.calories += act.calories ?? 0
   }
   const volumeData = Object.entries(weekBuckets)
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([week, v]) => ({
-      week,
-      swim: Math.round(v.swim * 10) / 10,
-      bike: Math.round(v.bike * 10) / 10,
-      run: Math.round(v.run * 10) / 10,
-      soccer: Math.round(v.soccer * 10) / 10,
-      surfing: Math.round(v.surfing * 10) / 10,
-      snowboarding: Math.round(v.snowboarding * 10) / 10,
-      yoga: Math.round(v.yoga * 10) / 10,
-    }))
+    .map(([week, sports]) => {
+      const row: { week: string } & Record<string, number> = { week } as { week: string } & Record<string, number>
+      for (const s of VOLUME_SPORTS) {
+        row[s] = Math.round(sports[s].distance * 10) / 10
+        row[`${s}Duration`] = Math.round(sports[s].duration)
+        row[`${s}Calories`] = Math.round(sports[s].calories)
+      }
+      return row
+    })
 
   const typeCounts = allActivities.reduce<Record<string, number>>((acc, a) => {
     const bucket = garminBucket(a.activity_type)
@@ -310,7 +314,7 @@ export default async function DashboardPage() {
       {/* ── Charts ── */}
       <div className="chart-row" style={{ marginBottom: 16 }}>
         <div className="chart-card">
-          <div className="chart-card-title">Weekly volume (swim / bike / run / soccer / surfing / snowboarding / yoga)</div>
+          <div className="chart-card-title">Weekly volume</div>
           <VolumeChart data={volumeData} />
         </div>
         <div className="chart-card">

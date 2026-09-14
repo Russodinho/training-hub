@@ -6,17 +6,57 @@ import {
 
 interface WeekVolume {
   week: string
-  swim: number
-  bike: number
-  run: number
-  soccer: number
-  surfing: number
-  snowboarding: number
-  yoga: number
+  [key: string]: number | string
 }
 
 interface VolumeChartProps {
   data: WeekVolume[]
+}
+
+const SPORT_BARS = [
+  { key: 'swim', name: 'Swim', color: 'var(--swim-t)' },
+  { key: 'bike', name: 'Bike', color: 'var(--bike-t)' },
+  { key: 'run', name: 'Run', color: 'var(--run-t)' },
+  { key: 'soccer', name: 'Soccer', color: 'var(--soccer-t)' },
+  { key: 'surfing', name: 'Surfing', color: 'var(--surfing-t)' },
+  { key: 'snowboarding', name: 'Snowboarding', color: 'var(--snowboarding-t)' },
+  { key: 'yoga', name: 'Yoga', color: 'var(--yoga-t)' },
+] as const
+
+function fmtDuration(min: number): string {
+  if (!min) return '0m'
+  const h = Math.floor(min / 60)
+  const m = Math.round(min % 60)
+  return h > 0 ? `${h}h ${m}m` : `${m}m`
+}
+
+function VolumeTooltip({ active, payload, label }: {
+  active?: boolean
+  payload?: { dataKey: string; name: string; color: string; payload: Record<string, number | string> }[]
+  label?: string
+}) {
+  if (!active || !payload || payload.length === 0) return null
+  const rows = payload.filter(p => (p.payload[`${p.dataKey}Duration`] as number) > 0)
+  if (rows.length === 0) return null
+
+  return (
+    <div style={{
+      background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
+      padding: '8px 10px', fontFamily: 'IBM Plex Mono', fontSize: 11,
+    }}>
+      <div style={{ color: 'var(--muted)', marginBottom: 4 }}>{label}</div>
+      {rows.map(p => {
+        const duration = p.payload[`${p.dataKey}Duration`] as number
+        const calories = p.payload[`${p.dataKey}Calories`] as number
+        return (
+          <div key={p.dataKey} style={{ display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+            <span style={{ color: p.color }}>{p.name}</span>
+            <span style={{ color: 'var(--text)' }}>{fmtDuration(duration)} · {calories} cal</span>
+          </div>
+        )
+      })}
+    </div>
+  )
 }
 
 export default function VolumeChart({ data }: VolumeChartProps) {
@@ -47,24 +87,14 @@ export default function VolumeChart({ data }: VolumeChartProps) {
           width={32}
           tickFormatter={v => `${v}mi`}
         />
-        <Tooltip
-          contentStyle={{
-            background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 8, fontFamily: 'IBM Plex Mono', fontSize: 11,
-          }}
-          formatter={(v: number, name: string) => [`${v.toFixed(1)} mi`, name]}
-        />
+        <Tooltip content={<VolumeTooltip />} />
         <Legend
           wrapperStyle={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--muted)' }}
           iconType="square"
         />
-        <Bar dataKey="swim" name="Swim" fill="var(--swim-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
-        <Bar dataKey="bike" name="Bike" fill="var(--bike-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
-        <Bar dataKey="run" name="Run" fill="var(--run-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
-        <Bar dataKey="soccer" name="Soccer" fill="var(--soccer-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
-        <Bar dataKey="surfing" name="Surfing" fill="var(--surfing-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
-        <Bar dataKey="snowboarding" name="Snowboarding" fill="var(--snowboarding-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
-        <Bar dataKey="yoga" name="Yoga" fill="var(--yoga-t)" radius={[2, 2, 0, 0]} maxBarSize={32} />
+        {SPORT_BARS.map(({ key, name, color }) => (
+          <Bar key={key} dataKey={key} name={name} fill={color} radius={[2, 2, 0, 0]} maxBarSize={32} />
+        ))}
       </BarChart>
     </ResponsiveContainer>
   )
