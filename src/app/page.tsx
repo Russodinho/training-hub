@@ -1,7 +1,10 @@
-import { getActiveRace, getDaysToRace, getGarminActivitiesForWeeks, getMobilityStreak, garminBucket } from '@/lib/supabase'
-import { getTodaySchedule } from '@/lib/schedule'
+import {
+  getActiveRace, getDaysToRace, getGarminActivitiesForWeeks, getMobilityStreak, garminBucket,
+  getWorkoutSessionDates, easternNow, todayStr, mondayOf,
+} from '@/lib/supabase'
+import { getTodaySchedule, SCHEDULE } from '@/lib/schedule'
 import { getAthleteContext } from '@/lib/agentContext'
-import VolumeChart from '@/components/dashboard/VolumeChart'
+import VolumeChart, { type WeekVolume, type DayVolume, type VolumeSport } from '@/components/dashboard/VolumeChart'
 import NutritionActualsPanel from '@/components/dashboard/NutritionActualsPanel'
 import MacroAccuracyPanel from '@/components/dashboard/MacroAccuracyPanel'
 import DistributionChart from '@/components/dashboard/DistributionChart'
@@ -21,15 +24,9 @@ export const dynamic = 'force-dynamic'
 const WORKOUT_CLASSES = ['bl-gym', 'bl-swim', 'bl-bike', 'bl-run', 'bl-brick', 'bl-soccer']
 const TIMELINE_CLASSES = [...WORKOUT_CLASSES, 'bl-mob', 'bl-wind']
 
-function getGreeting(): string {
-  const h = new Date().getHours()
+function getGreeting(now: Date): string {
+  const h = now.getHours()
   return h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'
-}
-
-function getWeekLabel(date: Date): string {
-  const d = new Date(date)
-  d.setDate(d.getDate() - d.getDay())
-  return `${d.getMonth() + 1}/${d.getDate()}`
 }
 
 // Map JS getDay() (0=Sun) to Mon-indexed (0=Mon)
@@ -38,11 +35,12 @@ function toMonIdx(day: number) { return day === 0 ? 6 : day - 1 }
 const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
 export default async function DashboardPage() {
-  const [weeklyActivities, mobilityStreak, activeRaceResult, athleteContextResult] = await Promise.allSettled([
+  const [weeklyActivities, mobilityStreak, activeRaceResult, athleteContextResult, loggedLiftsResult] = await Promise.allSettled([
     getGarminActivitiesForWeeks(13),
     getMobilityStreak(),
     getActiveRace(),
     getAthleteContext(),
+    getWorkoutSessionDates(mondayOf(todayStr())),
   ])
 
   const allActivities = weeklyActivities.status === 'fulfilled' ? weeklyActivities.value : []
@@ -50,68 +48,98 @@ export default async function DashboardPage() {
   const activeRace = activeRaceResult.status === 'fulfilled' ? activeRaceResult.value : null
   const daysToRace = activeRace ? getDaysToRace(activeRace.race) : null
   const athleteContext = athleteContextResult.status === 'fulfilled' ? athleteContextResult.value : null
+  const loggedLiftDates = loggedLiftsResult.status === 'fulfilled' ? loggedLiftsResult.value : []
 
-  // Weekly progress dots (Mon-indexed)
-  const now = new Date()
-  const weekStart = new Date(now)
-  weekStart.setDate(now.getDate() - now.getDay())
-  weekStart.setHours(0, 0, 0, 0)
-  const activeDays = Array(7).fill(false) as boolean[]
-  for (const act of allActivities) {
-    if (!act.date) continue
-    const d = new Date(act.date + 'T00:00:00')
-    if (d >= weekStart) activeDays[toMonIdx(d.getDay())] = true
-  }
-  const thisWeekCount = activeDays.filter(Boolean).length
+  const now = easternNow()
+  const today = todayStr()
+  const weekStartStr = mondayOf(today)
   const todayMonIdx = toMonIdx(now.getDay())
 
-  // Volume chart data — bars are sized by distance, but the tooltip surfaces
-  // duration + calories instead (distance alone isn't a meaningful number for
-  // soccer/yoga/etc.), so each sport tracks all three per week.
-  const VOLUME_SPORTS = ['swim', 'bike', 'run', 'soccer', 'surfing', 'snowboarding', 'yoga'] as const
-  type VolumeSport = typeof VOLUME_SPORTS[number]
-  type SportAgg = { distance: number; duration: number; calories: number }
-  const emptyWeek = (): Record<VolumeSport, SportAgg> =>
-    Object.fromEntries(VOLUME_SPORTS.map(s => [s, { distance: 0, duration: 0, calories: 0 }])) as Record<VolumeSport, SportAgg>
+  // Adherence (this Mon–Sun week). Planned = gym + soccer blocks in the weekly
+  // schedule template (swim/bike/run aren't in that template, so this
+  // undercounts a full tri week). Completed = distinct (day, sport) sessions
+  // from Garmin plus lifts logged in /log; a lift both on the watch and logged
+  // in /log on the same day counts once.
+  const TRAINING_BUCKETS = ['swim', 'bike', 'run', 'lift', 'soccer', 'surfing', 'snowboarding', 'yoga']
+  const workoutsPlanned = SCHEDULE.reduce(
+    (n, day) => n + (day.blocks.some(b => b.cls === 'bl-gym') ? 1 : 0) + (day.blocks.some(b => b.cls === 'bl-soccer') ? 1 : 0),
+    0,
+  )
+  const sessionKeys = new Set<string>()
+  for (const act of allActivities) {
+    if (!act.date || act.date < weekStartStr) continue
+    const bucket = garminBucket(act.activity_type)
+    if (TRAINING_BUCKETS.includes(bucket)) sessionKeys.add(`${act.date}|${bucket}`)
+  }
+  for (const d of loggedLiftDates) {
+    if (d >= weekStartStr) sessionKeys.add(`${d}|lift`)
+  }
+  const activeDays = Array(7).fill(false) as boolean[]
+  for (const key of sessionKeys) {
+    const d = new Date(key.split('|')[0] + 'T00:00:00')
+    activeDays[toMonIdx(d.getDay())] = true
+  }
+  const thisWeekCount = sessionKeys.size
 
-  const weekBuckets: Record<string, Record<VolumeSport, SportAgg>> = {}
+  // Weekly volume: 13 Monday-start weeks ending with the current (partial) one,
+  // keyed by real week-start date so ordering is chronological across months
+  // and years. Every bucket incl. lift/other is aggregated; the chart chooses
+  // which metric and range to show.
+  const VOLUME_SPORTS: VolumeSport[] = ['swim', 'bike', 'run', 'lift', 'soccer', 'surfing', 'snowboarding', 'yoga', 'other']
+  const weekMap = new Map<string, WeekVolume>()
+  for (let i = 12; i >= 0; i--) {
+    const d = new Date(weekStartStr + 'T00:00:00Z')
+    d.setUTCDate(d.getUTCDate() - i * 7)
+    const ws = d.toISOString().split('T')[0]
+    weekMap.set(ws, {
+      weekStart: ws,
+      partial: ws === weekStartStr,
+      sports: Object.fromEntries(
+        VOLUME_SPORTS.map(s => [s, { distance: 0, minutes: 0, calories: 0, sessions: 0 }]),
+      ) as WeekVolume['sports'],
+    })
+  }
   for (const act of allActivities) {
     if (!act.date) continue
-    const bucket = garminBucket(act.activity_type)
-    if (!(VOLUME_SPORTS as readonly string[]).includes(bucket)) continue
-    const wk = getWeekLabel(new Date(act.date + 'T00:00:00'))
-    if (!weekBuckets[wk]) weekBuckets[wk] = emptyWeek()
-    const agg = weekBuckets[wk][bucket as VolumeSport]
+    const week = weekMap.get(mondayOf(act.date))
+    if (!week) continue
+    const agg = week.sports[garminBucket(act.activity_type)]
     agg.distance += (act.distance_km ?? 0) * 0.621371
-    agg.duration += act.duration_min ?? 0
+    agg.minutes += act.duration_min ?? 0
     agg.calories += act.calories ?? 0
+    agg.sessions += 1
   }
-  const volumeData = Object.entries(weekBuckets)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([week, sports]) => {
-      const row: { week: string } & Record<string, number> = { week } as { week: string } & Record<string, number>
-      for (const s of VOLUME_SPORTS) {
-        row[s] = Math.round(sports[s].distance * 10) / 10
-        row[`${s}Duration`] = Math.round(sports[s].duration)
-        row[`${s}Calories`] = Math.round(sports[s].calories)
-      }
-      return row
-    })
+  const volumeData = [...weekMap.values()]
 
-  const typeCounts = allActivities.reduce<Record<string, number>>((acc, a) => {
-    const bucket = garminBucket(a.activity_type)
-    acc[bucket] = (acc[bucket] || 0) + 1; return acc
-  }, {})
-  const distributionData = [
-    { name: 'Swim', value: typeCounts.swim || 0, color: 'var(--swim-t)' },
-    { name: 'Bike', value: typeCounts.bike || 0, color: 'var(--bike-t)' },
-    { name: 'Run', value: typeCounts.run || 0, color: 'var(--run-t)' },
-    { name: 'Lift', value: typeCounts.lift || 0, color: 'var(--lift-t)' },
-    { name: 'Soccer', value: typeCounts.soccer || 0, color: 'var(--soccer-t)' },
-    { name: 'Surfing', value: typeCounts.surfing || 0, color: 'var(--surfing-t)' },
-    { name: 'Snowboarding', value: typeCounts.snowboarding || 0, color: 'var(--snowboarding-t)' },
-    { name: 'Yoga', value: typeCounts.yoga || 0, color: 'var(--yoga-t)' },
-  ].filter(d => d.value > 0)
+  // Daily buckets for the chart's 7-day view: the last 14 calendar days ending
+  // today (Eastern), so the older 7 can feed the "previous 7 days" comparison.
+  const dayMap = new Map<string, DayVolume>()
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(today + 'T00:00:00Z')
+    d.setUTCDate(d.getUTCDate() - i)
+    const ds = d.toISOString().split('T')[0]
+    dayMap.set(ds, {
+      date: ds,
+      sports: Object.fromEntries(
+        VOLUME_SPORTS.map(s => [s, { distance: 0, minutes: 0, calories: 0, sessions: 0 }]),
+      ) as DayVolume['sports'],
+    })
+  }
+  for (const act of allActivities) {
+    const day = act.date ? dayMap.get(act.date) : undefined
+    if (!day) continue
+    const agg = day.sports[garminBucket(act.activity_type)]
+    agg.distance += (act.distance_km ?? 0) * 0.621371
+    agg.minutes += act.duration_min ?? 0
+    agg.calories += act.calories ?? 0
+    agg.sessions += 1
+  }
+  const dailyVolume = [...dayMap.values()]
+
+  // Raw (date, bucket) list; the distribution chart applies its own 7d/30d/90d window.
+  const distributionSessions = allActivities
+    .filter(a => a.date)
+    .map(a => ({ date: a.date, bucket: garminBucket(a.activity_type) }))
 
   const recentActivities = allActivities.slice(0, 8)
 
@@ -138,7 +166,7 @@ export default async function DashboardPage() {
       <div className="page-header">
         <div>
           <h2>Dashboard</h2>
-          <div className="sub">{getGreeting()}, Matt</div>
+          <div className="sub">{getGreeting(now)}, Matt</div>
         </div>
         <GarminSyncButton />
       </div>
@@ -245,7 +273,7 @@ export default async function DashboardPage() {
             </span>
             <span style={{ fontFamily: 'Figtree, sans-serif', fontSize: 13,
               color: 'var(--muted)' }}>
-              / 5 workouts
+              / {workoutsPlanned} planned
             </span>
           </div>
           <div style={{ display: 'flex', gap: 6, justifyContent: 'space-between' }}>
@@ -315,11 +343,11 @@ export default async function DashboardPage() {
       <div className="chart-row" style={{ marginBottom: 16 }}>
         <div className="chart-card">
           <div className="chart-card-title">Weekly volume</div>
-          <VolumeChart data={volumeData} />
+          <VolumeChart data={volumeData} daily={dailyVolume} />
         </div>
         <div className="chart-card">
           <div className="chart-card-title">Training distribution</div>
-          <DistributionChart data={distributionData} />
+          <DistributionChart sessions={distributionSessions} today={today} />
         </div>
       </div>
 

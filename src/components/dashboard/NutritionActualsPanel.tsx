@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { daysAgoStr } from '@/lib/supabase'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts'
 
-type DayRange = 30 | 60 | 90
+type DayRange = 7 | 30 | 60 | 90
 
 interface NutritionRow {
   date: string
@@ -33,18 +34,16 @@ const SELECTOR_BTN: React.CSSProperties = {
 }
 
 export default function NutritionActualsPanel({ onFuelPage = false }: { onFuelPage?: boolean } = {}) {
-  const [days, setDays] = useState<DayRange>(30)
+  const [days, setDays] = useState<DayRange>(7)
   const [data, setData] = useState<NutritionRow[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const since = new Date()
-    since.setDate(since.getDate() - days)
     setLoading(true)
     getSupabase()
       .from('nutrition_actuals')
       .select('date, calories, protein, carbs, fat')
-      .gte('date', since.toISOString().split('T')[0])
+      .gte('date', daysAgoStr(days - 1))
       .order('date', { ascending: true })
       .then(({ data: rows }) => {
         setData(rows || [])
@@ -71,7 +70,7 @@ export default function NutritionActualsPanel({ onFuelPage = false }: { onFuelPa
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
         <div className="chart-card-title" style={{ marginBottom: 0 }}>Nutrition actuals — avg per day</div>
         <div style={{ display: 'flex', gap: 4 }}>
-          {([30, 60, 90] as DayRange[]).map(d => (
+          {([7, 30, 60, 90] as DayRange[]).map(d => (
             <button
               key={d}
               onClick={() => setDays(d)}
@@ -156,10 +155,10 @@ export default function NutritionActualsPanel({ onFuelPage = false }: { onFuelPa
               }}
             />
             <Legend wrapperStyle={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--muted)' }} />
-            <Line yAxisId="cal" type="monotone" dataKey="calories" name="Calories" stroke="var(--run-t)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
-            <Line yAxisId="g" type="monotone" dataKey="protein" name="Protein (g)" stroke="var(--swim-t)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
-            <Line yAxisId="g" type="monotone" dataKey="carbs" name="Carbs (g)" stroke="var(--bike-t)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
-            <Line yAxisId="g" type="monotone" dataKey="fat" name="Fat (g)" stroke="var(--lift-t)" strokeWidth={2} dot={false} activeDot={{ r: 3 }} />
+            <Line yAxisId="cal" type="monotone" dataKey="calories" name="Calories" stroke="var(--run-t)" strokeWidth={2} dot={valid.length <= 14 ? { r: 2 } : false} activeDot={{ r: 3 }} />
+            <Line yAxisId="g" type="monotone" dataKey="protein" name="Protein (g)" stroke="var(--swim-t)" strokeWidth={2} dot={valid.length <= 14 ? { r: 2 } : false} activeDot={{ r: 3 }} />
+            <Line yAxisId="g" type="monotone" dataKey="carbs" name="Carbs (g)" stroke="var(--bike-t)" strokeWidth={2} dot={valid.length <= 14 ? { r: 2 } : false} activeDot={{ r: 3 }} />
+            <Line yAxisId="g" type="monotone" dataKey="fat" name="Fat (g)" stroke="var(--lift-t)" strokeWidth={2} dot={valid.length <= 14 ? { r: 2 } : false} activeDot={{ r: 3 }} />
           </LineChart>
         </ResponsiveContainer>
       )}

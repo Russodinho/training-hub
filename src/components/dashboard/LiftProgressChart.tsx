@@ -6,13 +6,15 @@ import {
 } from 'recharts'
 import type { WorkoutSet } from '@/lib/workoutsParser'
 import { liftProgression, uniqueExercises } from '@/lib/workoutsParser'
+import { daysAgoStr } from '@/lib/supabase'
 
 interface Props {
   workouts: WorkoutSet[]
 }
 
-type RangeDays = 30 | 60 | 90 | 'all'
+type RangeDays = 7 | 30 | 60 | 90 | 'all'
 const RANGES: { label: string; value: RangeDays }[] = [
+  { label: '7d', value: 7 },
   { label: '30d', value: 30 },
   { label: '60d', value: 60 },
   { label: '90d', value: 90 },
@@ -63,16 +65,13 @@ function CustomTooltip({ active, payload }: { active?: boolean; payload?: { payl
 export default function LiftProgressChart({ workouts }: Props) {
   const exercises = useMemo(() => uniqueExercises(workouts), [workouts])
   const [selected, setSelected] = useState(exercises[0] ?? '')
-  const [range, setRange] = useState<RangeDays>('all')
+  const [range, setRange] = useState<RangeDays>(7)
 
   const allData = useMemo(() => liftProgression(workouts, selected), [workouts, selected])
 
   const data = useMemo(() => {
     if (range === 'all') return allData
-    const since = new Date()
-    since.setHours(0, 0, 0, 0)
-    since.setDate(since.getDate() - range)
-    const sinceStr = since.toISOString().split('T')[0]
+    const sinceStr = daysAgoStr(range - 1)
     return allData.filter(d => d.date >= sinceStr)
   }, [allData, range])
 

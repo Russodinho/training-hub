@@ -335,6 +335,37 @@ export async function getGarminActivitiesForWeeks(weeksBack = 8): Promise<Garmin
   return data || []
 }
 
+// YYYY-MM-DD for `n` days before today in the *caller's local* timezone (the
+// browser's, in client components). `toISOString()` would shift to UTC, which
+// is already "tomorrow" on Eastern evenings and made 'last N days' cutoffs
+// off by one. `daysAgoStr(6)` is the start of a 7-day window that includes today.
+export function daysAgoStr(n: number): string {
+  const d = new Date()
+  d.setDate(d.getDate() - n)
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${mm}-${dd}`
+}
+
+// Monday (YYYY-MM-DD) of the week containing a YYYY-MM-DD date. Pure string/UTC
+// math so it can't drift with the server's timezone; the UI presents weeks as
+// Monday–Sunday everywhere else.
+export function mondayOf(dateStr: string): string {
+  const d = new Date(dateStr + 'T00:00:00Z')
+  const back = (d.getUTCDay() + 6) % 7
+  d.setUTCDate(d.getUTCDate() - back)
+  return d.toISOString().split('T')[0]
+}
+
+// Dates (YYYY-MM-DD) on which a lift was logged in /log, for adherence counts.
+export async function getWorkoutSessionDates(sinceDate: string): Promise<string[]> {
+  const { data } = await getSupabase()
+    .from('workout_sessions')
+    .select('date')
+    .gte('date', sinceDate)
+  return (data ?? []).map((r: { date: string }) => r.date)
+}
+
 // ── Logged workout sets (from /log's own workout_sessions/workout_sets) ──
 // Adapts them into the same WorkoutSet shape the Google-Sheet-backed
 // training-log Lifts tab used to consume, so that tab can read from this

@@ -2,9 +2,22 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { daysAgoStr } from '@/lib/supabase'
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts'
+
+type DayRange = 7 | 30 | 90
+const RANGES: DayRange[] = [7, 30, 90]
+
+const SELECTOR_BTN: React.CSSProperties = {
+  fontFamily: "'IBM Plex Mono', monospace",
+  fontSize: 11,
+  padding: '3px 10px',
+  borderRadius: 6,
+  border: '1px solid var(--border)',
+  cursor: 'pointer',
+}
 
 interface BiometricRow {
   date: string
@@ -22,11 +35,10 @@ function getSupabase() {
 export default function BodyCompWidget() {
   const [data, setData] = useState<BiometricRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [range, setRange] = useState<DayRange>(7)
 
   useEffect(() => {
-    const since = new Date()
-    since.setDate(since.getDate() - 90)
-    const sinceStr = since.toISOString().split('T')[0]
+    const sinceStr = daysAgoStr(89)
     const sb = getSupabase()
 
     Promise.all([
@@ -55,9 +67,12 @@ export default function BodyCompWidget() {
     })
   }, [])
 
-  const filtered = data.filter(d => d.weight_lbs !== null)
+  // All 90 days are fetched once; the range buttons just narrow what's plotted.
+  const withWeight = data.filter(d => d.weight_lbs !== null)
+  const rangeStart = daysAgoStr(range - 1)
+  const filtered = withWeight.filter(d => d.date >= rangeStart)
 
-  if (!loading && filtered.length === 0) {
+  if (!loading && withWeight.length === 0) {
     return (
       <div className="empty-state" style={{ padding: '32px 16px' }}>
         <div className="empty-icon">⚖️</div>
@@ -73,7 +88,42 @@ export default function BodyCompWidget() {
 
   const hasBf = filtered.some(d => d.body_fat_pct !== null)
 
+  const controls = (
+    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 4, marginBottom: 10 }}>
+      {RANGES.map(d => (
+        <button
+          key={d}
+          type="button"
+          aria-pressed={range === d}
+          onClick={() => setRange(d)}
+          style={{
+            ...SELECTOR_BTN,
+            background: range === d ? 'var(--text)' : 'transparent',
+            color: range === d ? 'var(--bg)' : 'var(--muted)',
+          }}
+        >
+          {d}d
+        </button>
+      ))}
+    </div>
+  )
+
+  if (!loading && filtered.length === 0) {
+    return (
+      <div>
+        {controls}
+        <div className="empty-state" style={{ padding: '24px 16px' }}>
+          <div className="empty-icon">⚖️</div>
+          <div className="empty-title">No weight logged in the last {range} days</div>
+          <div>Try a wider range — the most recent weigh-ins are older than this.</div>
+        </div>
+      </div>
+    )
+  }
+
   return (
+    <div>
+    {controls}
     <ResponsiveContainer width="100%" height={180}>
       <LineChart data={filtered} margin={{ top: 4, right: hasBf ? 0 : 8, bottom: 0, left: -12 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="var(--border-soft)" vertical={false} />
@@ -111,15 +161,16 @@ export default function BodyCompWidget() {
         <Legend wrapperStyle={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--muted)' }} />
         <Line
           yAxisId="w" type="monotone" dataKey="weight_lbs" name="Weight (lbs)"
-          stroke="var(--run-t)" strokeWidth={2} dot={false} activeDot={{ r: 4 }}
+          stroke="var(--run-t)" strokeWidth={2} dot={filtered.length <= 14 ? { r: 3 } : false} activeDot={{ r: 4 }}
         />
         {hasBf && (
           <Line
             yAxisId="bf" type="monotone" dataKey="body_fat_pct" name="Body Fat %"
-            stroke="var(--bike-t)" strokeWidth={2} dot={false} activeDot={{ r: 4 }}
+            stroke="var(--bike-t)" strokeWidth={2} dot={filtered.length <= 14 ? { r: 3 } : false} activeDot={{ r: 4 }}
           />
         )}
       </LineChart>
     </ResponsiveContainer>
+    </div>
   )
 }

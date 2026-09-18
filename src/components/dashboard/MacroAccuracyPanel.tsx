@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { NUTRITION_TARGETS } from '@/lib/data'
+import { daysAgoStr } from '@/lib/supabase'
 
-type DayRange = 30 | 60 | 90
+type DayRange = 7 | 30 | 60 | 90
 
 interface NutritionRow {
   date: string
@@ -46,18 +47,16 @@ const SELECTOR_BTN: React.CSSProperties = {
 }
 
 export default function MacroAccuracyPanel({ onFuelPage = false }: { onFuelPage?: boolean } = {}) {
-  const [days, setDays] = useState<DayRange>(30)
+  const [days, setDays] = useState<DayRange>(7)
   const [data, setData] = useState<NutritionRow[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const since = new Date()
-    since.setDate(since.getDate() - days)
     setLoading(true)
     getSupabase()
       .from('nutrition_actuals')
       .select('date, calories, protein, carbs, fat')
-      .gte('date', since.toISOString().split('T')[0])
+      .gte('date', daysAgoStr(days - 1))
       .order('date', { ascending: true })
       .then(({ data: rows }) => {
         setData(rows || [])
@@ -99,7 +98,7 @@ export default function MacroAccuracyPanel({ onFuelPage = false }: { onFuelPage?
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <div className="chart-card-title" style={{ marginBottom: 0 }}>Macro target accuracy</div>
         <div style={{ display: 'flex', gap: 4 }}>
-          {([30, 60, 90] as DayRange[]).map(d => (
+          {([7, 30, 60, 90] as DayRange[]).map(d => (
             <button
               key={d}
               onClick={() => setDays(d)}
