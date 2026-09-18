@@ -36,7 +36,7 @@ const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
 export default async function DashboardPage() {
   const [weeklyActivities, mobilityStreak, activeRaceResult, athleteContextResult, loggedLiftsResult] = await Promise.allSettled([
-    getGarminActivitiesForWeeks(13),
+    getGarminActivitiesForWeeks(14),
     getMobilityStreak(),
     getActiveRace(),
     getAthleteContext(),
@@ -81,13 +81,13 @@ export default async function DashboardPage() {
   }
   const thisWeekCount = sessionKeys.size
 
-  // Weekly volume: 13 Monday-start weeks ending with the current (partial) one,
+  // Weekly volume: 14 Monday-start weeks ending with the current (partial) one,
   // keyed by real week-start date so ordering is chronological across months
   // and years. Every bucket incl. lift/other is aggregated; the chart chooses
   // which metric and range to show.
   const VOLUME_SPORTS: VolumeSport[] = ['swim', 'bike', 'run', 'lift', 'soccer', 'surfing', 'snowboarding', 'yoga', 'other']
   const weekMap = new Map<string, WeekVolume>()
-  for (let i = 12; i >= 0; i--) {
+  for (let i = 13; i >= 0; i--) {
     const d = new Date(weekStartStr + 'T00:00:00Z')
     d.setUTCDate(d.getUTCDate() - i * 7)
     const ws = d.toISOString().split('T')[0]
@@ -136,7 +136,7 @@ export default async function DashboardPage() {
   }
   const dailyVolume = [...dayMap.values()]
 
-  // Raw (date, bucket) list; the distribution chart applies its own 7d/30d/90d window.
+  // Raw (date, bucket) list; the distribution chart applies its own 7d/30d/60d/90d window.
   const distributionSessions = allActivities
     .filter(a => a.date)
     .map(a => ({ date: a.date, bucket: garminBucket(a.activity_type) }))
@@ -343,7 +343,7 @@ export default async function DashboardPage() {
       <div className="chart-row" style={{ marginBottom: 16 }}>
         <div className="chart-card">
           <div className="chart-card-title">Weekly volume</div>
-          <VolumeChart data={volumeData} daily={dailyVolume} />
+          <VolumeChart data={volumeData} daily={dailyVolume} today={today} />
         </div>
         <div className="chart-card">
           <div className="chart-card-title">Training distribution</div>

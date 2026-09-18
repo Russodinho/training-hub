@@ -22,7 +22,7 @@ export interface DayVolume {
   sports: Record<VolumeSport, SportAgg>
 }
 
-type Range = '7d' | 4 | 8 | 12
+type Range = 7 | 30 | 60 | 90
 
 type Metric = 'time' | 'distance' | 'calories' | 'sessions'
 
@@ -49,11 +49,25 @@ const METRICS: { key: Metric; label: string }[] = [
 ]
 
 const RANGES: { key: Range; label: string }[] = [
-  { key: '7d', label: '7D' },
-  { key: 4, label: '4W' },
-  { key: 8, label: '8W' },
-  { key: 12, label: '12W' },
+  { key: 7, label: '7D' },
+  { key: 30, label: '30D' },
+  { key: 60, label: '60D' },
+  { key: 90, label: '90D' },
 ]
+
+// Last day (YYYY-MM-DD) of the Monday-start week beginning on `weekStart`.
+function weekEnd(weekStart: string): string {
+  const d = new Date(weekStart + 'T00:00:00Z')
+  d.setUTCDate(d.getUTCDate() + 6)
+  return d.toISOString().split('T')[0]
+}
+
+// First day of a window of `days` calendar days ending on `today`.
+function windowStart(today: string, days: number): string {
+  const d = new Date(today + 'T00:00:00Z')
+  d.setUTCDate(d.getUTCDate() - (days - 1))
+  return d.toISOString().split('T')[0]
+}
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -148,20 +162,25 @@ function toggleStyle(active: boolean): React.CSSProperties {
   }
 }
 
-export default function VolumeChart({ data, daily }: { data: WeekVolume[]; daily: DayVolume[] }) {
+export default function VolumeChart({ data, daily, today }: { data: WeekVolume[]; daily: DayVolume[]; today: string }) {
   const [metric, setMetric] = useState<Metric>('time')
-  const [range, setRange] = useState<Range>('7d')
+  const [range, setRange] = useState<Range>(7)
 
   const sportsForMetric = metric === 'distance'
     ? SPORTS.filter(s => DISTANCE_SPORTS.includes(s.key))
     : SPORTS
 
   // Both views reduce to the same shape: a labelled bucket of per-sport aggregates.
-  // 7D = the last 7 calendar days (daily has 14, the older 7 feed the comparison).
-  const isDaily = range === '7d'
+  // 7D = the last 7 calendar days as daily bars (daily has 14, the older 7 feed
+  // the comparison). 30D/60D/90D = weekly bars for every Monday-week that touches
+  // the last N days, so the oldest bar can include a few days before the window.
+  const isDaily = range === 7
+  const start = windowStart(today, range)
   const buckets: { label: string; sports: Record<VolumeSport, SportAgg> }[] = isDaily
     ? daily.slice(-7).map(d => ({ label: dayLabel(d.date), sports: d.sports }))
-    : data.slice(-range).map(w => ({ label: `Week of ${weekLabel(w.weekStart, w.partial)}`, sports: w.sports }))
+    : data
+        .filter(w => weekEnd(w.weekStart) >= start)
+        .map(w => ({ label: `Week of ${weekLabel(w.weekStart, w.partial)}`, sports: w.sports }))
 
   const rows: Row[] = buckets.map(b => {
     const row: Row = { label: b.label }
@@ -255,7 +274,9 @@ export default function VolumeChart({ data, daily }: { data: WeekVolume[]; daily
         </BarChart>
       </ResponsiveContainer>
       <div style={{ fontFamily: 'IBM Plex Mono', fontSize: 10, color: 'var(--faint)', marginTop: 4 }}>
-        {isDaily ? 'Last 7 days, ending today.' : 'Weeks start Monday. * = current week, still in progress.'}
+        {isDaily
+          ? 'Last 7 days, ending today.'
+          : `Weekly totals for the weeks in the last ${range} days. Weeks start Monday; * = current week, still in progress.`}
       </div>
     </div>
   )

@@ -24,8 +24,8 @@ const SLICES: { bucket: string; name: string; color: string }[] = [
   { bucket: 'yoga', name: 'Yoga', color: 'var(--yoga-t)' },
 ]
 
-type DayRange = 7 | 30 | 90
-const RANGES: DayRange[] = [7, 30, 90]
+type DayRange = 7 | 30 | 60 | 90
+const RANGES: DayRange[] = [7, 30, 60, 90]
 
 // Start (YYYY-MM-DD) of a window of `days` calendar days ending on `today`.
 function windowStart(today: string, days: number): string {

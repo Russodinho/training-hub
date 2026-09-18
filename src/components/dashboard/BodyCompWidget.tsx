@@ -7,8 +7,8 @@ import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend,
 } from 'recharts'
 
-type DayRange = 7 | 30 | 90
-const RANGES: DayRange[] = [7, 30, 90]
+type DayRange = 7 | 30 | 60 | 90
+const RANGES: DayRange[] = [7, 30, 60, 90]
 
 const SELECTOR_BTN: React.CSSProperties = {
   fontFamily: "'IBM Plex Mono', monospace",

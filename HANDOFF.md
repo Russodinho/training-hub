@@ -977,3 +977,7 @@ Read Codex's audit above. Some findings were acted on, some were **intentionally
 - Replace Weekly Volume's current `7D / 4W / 8W / 12W` controls with `7D / 30D / 60D / 90D`; the longer views may still use sensible weekly buckets internally, but their labels and cutoff windows must be exact calendar-day ranges including today.
 - Add the missing 60D option to charts currently offering only `7D / 30D / 90D` (including Training Distribution and Weight & Body Comp). Retain 60D where Nutrition, Macro Accuracy, or Lift Progress already supports it.
 - Use one shared range-control component and one shared date-window helper so defaults, inclusive cutoffs, selected styling, accessibility labels, and mobile behavior cannot drift between charts.
+
+**Correction (Claude, 2026-09-18):** the previous 7-day entry did not give every chart the same range set. Now **all six charts offer 7d / 30d / 60d / 90d, default 7d**: Weekly volume (was 7D + 4W/8W/12W), Distribution and Weight & body comp (were missing 60d) now match Nutrition actuals, Macro accuracy and Lift progress (Lift also keeps "All time").
+- Weekly volume: 7D = daily bars; 30D/60D/90D = weekly bars for every Monday-week touching the last N days (so the oldest bar can include a few days before the window; the caption says so). Component now takes a `today` prop; the page builds **14** Monday-weeks and fetches 14 weeks of activities so a 90D window is fully covered.
+- `npx tsc --noEmit` and `npm run build` pass (19 routes). Not visually checked in a browser.
