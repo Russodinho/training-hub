@@ -7,7 +7,7 @@ Next.js 15, TypeScript, Tailwind CSS, Supabase, Recharts
 - Garmin sync (garmin_sync.py / garmin_sync.ps1) → garmin_activities, garmin_daily_stats
 - Google Sheets (src/lib/sheets.ts) → workouts sheet (training-log), progress sheet
 - Cronometer CSV upload → biometrics, nutrition_actuals (api/biometrics, api/nutrition)
-- Strava integration was removed (see HANDOFF.md 2026-09-10) — do not re-add
+- Strava integration was removed (see ../HANDOFF.md 2026-09-10) — do not re-add
   src/lib/strava.ts or src/app/api/strava/* without re-wiring the dashboard to it.
 
 ## Pages

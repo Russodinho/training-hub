@@ -21,7 +21,7 @@
 
 ## Before Starting Each Session
 1. Read .agents/CONTEXT.md
-2. Read .agents/HANDOFF.md — check what Claude deployed and what needs styling
+2. Read HANDOFF.md (project root) — check what Claude deployed and what needs styling
 3. Append your completed visual work to HANDOFF.md when done
 
 ## Design System

@@ -18,7 +18,7 @@
 
 ## Before Starting Each Session
 1. Read .agents/CONTEXT.md
-2. Read .agents/HANDOFF.md
+2. Read HANDOFF.md (project root)
 3. Append your completed work to HANDOFF.md when done
 
 ## Deployment

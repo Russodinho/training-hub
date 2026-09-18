@@ -1,7 +1,7 @@
 // Shared live-data context for the coaching agent system (src/app/agent).
 // Every coach's system prompt is built from ONE call to getAthleteContext()
 // per page load / per check-in run — never per-agent, and never hardcoded.
-// See .agents/HANDOFF.md (2026-09-11, "Rebuilt coaching agent system") for
+// See HANDOFF.md (2026-09-11, "Rebuilt coaching agent system") for
 // the field-by-field mapping to real tables and the honest gaps (some
 // fields are structurally untracked right now and stay null/false).
 
