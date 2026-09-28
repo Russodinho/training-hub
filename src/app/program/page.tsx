@@ -1,6 +1,6 @@
 'use client'
 import { getSupabaseClient } from '@/lib/supabase'
-import { getProgram, newDayId, WEEKDAY_NAMES, type ProgramDay, type ProgramExercise } from '@/lib/program'
+import { getProgram, newDayId, WEEKDAY_NAMES, type ProgramDay, type ProgramExercise, type LogStyle } from '@/lib/program'
 import { EXERCISE_LIBRARY } from '@/lib/exerciseLibrary'
 import { useState, useEffect, useCallback } from 'react'
 import type { CSSProperties } from 'react'
@@ -48,6 +48,13 @@ function toRow(f: ExForm) {
   }
 }
 
+const LOG_STYLE_OPTIONS = (
+  <>
+    <option value="sets">Sets (weight, reps, RPE per set)</option>
+    <option value="simple">Simple (weight + done checkbox)</option>
+  </>
+)
+
 const CUSTOM = '__custom__'
 
 // "+ Add lift" step 1: pick from EXERCISE_LIBRARY (or Custom). Picking fills
@@ -84,10 +91,11 @@ function ExerciseFields({ form, setForm }: { form: ExForm; setForm: (f: ExForm) 
     <>
       <input required placeholder="Exercise name *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={inputS} />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 8 }}>
-        {([['sets', 'Sets', 'number'], ['reps', 'Reps', 'text'], ['rpe', 'RPE', 'text'], ['rest', 'Rest (s)', 'number']] as [keyof ExForm, string, string][]).map(([key, label, type]) => (
+        {([['sets', 'Sets', true], ['reps', 'Reps', false], ['rpe', 'RPE', false], ['rest', 'Rest (s)', true]] as [keyof ExForm, string, boolean][]).map(([key, label, digitsOnly]) => (
           <label key={key}>
             <span style={labelS}>{label}</span>
-            <input type={type} value={form[key]} onChange={e => setForm({ ...form, [key]: e.target.value })} style={smallInputS} />
+            <input type="text" inputMode={digitsOnly ? 'numeric' : 'text'} value={form[key]}
+              onChange={e => setForm({ ...form, [key]: digitsOnly ? e.target.value.replace(/\D/g, '') : e.target.value })} style={smallInputS} />
           </label>
         ))}
       </div>
@@ -105,10 +113,10 @@ export default function ProgramPage() {
   const [error, setError] = useState('')
 
   // day editing
-  const [dayForm, setDayForm] = useState({ name: '', subtitle: '', weekday: '' })
+  const [dayForm, setDayForm] = useState<{ name: string; subtitle: string; weekday: string; logStyle: LogStyle }>({ name: '', subtitle: '', weekday: '', logStyle: 'sets' })
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [showNewDay, setShowNewDay] = useState(false)
-  const [newDay, setNewDay] = useState({ name: '', subtitle: '', weekday: '' })
+  const [newDay, setNewDay] = useState<{ name: string; subtitle: string; weekday: string; logStyle: LogStyle }>({ name: '', subtitle: '', weekday: '', logStyle: 'sets' })
 
   // exercise editing
   const [showAddEx, setShowAddEx] = useState(false)
@@ -133,13 +141,13 @@ export default function ProgramPage() {
 
   useEffect(() => {
     if (!active) return
-    setDayForm({ name: active.name, subtitle: active.subtitle ?? '', weekday: active.weekday == null ? '' : String(active.weekday) })
+    setDayForm({ name: active.name, subtitle: active.subtitle ?? '', weekday: active.weekday == null ? '' : String(active.weekday), logStyle: active.logStyle })
     setConfirmDelete(false)
     setShowAddEx(false)
     setEditingId(null)
     // only when switching days, not on every reload of the same day
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeId, active?.name, active?.subtitle, active?.weekday])
+  }, [activeId, active?.name, active?.subtitle, active?.weekday, active?.logStyle])
 
   async function run(fn: () => PromiseLike<{ error: { message: string } | null } | void>, selectId?: string) {
     setBusy(true)
@@ -166,8 +174,9 @@ export default function ProgramPage() {
       const res = await sb().from('workout_days').insert({
         id, name: newDay.name.trim(), subtitle: newDay.subtitle.trim() || null,
         weekday: newDay.weekday === '' ? null : Number(newDay.weekday), sort_order: sortOrder,
+        log_style: newDay.logStyle,
       })
-      if (!res.error) { setNewDay({ name: '', subtitle: '', weekday: '' }); setShowNewDay(false) }
+      if (!res.error) { setNewDay({ name: '', subtitle: '', weekday: '', logStyle: 'sets' }); setShowNewDay(false) }
       return res
     }, id)
   }
@@ -177,6 +186,7 @@ export default function ProgramPage() {
     run(() => sb().from('workout_days').update({
       name: dayForm.name.trim(), subtitle: dayForm.subtitle.trim() || null,
       weekday: dayForm.weekday === '' ? null : Number(dayForm.weekday),
+      log_style: dayForm.logStyle,
     }).eq('id', active.id).then(r => r))
   }
 
@@ -275,6 +285,9 @@ export default function ProgramPage() {
             <option value="">Not scheduled on a weekday</option>
             {WEEKDAY_NAMES.map((n, i) => <option key={n} value={i}>{n}</option>)}
           </select>
+          <select value={newDay.logStyle} onChange={e => setNewDay(d => ({ ...d, logStyle: e.target.value as LogStyle }))} style={inputS} aria-label="Log as">
+            {LOG_STYLE_OPTIONS}
+          </select>
           <div style={{ display: 'flex', gap: 8 }}>
             <button type="submit" disabled={busy} style={{ ...primaryBtn, flex: 1 }}>{busy ? 'Saving…' : 'Add day'}</button>
             <button type="button" onClick={() => setShowNewDay(false)} style={ghostBtn}>Cancel</button>
@@ -320,9 +333,16 @@ export default function ProgramPage() {
                     </select>
                   </label>
                 </div>
-                <label><span style={labelS}>Subtitle</span>
-                  <input value={dayForm.subtitle} disabled={!fromDb} onChange={e => setDayForm(f => ({ ...f, subtitle: e.target.value }))} style={inputS} />
-                </label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 8 }}>
+                  <label><span style={labelS}>Subtitle</span>
+                    <input value={dayForm.subtitle} disabled={!fromDb} onChange={e => setDayForm(f => ({ ...f, subtitle: e.target.value }))} style={inputS} />
+                  </label>
+                  <label><span style={labelS}>Log as</span>
+                    <select value={dayForm.logStyle} disabled={!fromDb} onChange={e => setDayForm(f => ({ ...f, logStyle: e.target.value as LogStyle }))} style={inputS}>
+                      {LOG_STYLE_OPTIONS}
+                    </select>
+                  </label>
+                </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                   <button onClick={saveDay} disabled={!canEdit} style={{ ...primaryBtn, opacity: canEdit ? 1 : 0.5 }}>Save day</button>
                   <button onClick={() => moveDay(-1)} disabled={!canEdit} style={ghostBtn} aria-label="Move day earlier">← Move</button>

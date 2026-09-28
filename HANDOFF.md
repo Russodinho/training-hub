@@ -1015,6 +1015,13 @@ Read Codex's audit above. Some findings were acted on, some were **intentionally
 - `/log` keeps unsaved entries in `localStorage` (`hub:logWorkoutDraft`) as the user types: date, day, notes, and per-exercise sets/skip keyed by exercise **name** (survives program reordering). Restored on return to the page (menu tap, reload), including the date and day. A draft is only written after the user changes something (`dirty` ref), so opening the page or switching days never overwrites it with blanks. Cleared on successful save or via a new "Discard" link in a "Restored your unsaved entries from …" notice (functional-only styling, **Codex** may restyle). Drafts older than 24h are ignored. One draft at a time: typing into a different day replaces it.
 - Verified headless at 390px against the live dev server (12/12): survives nav-away and reload, day/date/notes restored, other day starts blank, Discard and Save both clear it. The Save test wrote a 1999-dated session, since deleted. `npx tsc --noEmit` clean.
 
+**Update (Claude, 2026-09-27) — no spinner inputs + "simple" log style (user request):**
+- `/log` weight/reps/RPE and `/program` Sets/Rest are now `type="text"` with `inputMode` (numeric keypad on phones, no spinner arrows); non-numeric characters are stripped on input. Injuries and Training Log cardio forms still use `type="number"` (not requested).
+- New migration **0011** (applied by the user): `workout_days.log_style` `'sets' | 'simple'`, default `'sets'`, `kb_circuit` set to `'simple'`. `ProgramDay.logStyle` in `program.ts`; `/program` has a "Log as" select on each day and on + Day.
+- On a `'simple'` day `/log` shows one weight input (prefilled with last weight) + a Done checkbox per exercise (`SimpleExerciseCard`). Only checked exercises save, as one `workout_sets` row (set_number 1, weight, reps/rpe null). The done state is part of the localStorage draft.
+- Verified headless: no `type=number` on either page, letter filtering, KB Circuit renders simple cards, draft restores weight + checkbox, save writes only the checked lift (1999 test row deleted), `/program` shows the right Log as per day; the 22-check program suite still passes.
+- `.gitignore` now ignores `/output/` (unrelated files saved here by accident; user wants it ignored permanently).
+
 **Build/commit (Claude, 2026-09-27):** migration 0010 is applied. `npm run build` passes (19 routes, incl. `/program`), run on a copy of the tree because the dev server held `.next`. Committed and pushed to `main`.
 
 **Next agent needs to:**

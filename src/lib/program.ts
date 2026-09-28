@@ -16,12 +16,17 @@ export interface ProgramExercise {
   notes: string | null
 }
 
+// How /log records the day: 'sets' = weight/reps/RPE per set, 'simple' =
+// one weight + a done checkbox per exercise (circuits). Migration 0011.
+export type LogStyle = 'sets' | 'simple'
+
 export interface ProgramDay {
   id: string
   name: string
   subtitle: string | null
   weekday: number | null // 0=Sun .. 6=Sat, null = unscheduled
   sortOrder: number
+  logStyle: LogStyle
   exercises: ProgramExercise[]
 }
 
@@ -50,7 +55,7 @@ const ex = (name: string, sets: number, reps: string, rpe: string, rest: number 
 // something to show.
 export const DEFAULT_PROGRAM: ProgramDay[] = [
   {
-    id: 'upper_a', name: 'Upper A', subtitle: 'Push-dominant · ~30-35 min', weekday: 1, sortOrder: 10,
+    id: 'upper_a', name: 'Upper A', subtitle: 'Push-dominant · ~30-35 min', weekday: 1, sortOrder: 10, logStyle: 'sets',
     exercises: [
       ex('Incline DB or BB Press', 3, '6-8', '8, 8, 9-10', 90, 'Final set to near/true failure'),
       ex('Standing DB OHP', 2, '8-10', '8', 60),
@@ -60,7 +65,7 @@ export const DEFAULT_PROGRAM: ProgramDay[] = [
     ],
   },
   {
-    id: 'kb_circuit', name: 'KB Circuit', subtitle: 'After swim · ~15-18 min', weekday: 2, sortOrder: 20,
+    id: 'kb_circuit', name: 'KB Circuit', subtitle: 'After swim · ~15-18 min', weekday: 2, sortOrder: 20, logStyle: 'simple',
     exercises: [
       ex('KB Halos', 3, '8-10 each direction', '', null, '2-3 rounds'),
       ex('KB Swings', 10, '15-20', '', null, '10 min EMOM, one set at the top of each minute'),
@@ -68,7 +73,7 @@ export const DEFAULT_PROGRAM: ProgramDay[] = [
     ],
   },
   {
-    id: 'upper_b', name: 'Upper B', subtitle: 'Pull-dominant · ~35-40 min', weekday: 4, sortOrder: 30,
+    id: 'upper_b', name: 'Upper B', subtitle: 'Pull-dominant · ~35-40 min', weekday: 4, sortOrder: 30, logStyle: 'sets',
     exercises: [
       ex('Lat Pulldown or Pull-Up', 3, '6-8', '8, 8, 9-10', 60, 'Final set to near/true failure'),
       ex('Machine Low Row (single arm)', 2, '10-12/side', '8', 60),
@@ -78,7 +83,7 @@ export const DEFAULT_PROGRAM: ProgramDay[] = [
     ],
   },
   {
-    id: 'legs', name: 'Legs', subtitle: 'Combined · ~30 min', weekday: 5, sortOrder: 40,
+    id: 'legs', name: 'Legs', subtitle: 'Combined · ~30 min', weekday: 5, sortOrder: 40, logStyle: 'sets',
     exercises: [
       ex('Zercher Squat', 3, '4-6', '8, 8, 9', 90, 'Final set: heaviest load with a clean upright position held. Use a barbell pad.'),
       ex('Romanian Deadlift', 2, '6-8', '8', 90),
@@ -88,7 +93,7 @@ export const DEFAULT_PROGRAM: ProgramDay[] = [
   },
 ]
 
-interface DayRow { id: string; name: string; subtitle: string | null; weekday: number | null; sort_order: number }
+interface DayRow { id: string; name: string; subtitle: string | null; weekday: number | null; sort_order: number; log_style?: string | null }
 interface ExerciseRow {
   id: string; name: string; category: string; default_sets: number | null; default_reps: string | null
   default_rpe: string | null; rest_seconds: number | null; notes?: string | null; is_active: boolean; sort_order: number
@@ -112,6 +117,7 @@ export async function getProgram(): Promise<ProgramResult> {
 
   const days = (dayRows as DayRow[]).map(d => ({
     id: d.id, name: d.name, subtitle: d.subtitle, weekday: d.weekday, sortOrder: d.sort_order,
+    logStyle: (d.log_style === 'simple' ? 'simple' : 'sets') as LogStyle,
     exercises: ((exRows ?? []) as ExerciseRow[]).filter(e => e.category === d.id).map(e => ({
       id: e.id,
       name: e.name,

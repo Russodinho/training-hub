@@ -39,3 +39,6 @@ next-env.d.ts
 
 .vercel
 .env*
+
+# Unrelated files accidentally saved here (tattoo artwork), not part of the app
+/output/

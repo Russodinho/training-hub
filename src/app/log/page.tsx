@@ -17,7 +17,15 @@ interface SetEntry {
 interface ExData {
   skipped: boolean
   sets: SetEntry[]
+  // 'simple' log-style days only: the exercise's done checkbox. The weight
+  // lives in sets[0].
+  done?: boolean
 }
+
+// Plain text inputs (no number-spinner arrows); strip anything that isn't
+// part of a number. inputMode still brings up the numeric keypad on phones.
+const decimalOnly = (v: string) => v.replace(/[^\d.]/g, '')
+const digitsOnly = (v: string) => v.replace(/\D/g, '')
 
 function blankSetState(exercise: Exercise): SetEntry[] {
   return Array.from({ length: exercise.sets }, (_, i) => ({
@@ -60,6 +68,12 @@ function clearDraft() {
   try { localStorage.removeItem(DRAFT_KEY) } catch {}
 }
 
+function blankExData(exercise: Exercise, simple: boolean): ExData {
+  return simple
+    ? { skipped: false, done: false, sets: [{ id: `${Date.now()}-0`, weight: '', reps: '', rpe: '' }] }
+    : { skipped: false, sets: blankSetState(exercise) }
+}
+
 function getWeekNumber(dateStr: string): number {
   const d = new Date(dateStr)
   d.setHours(0, 0, 0, 0)
@@ -84,13 +98,43 @@ function SetRow({ setNum, data, prevWeight, onChange, onRemove }: {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '24px 1fr 1fr 1fr 24px', gap: 4, alignItems: 'center', marginBottom: 4 }}>
       <span style={{ fontSize: 11, color: 'var(--faint)', textAlign: 'center', fontFamily: "'IBM Plex Mono', monospace" }}>{setNum}</span>
-      <input type="number" inputMode="decimal" placeholder={prevWeight ? `${prevWeight}` : 'lbs'}
-        value={data.weight} onChange={e => onChange({ ...data, weight: e.target.value })} style={inputS} />
-      <input type="number" inputMode="numeric" placeholder="reps"
-        value={data.reps} onChange={e => onChange({ ...data, reps: e.target.value })} style={inputS} />
-      <input type="number" inputMode="decimal" placeholder="RPE" step="0.5" min="1" max="10"
-        value={data.rpe} onChange={e => onChange({ ...data, rpe: e.target.value })} style={inputS} />
+      <input type="text" inputMode="decimal" placeholder={prevWeight ? `${prevWeight}` : 'lbs'}
+        value={data.weight} onChange={e => onChange({ ...data, weight: decimalOnly(e.target.value) })} style={inputS} />
+      <input type="text" inputMode="numeric" placeholder="reps"
+        value={data.reps} onChange={e => onChange({ ...data, reps: digitsOnly(e.target.value) })} style={inputS} />
+      <input type="text" inputMode="decimal" placeholder="RPE"
+        value={data.rpe} onChange={e => onChange({ ...data, rpe: decimalOnly(e.target.value) })} style={inputS} />
       <button onClick={onRemove} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--faint)', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
+    </div>
+  )
+}
+
+// 'simple' log style: one weight and a done checkbox, no per-set grid.
+function SimpleExerciseCard({ exercise, exIdx, setData, prevWeight, onUpdateSet, onToggleDone }: {
+  exercise: Exercise
+  exIdx: number
+  setData: ExData | undefined
+  prevWeight?: number
+  onUpdateSet: (exIdx: number, setIdx: number, d: SetEntry) => void
+  onToggleDone: (exIdx: number) => void
+}) {
+  const first = setData?.sets[0]
+  const done = !!setData?.done
+  return (
+    <div style={{ borderRadius: 8, border: '0.5px solid var(--border)', background: 'var(--s1)', marginBottom: 10, padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 10 }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{exercise.name}</span>
+        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)', marginTop: 2 }}>
+          {[`${exercise.sets}×${exercise.reps}`, exercise.notes].filter(Boolean).join(' · ')}
+        </p>
+      </div>
+      <input type="text" inputMode="decimal" placeholder={prevWeight ? `${prevWeight}` : 'lbs'} aria-label={`${exercise.name} weight`}
+        value={first?.weight ?? ''} onChange={e => first && onUpdateSet(exIdx, 0, { ...first, weight: decimalOnly(e.target.value) })}
+        style={{ ...inputS, width: 72, flexShrink: 0 }} />
+      <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', minHeight: 44, flexShrink: 0, fontFamily: "'Figtree', sans-serif", fontSize: 12, color: done ? 'var(--accent)' : 'var(--muted)' }}>
+        <input type="checkbox" checked={done} onChange={() => onToggleDone(exIdx)} style={{ width: 20, height: 20, cursor: 'pointer' }} />
+        Done
+      </label>
     </div>
   )
 }
@@ -191,7 +235,7 @@ export default function LogWorkoutPage() {
 
   const plan = useMemo(() => {
     const day = days.find(d => d.id === workoutType)
-    return { label: day?.name ?? '', sub: day?.subtitle ?? '', exercises: day?.exercises ?? [] as Exercise[] }
+    return { label: day?.name ?? '', sub: day?.subtitle ?? '', simple: day?.logStyle === 'simple', exercises: day?.exercises ?? [] as Exercise[] }
   }, [workoutType, days])
 
   useEffect(() => {
@@ -201,8 +245,8 @@ export default function LogWorkoutPage() {
     plan.exercises.forEach((ex, i) => {
       const cached = fromDraft?.exercises[ex.name]
       init[i] = cached && Array.isArray(cached.sets) && cached.sets.length
-        ? { skipped: !!cached.skipped, sets: cached.sets }
-        : { skipped: false, sets: blankSetState(ex) }
+        ? { skipped: !!cached.skipped, sets: cached.sets, done: !!cached.done }
+        : blankExData(ex, plan.simple)
     })
     setExerciseData(init)
     if (fromDraft) setNotes(fromDraft.notes ?? '')
@@ -226,7 +270,7 @@ export default function LogWorkoutPage() {
     clearDraft()
     dirty.current = false
     const init: Record<number, ExData> = {}
-    plan.exercises.forEach((ex, i) => { init[i] = { skipped: false, sets: blankSetState(ex) } })
+    plan.exercises.forEach((ex, i) => { init[i] = blankExData(ex, plan.simple) })
     setExerciseData(init)
     setNotes('')
     setRestoredAt(null)
@@ -304,6 +348,11 @@ export default function LogWorkoutPage() {
     })
   }, [])
 
+  const toggleDone = useCallback((exIdx: number) => {
+    dirty.current = true
+    setExerciseData(prev => ({ ...prev, [exIdx]: { ...prev[exIdx], done: !prev[exIdx].done } }))
+  }, [])
+
   const toggleSkip = useCallback((exIdx: number) => {
     dirty.current = true
     setExerciseData(prev => ({ ...prev, [exIdx]: { ...prev[exIdx], skipped: !prev[exIdx].skipped } }))
@@ -325,6 +374,13 @@ export default function LogWorkoutPage() {
       plan.exercises.forEach((ex, exIdx) => {
         const exData = exerciseData[exIdx]
         if (!exData || exData.skipped) return
+        if (plan.simple) {
+          // One row per exercise checked done; unchecked ones aren't saved.
+          if (!exData.done) return
+          const w = exData.sets[0]?.weight
+          rows.push({ session_id: session.id, exercise_name: ex.name, set_number: 1, reps: null, weight: w ? parseFloat(w) : null, rpe: null })
+          return
+        }
         exData.sets.forEach((s, setIdx) => {
           if (!s.weight && !s.reps) return
           rows.push({
@@ -393,7 +449,12 @@ export default function LogWorkoutPage() {
       )}
 
       {/* Exercise cards */}
-      {plan.exercises.map((ex, i) => (
+      {plan.simple && plan.exercises.map((ex, i) => (
+        <SimpleExerciseCard key={`${workoutType}-${i}`} exercise={ex} exIdx={i}
+          setData={exerciseData[i]} prevWeight={prevWeights[ex.name]}
+          onUpdateSet={updateSet} onToggleDone={toggleDone} />
+      ))}
+      {!plan.simple && plan.exercises.map((ex, i) => (
         <ExerciseCard key={`${workoutType}-${i}`} exercise={ex} exIdx={i}
           setData={exerciseData[i]} prevWeights={prevWeights}
           onUpdateSet={updateSet} onAddSet={addSet} onRemoveSet={removeSet} onToggleSkip={toggleSkip} />
