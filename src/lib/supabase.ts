@@ -371,13 +371,6 @@ export async function getWorkoutSessionDates(sinceDate: string): Promise<string[
 // training-log Lifts tab used to consume, so that tab can read from this
 // app's own data instead of an external spreadsheet.
 
-const SESSION_LABEL: Record<string, string> = {
-  upper_a: 'Upper A (Push + Delts)',
-  lower_a: 'Lower A (Quad Dominant)',
-  upper_b: 'Upper B (Pull + Delts)',
-  lower_b: 'Lower B (Glute Dominant)',
-}
-
 function isoWeekNumber(dateStr: string): number {
   const d = new Date(dateStr)
   d.setHours(0, 0, 0, 0)
@@ -392,6 +385,11 @@ export async function getLoggedWorkoutSets(): Promise<import('./workoutsParser')
     .select('id, date, type, notes')
     .order('date', { ascending: true })
   if (!sessions || sessions.length === 0) return []
+  // Session labels come from the program's day names (retired types like
+  // lower_a keep their old labels). Imported lazily: program.ts imports this
+  // module.
+  const { getProgramDays, sessionLabel } = await import('./program')
+  const programDays = await getProgramDays()
 
   const ids = sessions.map((s: { id: string }) => s.id)
   const { data: sets } = await sb.from('workout_sets')
@@ -414,7 +412,7 @@ export async function getLoggedWorkoutSets(): Promise<import('./workoutsParser')
         week,
         date: session.date,
         day,
-        session: SESSION_LABEL[session.type] ?? session.type,
+        session: sessionLabel(session.type, programDays),
         section: '',
         exercise: s.exercise_name,
         working_sets: null,

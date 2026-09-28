@@ -2,7 +2,8 @@ import {
   getActiveRace, getDaysToRace, getGarminActivitiesForWeeks, getMobilityStreak, garminBucket,
   getWorkoutSessionDates, easternNow, todayStr, mondayOf,
 } from '@/lib/supabase'
-import { getTodaySchedule, SCHEDULE } from '@/lib/schedule'
+import { getTodaySchedule, scheduleWithProgram, plannedBuckets } from '@/lib/schedule'
+import { getProgramDays } from '@/lib/program'
 import { getAthleteContext } from '@/lib/agentContext'
 import VolumeChart, { type WeekVolume, type DayVolume, type VolumeSport } from '@/components/dashboard/VolumeChart'
 import NutritionActualsPanel from '@/components/dashboard/NutritionActualsPanel'
@@ -35,12 +36,13 @@ function toMonIdx(day: number) { return day === 0 ? 6 : day - 1 }
 const DAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
 
 export default async function DashboardPage() {
-  const [weeklyActivities, mobilityStreak, activeRaceResult, athleteContextResult, loggedLiftsResult] = await Promise.allSettled([
+  const [weeklyActivities, mobilityStreak, activeRaceResult, athleteContextResult, loggedLiftsResult, programResult] = await Promise.allSettled([
     getGarminActivitiesForWeeks(14),
     getMobilityStreak(),
     getActiveRace(),
     getAthleteContext(),
     getWorkoutSessionDates(mondayOf(todayStr())),
+    getProgramDays(),
   ])
 
   const allActivities = weeklyActivities.status === 'fulfilled' ? weeklyActivities.value : []
@@ -49,22 +51,20 @@ export default async function DashboardPage() {
   const daysToRace = activeRace ? getDaysToRace(activeRace.race) : null
   const athleteContext = athleteContextResult.status === 'fulfilled' ? athleteContextResult.value : null
   const loggedLiftDates = loggedLiftsResult.status === 'fulfilled' ? loggedLiftsResult.value : []
+  const programDays = programResult.status === 'fulfilled' ? programResult.value : undefined
 
   const now = easternNow()
   const today = todayStr()
   const weekStartStr = mondayOf(today)
   const todayMonIdx = toMonIdx(now.getDay())
 
-  // Adherence (this Mon–Sun week). Planned = gym + soccer blocks in the weekly
-  // schedule template (swim/bike/run aren't in that template, so this
-  // undercounts a full tri week). Completed = distinct (day, sport) sessions
+  // Adherence (this Mon–Sun week). Planned = training sessions in the weekly
+  // schedule template, with gym days taken from the program (see
+  // plannedBuckets). Completed = distinct (day, sport) sessions
   // from Garmin plus lifts logged in /log; a lift both on the watch and logged
   // in /log on the same day counts once.
   const TRAINING_BUCKETS = ['swim', 'bike', 'run', 'lift', 'soccer', 'surfing', 'snowboarding', 'yoga']
-  const workoutsPlanned = SCHEDULE.reduce(
-    (n, day) => n + (day.blocks.some(b => b.cls === 'bl-gym') ? 1 : 0) + (day.blocks.some(b => b.cls === 'bl-soccer') ? 1 : 0),
-    0,
-  )
+  const workoutsPlanned = scheduleWithProgram(programDays).reduce((n, day) => n + plannedBuckets(day).size, 0)
   const sessionKeys = new Set<string>()
   for (const act of allActivities) {
     if (!act.date || act.date < weekStartStr) continue
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
   const recentActivities = allActivities.slice(0, 8)
 
   // Today's schedule
-  const todaySchedule = getTodaySchedule()
+  const todaySchedule = getTodaySchedule(programDays, now.getDay())
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
   const todayName = dayNames[now.getDay()]
   const timelineBlocks = todaySchedule?.blocks.filter(b => TIMELINE_CLASSES.includes(b.cls)) ?? []

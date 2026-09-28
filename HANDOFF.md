@@ -981,3 +981,41 @@ Read Codex's audit above. Some findings were acted on, some were **intentionally
 **Correction (Claude, 2026-09-18):** the previous 7-day entry did not give every chart the same range set. Now **all six charts offer 7d / 30d / 60d / 90d, default 7d**: Weekly volume (was 7D + 4W/8W/12W), Distribution and Weight & body comp (were missing 60d) now match Nutrition actuals, Macro accuracy and Lift progress (Lift also keeps "All time").
 - Weekly volume: 7D = daily bars; 30D/60D/90D = weekly bars for every Monday-week touching the last N days (so the oldest bar can include a few days before the window; the caption says so). Component now takes a `today` prop; the page builds **14** Monday-weeks and fetches 14 weeks of activities so a 90D window is fully covered.
 - `npx tsc --noEmit` and `npm run build` pass (19 routes). Not visually checked in a browser.
+
+## 2026-09-24 — Tattoo flash artwork
+**Agent:** Codex
+- Created five black-and-white tattoo concept sheets covering the user's pop-culture, MSG, vegetables, herbs, fruit, and flower list in output/tattoo-flash. Used built-in image generation; corrected three dark backgrounds. No application code changed.
+
+## 2026-09-27 — Claude: editable workout program + its own /program page
+**Agent:** Claude
+
+**Recovered (previous Claude session, VS Code froze before it wrote a handoff):** the lift days are now data instead of hardcoded.
+- `supabase/migrations/0010_workout_program.sql`: new `workout_days` table (`id` slug = `workout_sessions.type`, `weekday` 0=Sun..6=Sat), `exercises.notes` column, seeds the Sep 2026 program (Upper A Mon, KB Circuit Tue, Upper B Thu, Legs Fri). **Unknown whether it has been run in Supabase**; until it is, the app falls back to `DEFAULT_PROGRAM` and the editor is read-only with a banner saying so.
+- `src/lib/program.ts` (new): `getProgram()`, `getProgramDays()`, `sessionLabel()` (keeps old labels for retired `lower_a`/`lower_b` history), `DEFAULT_PROGRAM`.
+- `/log`, dashboard (`page.tsx`), `schedule.ts`, `agentContext.ts`, `supabase.ts` (Training Log labels) read from the program. Coach prompts, nutrition day labels and the IT-band injury note were updated to the new split.
+
+**This session (user request: a separate page for editing the workout that feeds Log Workout):**
+- The editor moved from `src/app/settings/exercises/page.tsx` to **`src/app/program/page.tsx`**, titled "Workout Program". `/settings/exercises` 308-redirects to `/program` (`next.config.js`).
+- Nav: "Workout Program" is now under **Train** after Log Workout (`navConfig.ts`); mobile Train tab claims `/program`. `UTILITY_NAV` is now empty, and `Sidebar.tsx` hides the utility section / mobile "More" group when it has no links. The existing gear icon was re-keyed to `/program`, not re-chosen.
+- `/log` header has an "Edit program →" link; the program page subtitle links back to Log Workout. Both are plain functional links; **Codex** may want to style them.
+- Verified: `npx tsc --noEmit` clean; on the running dev server `/program`, `/log`, `/` return 200 and `/settings/exercises` redirects. `npm run build` not run (dev server on :3000 holds `.next`). Not visually checked. Nothing committed.
+
+**Update (Claude, 2026-09-27) — "Add lift" didn't work + exercise dropdown:**
+- Root cause, confirmed against the live DB: `workout_days` doesn't exist and `exercises.notes` doesn't exist (0010 never run), so `/program` falls back to `DEFAULT_PROGRAM` and disables every edit button. Second, independent cause: **`exercises` has RLS on with no policy**; the service key sees 46 rows, the anon key sees 0, and anon writes are rejected. This would have broken Add lift even after 0010. Added `alter table if exists exercises disable row level security;` to 0010 (project convention, same as 0003/0004).
+- New `src/lib/exerciseLibrary.ts`: the user's exercise list grouped for `<optgroup>`s, plus Reverse crunch, KB halos, Around the worlds (in the current program but not on the list). "+ Add lift" now opens with an "Exercise" dropdown (plus "Custom (type your own)"); picking fills the name field, which stays editable. Edit-lift still uses the plain name field. Dropdown is a native `<select>` with functional-only styling.
+- `npx tsc --noEmit` clean. **Buttons not yet exercised end to end** because the migration isn't applied.
+
+**Update (Claude, 2026-09-27) — migration applied, all buttons verified:**
+- First run of 0010 failed: `exercises_category_check` only allowed the old categories. 0010 now also drops that constraint and `workout_sessions_type_check` (if present) so `/log` can save `kb_circuit`/`legs`/user-added day types. User re-ran it; it succeeded.
+- Verified against the live DB with a headless Playwright script on the dev server (throwaway "ZZ Test Day", deleted afterwards): + Day, + Add lift (dropdown pick and Custom), Cancel, ↑/↓, Edit/Save/Cancel, Remove, Save day (subtitle + weekday), ← Move/Move →, Delete day (Keep and confirm), day tabs, `/log` showing program lifts, and "Edit program →" all pass (22/22). A `workout_sessions` insert with `type = 'legs'` via the anon key succeeds (test row deleted). No console errors.
+- Script lives in the session scratchpad, not the repo.
+
+**Update (Claude, 2026-09-27) — tab title + /log draft caching (user request):**
+- Browser tab title is now "Matt's Training Hub" (`src/app/layout.tsx` metadata). The sidebar/mobile header brand text still says "Training Hub 2026"; not changed (only the tab title was asked for).
+- `/log` keeps unsaved entries in `localStorage` (`hub:logWorkoutDraft`) as the user types: date, day, notes, and per-exercise sets/skip keyed by exercise **name** (survives program reordering). Restored on return to the page (menu tap, reload), including the date and day. A draft is only written after the user changes something (`dirty` ref), so opening the page or switching days never overwrites it with blanks. Cleared on successful save or via a new "Discard" link in a "Restored your unsaved entries from …" notice (functional-only styling, **Codex** may restyle). Drafts older than 24h are ignored. One draft at a time: typing into a different day replaces it.
+- Verified headless at 390px against the live dev server (12/12): survives nav-away and reload, day/date/notes restored, other day starts blank, Discard and Save both clear it. The Save test wrote a 1999-dated session, since deleted. `npx tsc --noEmit` clean.
+
+**Build/commit (Claude, 2026-09-27):** migration 0010 is applied. `npm run build` passes (19 routes, incl. `/program`), run on a copy of the tree because the dev server held `.next`. Committed and pushed to `main`.
+
+**Next agent needs to:**
+- Stray file `supabase/migrations/My projects.code-workspace` (VS Code workspace saved in the wrong folder) should be moved/deleted; don't commit `output/` (tattoo art).

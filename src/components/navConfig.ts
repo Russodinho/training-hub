@@ -24,6 +24,7 @@ export const DESKTOP_NAV: NavEntry[] = [
     type: 'group', key: 'train', label: 'Train',
     children: [
       { href: '/log', label: 'Log Workout' },
+      { href: '/program', label: 'Workout Program' },
       { href: '/training-log', label: 'Training History' },
       { href: '/cardio', label: 'Cardio' },
     ],
@@ -43,20 +44,16 @@ export const DESKTOP_NAV: NavEntry[] = [
 
 // Rendered separately in a quiet utility area (bottom of the desktop
 // sidebar, its own section in the mobile full menu) rather than as a
-// seventh top-level destination.
-export const UTILITY_NAV: NavLink[] = [
-  { href: '/settings/exercises', label: 'Exercise Library' },
-]
+// seventh top-level destination. Currently empty: the program editor moved
+// from here (/settings/exercises) into Train as /program.
+export const UTILITY_NAV: NavLink[] = []
 
 // Five fixed bottom shortcuts on mobile. `paths` decides both the tab's
-// active state and its section-selector siblings — deliberately looser
-// than DESKTOP_NAV's grouping in one place: Train also claims
-// /settings/exercises so the bottom bar highlights correctly there, even
-// though Exercise Library lives in the utility area on desktop.
+// active state and its section-selector siblings.
 export const MOBILE_TABS: { href: string; label: string; paths: string[] }[] = [
   { href: '/', label: 'Home', paths: ['/'] },
   { href: '/race-calendar', label: 'Plan', paths: ['/race-calendar', '/season-plan', '/race-day'] },
-  { href: '/log', label: 'Train', paths: ['/log', '/training-log', '/cardio', '/settings/exercises'] },
+  { href: '/log', label: 'Train', paths: ['/log', '/training-log', '/cardio', '/program'] },
   { href: '/recovery', label: 'Recover', paths: ['/recovery', '/injuries', '/mobility', '/wind-down', '/sleep'] },
   { href: '/fuel', label: 'Fuel', paths: ['/fuel'] },
 ]

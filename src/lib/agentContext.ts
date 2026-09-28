@@ -6,7 +6,8 @@
 // fields are structurally untracked right now and stay null/false).
 
 import { NUTRITION_TARGETS, NUTRITION_BASELINE } from './data'
-import { getTodaySchedule, SCHEDULE } from './schedule'
+import { getTodaySchedule, scheduleWithProgram, plannedBuckets } from './schedule'
+import { getProgramDays } from './program'
 import {
   getSupabaseClient, getRaces, getActiveRace, getDaysToRace, getRaceResult,
   garminBucket, easternNow, type Race,
@@ -135,12 +136,14 @@ function raceToSummary(race: Race, result: string | null): RaceSummary {
 }
 
 async function fetchToday() {
-  const schedule = getTodaySchedule()
+  const schedule = getTodaySchedule(await getProgramDays(), easternNow().getDay())
   const gymBlock = schedule?.blocks.find(b => b.cls === 'bl-gym')
   const hasSoccer = !!schedule?.blocks.find(b => b.cls === 'bl-soccer')
+  const has = (cls: string) => !!schedule?.blocks.some(b => b.cls === cls)
+  const cardioBlocks = schedule?.blocks.filter(b => ['bl-swim', 'bl-bike', 'bl-run', 'bl-brick'].includes(b.cls)) ?? []
   const gymSession = gymBlock ? gymBlock.name.replace(/^Gym\s*·\s*/, '') : null
 
-  const workouts: Workout[] = []
+  const workouts: Workout[] = cardioBlocks.map(b => ({ name: b.name, time: b.time }))
   if (gymBlock) workouts.push({ name: `Gym · ${gymSession}`, time: gymBlock.time })
   if (hasSoccer) {
     const soccerBlock = schedule?.blocks.find(b => b.cls === 'bl-soccer')
@@ -149,17 +152,15 @@ async function fetchToday() {
 
   return {
     workouts,
-    isRestDay: !gymBlock && !hasSoccer,
+    isRestDay: !gymBlock && !hasSoccer && cardioBlocks.length === 0,
     hasSoccer,
     hasGym: !!gymBlock,
     gymSession,
-    // Swim/bike/run/brick days aren't tracked as structured data anywhere in
-    // this app yet (schedule.ts only encodes gym + soccer blocks) — honest
-    // false rather than a guessed day-of-week mapping.
-    hasSwim: false,
-    hasRun: false,
-    hasBike: false,
-    hasBrick: false,
+    // From the swim/run/bike/brick blocks in the weekly schedule template.
+    hasSwim: has('bl-swim'),
+    hasRun: has('bl-run') || has('bl-brick'),
+    hasBike: has('bl-bike') || has('bl-brick'),
+    hasBrick: has('bl-brick'),
     notes: schedule?.tag ?? null,
   }
 }
@@ -186,11 +187,13 @@ async function fetchWeek() {
     totalMin += a.duration_min ?? 0
   }
 
-  // Planned sessions this week, derived from the real weekly schedule
-  // template (gym + soccer blocks) — swim/bike/run aren't in that template
-  // (see fetchToday's comment), so "planned" undercounts a full tri week.
-  const workoutsPlanned = SCHEDULE.reduce((n, day) => {
-    return n + (day.blocks.some(b => b.cls === 'bl-gym') ? 1 : 0) + (day.blocks.some(b => b.cls === 'bl-soccer') ? 1 : 0)
+  // Planned sessions this week from the weekly schedule template (gym days
+  // from the program). Yoga is left out since workoutsCompleted doesn't
+  // count it.
+  const workoutsPlanned = scheduleWithProgram(await getProgramDays()).reduce((n, day) => {
+    const buckets = plannedBuckets(day)
+    buckets.delete('yoga')
+    return n + buckets.size
   }, 0)
 
   return {

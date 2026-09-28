@@ -1,95 +1,11 @@
 'use client'
-import { getSupabaseClient } from '@/lib/supabase'
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { getSupabaseClient, todayStr as easternTodayStr, easternNow } from '@/lib/supabase'
+import { getProgram, dayForWeekday, DEFAULT_PROGRAM, type ProgramDay, type ProgramExercise as Exercise } from '@/lib/program'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { CSSProperties } from 'react'
 
-// Maps each lift day onto the categories used by the Settings → Exercises
-// page, so custom exercises added/enabled there actually show up here.
-const CATEGORY_MAP: Record<string, string[]> = {
-  upper_a: ['upper_push', 'core'],
-  lower_a: ['lower_quad'],
-  upper_b: ['upper_pull', 'core'],
-  lower_b: ['lower_glute'],
-}
-
-interface DbExercise {
-  name: string
-  category: string
-  default_sets: number | null
-  default_reps: string | null
-  default_rpe: string | null
-  rest_seconds: number | null
-  is_active: boolean
-  sort_order: number
-}
-
-// Monday=Upper A, Tuesday=Lower A, Thursday=Upper B, Friday=Lower B — matches
-// the actual training schedule (previously this said Wednesday for Lower A).
-const DAY_WORKOUT: Record<number, string> = { 1: 'upper_a', 2: 'lower_a', 4: 'upper_b', 5: 'lower_b' }
-
-// Exercise lists below were reconciled against 19 weeks of real logged
-// history (previously tracked in a Google Sheet, now retired in favor of
-// this app's own Supabase-backed logging) so the day/exercise structure
-// matches what's actually been trained, instead of a divergent guess.
-const PLAN: Record<string, { label: string; sub: string; exercises: Exercise[] }> = {
-  upper_a: {
-    label: 'Upper A', sub: 'Push + Delts',
-    exercises: [
-      { name: 'Incline DB or BB Press',        sets: 4, reps: '6-8',        rpe: '8-9', rest: 90 },
-      { name: 'Flat DB or Machine Press',       sets: 3, reps: '6-8',        rpe: '8',   rest: 90 },
-      { name: 'Cable Fly (high-to-low crossover)', sets: 3, reps: '12-15',  rpe: '9',   rest: 45 },
-      { name: 'Standing DB OHP',               sets: 3, reps: '8-10',       rpe: '8-9', rest: 90 },
-      { name: 'Lateral Raise',                 sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
-      { name: 'Reverse Cable Fly',             sets: 3, reps: '10',         rpe: '9',   rest: 45 },
-      { name: 'Cable Triceps Pushdowns',       sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
-      { name: 'Hammer Curls',                  sets: 3, reps: '10',         rpe: '8-9', rest: 45 },
-      { name: 'Weighted Cable Crunches',       sets: 4, reps: '15',         rpe: '9',   rest: 30, isCore: true },
-      { name: 'Pallof Press',                  sets: 3, reps: '12-15/side', rpe: '9',   rest: 60, isCore: true },
-    ],
-  },
-  lower_a: {
-    label: 'Lower A', sub: 'Quad Dominant',
-    exercises: [
-      { name: 'Hack squat (quad)',                  sets: 4, reps: '4-6',        rpe: '8-9', rest: 90 },
-      { name: 'Front foot elevated split squat',    sets: 3, reps: '10/side',    rpe: '8-9', rest: 90 },
-      { name: 'Leg press',                          sets: 3, reps: '10-12',      rpe: '9',   rest: 90 },
-      { name: 'Seated Hamstring Curl',              sets: 3, reps: '10-12',      rpe: '9',   rest: 60 },
-      { name: 'Standing calf raises',               sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
-    ],
-  },
-  upper_b: {
-    label: 'Upper B', sub: 'Pull + Delts',
-    exercises: [
-      { name: 'Lat Pulldown',                      sets: 4, reps: '8-10',       rpe: '8-9', rest: 90 },
-      { name: 'Chest Supported Row',               sets: 4, reps: '8-10',       rpe: '8-9', rest: 90 },
-      { name: 'Machine Low Row (single arm)',      sets: 3, reps: '10-12',      rpe: '8-9', rest: 60 },
-      { name: 'Reverse Pec Deck',                  sets: 3, reps: '12-15',      rpe: '9',   rest: 45 },
-      { name: 'Face Pulls',                         sets: 3, reps: '15',         rpe: '8',   rest: 45 },
-      { name: 'EZ Bar Preacher Curl',              sets: 3, reps: '10-12',      rpe: '8-9', rest: 45 },
-      { name: 'Rotary Torso',                       sets: 3, reps: '12/side',    rpe: '8-9', rest: 30, isCore: true },
-    ],
-  },
-  lower_b: {
-    label: 'Lower B', sub: 'Glute Dominant',
-    exercises: [
-      { name: 'Romanian Deadlift',                 sets: 4, reps: '6-8',        rpe: '8',   rest: 90 },
-      { name: 'Belted Hip Thrust',                 sets: 4, reps: '10-12',      rpe: '8-9', rest: 90 },
-      { name: 'Leg Extension',                     sets: 3, reps: '12',         rpe: '9',   rest: 45 },
-      { name: 'Hip Abduction',                     sets: 3, reps: '15',         rpe: '9',   rest: 45 },
-      { name: 'Standing Cable Hip Flexor Pull',   sets: 3, reps: '12-15/side', rpe: '8',   rest: 45 },
-      { name: 'Seated Calf Raises',               sets: 3, reps: '15',         rpe: '7',   rest: 45 },
-    ],
-  },
-}
-
-interface Exercise {
-  name: string
-  sets: number
-  reps: string
-  rpe: string
-  rest: number
-  isCore?: boolean
-}
+// Days and exercises come from the editable program (/program,
+// src/lib/program.ts). The day's id is saved as workout_sessions.type.
 
 interface SetEntry {
   id: string
@@ -108,6 +24,40 @@ function blankSetState(exercise: Exercise): SetEntry[] {
     id: `${Date.now()}-${i}`,
     weight: '', reps: '', rpe: '',
   }))
+}
+
+// Unsaved entries are kept in localStorage as the user types, so leaving
+// the page (a menu tap, a refresh, the phone reloading the tab) doesn't lose
+// them. One draft at a time, keyed by exercise name so it survives program
+// edits that reorder lifts. Cleared on a successful save; ignored once it's
+// older than DRAFT_MAX_AGE_MS.
+const DRAFT_KEY = 'hub:logWorkoutDraft'
+const DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000
+
+interface Draft {
+  date: string
+  type: string
+  notes: string
+  exercises: Record<string, ExData>
+  updatedAt: number
+}
+
+function readDraft(): Draft | null {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY)
+    if (!raw) return null
+    const d = JSON.parse(raw) as Draft
+    if (!d || typeof d.type !== 'string' || Date.now() - d.updatedAt > DRAFT_MAX_AGE_MS) return null
+    return d
+  } catch { return null }
+}
+
+function writeDraft(d: Draft) {
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify(d)) } catch {}
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(DRAFT_KEY) } catch {}
 }
 
 function getWeekNumber(dateStr: string): number {
@@ -158,21 +108,21 @@ function ExerciseCard({ exercise, exIdx, setData, prevWeights, onUpdateSet, onAd
   const skipped = setData?.skipped ?? false
   return (
     <div style={{
-      borderRadius: 8, border: `0.5px solid ${exercise.isCore ? 'var(--bike-bd)' : 'var(--border)'}`,
+      borderRadius: 8, border: '0.5px solid var(--border)',
       background: 'var(--s1)', marginBottom: 10,
       opacity: skipped ? 0.45 : 1, overflow: 'hidden',
     }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '10px 12px 4px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {exercise.isCore && (
-              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, fontWeight: 600, color: 'var(--bike)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Core</span>
-            )}
             <span style={{ fontFamily: "'Figtree', sans-serif", fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{exercise.name}</span>
           </div>
           <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)', marginTop: 2 }}>
-            {exercise.sets}×{exercise.reps} · RPE {exercise.rpe} · {exercise.rest}s rest
+            {[`${exercise.sets}×${exercise.reps}`, exercise.rpe && `RPE ${exercise.rpe}`, exercise.rest != null && `${exercise.rest}s rest`].filter(Boolean).join(' · ')}
           </p>
+          {exercise.notes && (
+            <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{exercise.notes}</p>
+          )}
         </div>
         <button onClick={() => onToggleSkip(exIdx)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: 'var(--faint)', paddingTop: 2 }}>
           {skipped ? 'Undo' : 'Skip'}
@@ -202,77 +152,113 @@ function ExerciseCard({ exercise, exIdx, setData, prevWeights, onUpdateSet, onAd
 }
 
 export default function LogWorkoutPage() {
-  const today = new Date()
-  const todayStr = today.toISOString().split('T')[0]
-  const todayType = DAY_WORKOUT[today.getDay()]
+  const todayStr = easternTodayStr()
 
+  const [days, setDays] = useState<ProgramDay[]>(DEFAULT_PROGRAM)
   const [date, setDate] = useState(todayStr)
-  const [workoutType, setWorkoutType] = useState(todayType ?? 'upper_a')
+  const [workoutType, setWorkoutType] = useState<string>(() => dayForWeekday(DEFAULT_PROGRAM, easternNow().getDay())?.id ?? DEFAULT_PROGRAM[0].id)
   const [exerciseData, setExerciseData] = useState<Record<number, ExData>>({})
   const [prevWeights, setPrevWeights] = useState<Record<string, number>>({})
   const [notes, setNotes] = useState('')
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState('')
-
-  const [dbExercises, setDbExercises] = useState<DbExercise[]>([])
+  // When the on-screen entries came from a saved draft (shown as a notice).
+  const [restoredAt, setRestoredAt] = useState<number | null>(null)
+  // True once the user has typed/changed something for the current day, so
+  // just opening or switching days never overwrites a draft with blanks.
+  const dirty = useRef(false)
 
   useEffect(() => {
-    async function fetchCustomExercises() {
-      const sb = getSupabaseClient()
-      const { data } = await sb.from('exercises').select('*').eq('is_active', true).order('sort_order').order('name')
-      if (data) setDbExercises(data)
-    }
-    fetchCustomExercises()
+    getProgram().then(({ days: loaded }) => {
+      setDays(loaded)
+      // Resume an unsaved draft if there is one for a day that still
+      // exists; otherwise pick today's scheduled day from the loaded program
+      // (it may differ from the built-in default the page first rendered with).
+      const draft = readDraft()
+      if (draft && loaded.some(d => d.id === draft.type)) {
+        setDate(draft.date)
+        setWorkoutType(draft.type)
+        return
+      }
+      const todays = dayForWeekday(loaded, easternNow().getDay())
+      setWorkoutType(prev => todays?.id ?? (loaded.some(d => d.id === prev) ? prev : loaded[0]?.id ?? prev))
+    }).catch(() => {})
   }, [])
 
-  // Exercises table (Settings -> Exercises) is the source of truth — the
-  // built-in lifts were seeded in there too (scripts/seed-plan-exercises.mjs),
-  // so editing one in Settings changes what shows up here. PLAN's hardcoded
-  // exercises only serve as a fallback if the DB has nothing yet for a
-  // category (e.g. before that seed has run), so this page never shows a
-  // workout with zero exercises.
+  // The day scheduled for the selected date, if any (for the header hint).
+  const dateDay = useMemo(() => dayForWeekday(days, new Date(date + 'T00:00:00').getDay()), [days, date])
+
   const plan = useMemo(() => {
-    const base = PLAN[workoutType]
-    const categories = CATEGORY_MAP[workoutType] ?? []
-    const dbForDay = dbExercises.filter(ex => categories.includes(ex.category))
-    const exercises: Exercise[] = dbForDay.map(ex => ({
-      name: ex.name,
-      sets: ex.default_sets ?? 3,
-      reps: ex.default_reps ?? '10-12',
-      rpe: ex.default_rpe ?? '8-9',
-      rest: ex.rest_seconds ?? 60,
-      isCore: ex.category === 'core',
-    }))
-    return { ...base, exercises: exercises.length ? exercises : base.exercises }
-  }, [workoutType, dbExercises])
+    const day = days.find(d => d.id === workoutType)
+    return { label: day?.name ?? '', sub: day?.subtitle ?? '', exercises: day?.exercises ?? [] as Exercise[] }
+  }, [workoutType, days])
 
   useEffect(() => {
+    const draft = readDraft()
+    const fromDraft = draft && draft.type === workoutType ? draft : null
+    const init: Record<number, ExData> = {}
+    plan.exercises.forEach((ex, i) => {
+      const cached = fromDraft?.exercises[ex.name]
+      init[i] = cached && Array.isArray(cached.sets) && cached.sets.length
+        ? { skipped: !!cached.skipped, sets: cached.sets }
+        : { skipped: false, sets: blankSetState(ex) }
+    })
+    setExerciseData(init)
+    if (fromDraft) setNotes(fromDraft.notes ?? '')
+    setRestoredAt(fromDraft ? fromDraft.updatedAt : null)
+    dirty.current = false
+    setSaved(false)
+    setError('')
+    // workoutType is read, not a trigger: plan already changes with it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plan])
+
+  // Persist entries as they change, once the user has touched something.
+  useEffect(() => {
+    if (!dirty.current) return
+    const exercises: Record<string, ExData> = {}
+    plan.exercises.forEach((ex, i) => { if (exerciseData[i]) exercises[ex.name] = exerciseData[i] })
+    writeDraft({ date, type: workoutType, notes, exercises, updatedAt: Date.now() })
+  }, [exerciseData, notes, date, workoutType, plan])
+
+  function discardDraft() {
+    clearDraft()
+    dirty.current = false
     const init: Record<number, ExData> = {}
     plan.exercises.forEach((ex, i) => { init[i] = { skipped: false, sets: blankSetState(ex) } })
     setExerciseData(init)
-    setSaved(false)
-    setError('')
-  }, [plan])
+    setNotes('')
+    setRestoredAt(null)
+  }
 
+  // Prefill each exercise with the top weight from the most recent session
+  // that included it, whichever day that was logged under (so a lift that
+  // moved between days, e.g. RDL from Lower B to Legs, keeps its history).
   useEffect(() => {
+    const names = plan.exercises.map(e => e.name)
+    if (!names.length) { setPrevWeights({}); return }
+    let cancelled = false
     async function fetchPrev() {
       const sb = getSupabaseClient()
-      const { data: prevSession } = await sb.from('workout_sessions').select('id').eq('type', workoutType).order('date', { ascending: false }).limit(1).single()
-      if (!prevSession) return
-      const { data: prevSets } = await sb.from('workout_sets').select('exercise_name, weight').eq('session_id', prevSession.id)
-      if (!prevSets) return
+      const { data: prevSets } = await sb.from('workout_sets')
+        .select('exercise_name, weight, workout_sessions!inner(date)')
+        .in('exercise_name', names)
+        .not('weight', 'is', null)
+      if (cancelled || !prevSets) return
+      const latest: Record<string, { date: string; weight: number }> = {}
+      for (const s of prevSets as unknown as { exercise_name: string; weight: number; workout_sessions: { date: string } }[]) {
+        const d = s.workout_sessions?.date ?? ''
+        const cur = latest[s.exercise_name]
+        if (!cur || d > cur.date || (d === cur.date && s.weight > cur.weight)) latest[s.exercise_name] = { date: d, weight: s.weight }
+      }
       const weights: Record<string, number> = {}
-      prevSets.forEach((s: { exercise_name: string; weight: number }) => {
-        if (s.weight && (!weights[s.exercise_name] || s.weight > weights[s.exercise_name])) {
-          weights[s.exercise_name] = s.weight
-        }
-      })
+      for (const [n, v] of Object.entries(latest)) weights[n] = v.weight
       setPrevWeights(weights)
 
       // Backfill only sets the user hasn't touched yet — never overwrite
       // something they've already typed, and this can land after the
-      // blank-state init effect below since it's a separate async fetch.
+      // blank-state init effect above since it's a separate async fetch.
       setExerciseData(prev => {
         const next = { ...prev }
         for (const [exIdx, ex] of Object.entries(next)) {
@@ -288,9 +274,11 @@ export default function LogWorkoutPage() {
       })
     }
     fetchPrev()
-  }, [workoutType, plan])
+    return () => { cancelled = true }
+  }, [plan])
 
   const updateSet = useCallback((exIdx: number, setIdx: number, updated: SetEntry) => {
+    dirty.current = true
     setExerciseData(prev => {
       const ex = { ...prev[exIdx] }
       const sets = [...ex.sets]
@@ -300,6 +288,7 @@ export default function LogWorkoutPage() {
   }, [])
 
   const addSet = useCallback((exIdx: number) => {
+    dirty.current = true
     setExerciseData(prev => {
       const ex = prev[exIdx]
       return { ...prev, [exIdx]: { ...ex, sets: [...ex.sets, { id: `${Date.now()}`, weight: '', reps: '', rpe: '' }] } }
@@ -307,6 +296,7 @@ export default function LogWorkoutPage() {
   }, [])
 
   const removeSet = useCallback((exIdx: number, setIdx: number) => {
+    dirty.current = true
     setExerciseData(prev => {
       const ex = prev[exIdx]
       if (ex.sets.length <= 1) return prev
@@ -315,6 +305,7 @@ export default function LogWorkoutPage() {
   }, [])
 
   const toggleSkip = useCallback((exIdx: number) => {
+    dirty.current = true
     setExerciseData(prev => ({ ...prev, [exIdx]: { ...prev[exIdx], skipped: !prev[exIdx].skipped } }))
   }, [])
 
@@ -349,6 +340,9 @@ export default function LogWorkoutPage() {
         const { error: setsErr } = await sb.from('workout_sets').insert(rows)
         if (setsErr) throw setsErr
       }
+      clearDraft()
+      dirty.current = false
+      setRestoredAt(null)
       setSaved(true)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong')
@@ -366,7 +360,8 @@ export default function LogWorkoutPage() {
       <div className="page-header">
         <div>
           <h2>Workout Log</h2>
-          <div className="sub">{!todayType ? 'No lift scheduled today — logging manually' : plan.sub}</div>
+          <div className="sub">{!dateDay ? 'No lift scheduled this day, logging manually' : workoutType === dateDay.id ? plan.sub : `${dateDay.name} is scheduled this day`}</div>
+          <a href="/program" style={{ fontFamily: "'Figtree', sans-serif", fontSize: 12, color: 'var(--accent)' }}>Edit program →</a>
         </div>
         <input type="date" value={date} onChange={e => setDate(e.target.value)}
           style={{ background: 'var(--s2)', border: '0.5px solid var(--border)', borderRadius: 6, padding: '5px 10px', fontSize: 12, color: 'var(--text)', fontFamily: "'IBM Plex Mono', monospace" }} />
@@ -374,7 +369,7 @@ export default function LogWorkoutPage() {
 
       {/* Workout type selector */}
       <div style={{ display: 'flex', gap: 8, marginBottom: 20, overflowX: 'auto', paddingBottom: 2 }}>
-        {Object.entries(PLAN).map(([type, w]) => (
+        {days.map(({ id: type, name }) => (
           <button key={type} onClick={() => setWorkoutType(type)} style={{
             flexShrink: 0, padding: '6px 16px', borderRadius: 20,
             fontFamily: "'Figtree', sans-serif", fontSize: 12, fontWeight: workoutType === type ? 600 : 400,
@@ -383,10 +378,19 @@ export default function LogWorkoutPage() {
             border: `1px solid ${workoutType === type ? 'var(--accent)' : 'var(--border)'}`,
             cursor: 'pointer', transition: 'all 0.15s',
           }}>
-            {w.label}
+            {name}
           </button>
         ))}
       </div>
+
+      {restoredAt && (
+        <p style={{ fontFamily: "'Figtree', sans-serif", fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>
+          Restored your unsaved entries from {new Date(restoredAt).toLocaleString([], { weekday: 'short', hour: 'numeric', minute: '2-digit' })}.{' '}
+          <button onClick={discardDraft} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, color: 'var(--accent)' }}>
+            Discard
+          </button>
+        </p>
+      )}
 
       {/* Exercise cards */}
       {plan.exercises.map((ex, i) => (
@@ -395,8 +399,14 @@ export default function LogWorkoutPage() {
           onUpdateSet={updateSet} onAddSet={addSet} onRemoveSet={removeSet} onToggleSkip={toggleSkip} />
       ))}
 
+      {plan.exercises.length === 0 && (
+        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: 'var(--muted)', marginBottom: 12 }}>
+          No lifts on this day yet. Add them in <a href="/program" style={{ color: 'var(--accent)' }}>Workout Program</a>.
+        </p>
+      )}
+
       {/* Session notes */}
-      <textarea placeholder="Session notes (optional)…" value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+      <textarea placeholder="Session notes (optional)…" value={notes} onChange={e => { dirty.current = true; setNotes(e.target.value) }} rows={2}
         style={{ width: '100%', background: 'var(--s1)', border: '0.5px solid var(--border)', borderRadius: 8, padding: '10px 12px', fontSize: 13, color: 'var(--text)', fontFamily: "'Figtree', sans-serif", marginBottom: 12, resize: 'none', outline: 'none', boxSizing: 'border-box' }} />
 
       {error && <p style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 10 }}>{error}</p>}

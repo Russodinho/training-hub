@@ -12,6 +12,8 @@ const nextConfig = {
       { source: '/nutrition', destination: '/fuel', permanent: true },
       { source: '/supplements', destination: '/fuel', permanent: true },
       { source: '/meal-hub', destination: '/fuel', permanent: true },
+      // Program editor moved out of Settings into Train
+      { source: '/settings/exercises', destination: '/program', permanent: true },
       // Schedule → Dashboard
       { source: '/schedule', destination: '/', permanent: true },
     ]

@@ -142,12 +142,12 @@ export interface NutritionDay {
 
 export const NUTRITION_TARGETS: NutritionDay[] = [
   { day: 'Monday',    activity: 'Upper A + Soccer',   calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
-  { day: 'Tuesday',   activity: 'Lower A',            calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
-  { day: 'Wednesday', activity: 'Swim',               calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
-  { day: 'Thursday',  activity: 'Upper B + Run',      calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
-  { day: 'Friday',    activity: 'Lower B',            calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
-  { day: 'Saturday',  activity: 'Bike / Surf',        calories: 0,    protein: 0,   carbs: 0,   fat: 0,  notes: '~1,800 clean through breakfast and lunch + cheat dinner (not tracked)' },
-  { day: 'Sunday',    activity: 'Rest / Hike / Garden', calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
+  { day: 'Tuesday',   activity: 'Swim + KB + Soccer', calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
+  { day: 'Wednesday', activity: 'Run + Yoga',         calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
+  { day: 'Thursday',  activity: 'Upper B',            calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
+  { day: 'Friday',    activity: 'Legs',               calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
+  { day: 'Saturday',  activity: 'Brick + Yoga',       calories: 0,    protein: 0,   carbs: 0,   fat: 0,  notes: '~1,800 clean through breakfast and lunch + cheat dinner (not tracked)' },
+  { day: 'Sunday',    activity: 'Soccer',             calories: 2650, protein: 200, carbs: 250, fat: 85, notes: 'Maintenance target — protein stays at 200g+ regardless of day' },
 ]
 
 // Maintenance-calorie approach: real TDEE with full training (soccer 3x/week

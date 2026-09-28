@@ -91,9 +91,9 @@ const BUILTIN_INJURIES: InjuryCard[] = [
     location: 'Right knee · lateral aspect · IT band insertion',
     aggravated: 'Long runs · stairs · prolonged sitting with bent knee',
     notAffected: 'Biking · swimming · gym (with hip abduction work)',
-    treatment: 'Hip abduction + glute medius work (Friday Lower B) · pigeon pose + IT band rollout · avoid overstriding · anti-inflammatory (fish oil)',
+    treatment: 'Hip abduction + glute medius work (Friday Legs) · pigeon pose + IT band rollout · avoid overstriding · anti-inflammatory (fish oil)',
     symptoms: 'Lateral knee pain during and after long runs. Tightness from hip down to knee. No swelling. Worse on downhill.',
-    notes: 'Stable. Hip abduction exercise added to Friday Lower B specifically for this. Monitoring — does not affect soccer or biking.',
+    notes: 'Stable. Hip abduction kept on Friday Legs specifically for this. Monitoring — does not affect soccer or biking.',
     isBuiltin: true,
   },
   {

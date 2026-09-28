@@ -106,7 +106,7 @@ const ICONS: Record<string, React.ReactNode> = {
       <path d="M3 1.5v13M3 1.5l9 3.5-9 4" />
     </svg>
   ),
-  '/settings/exercises': (
+  '/program': (
     <svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor"
       strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
       <circle cx="8" cy="8" r="2.5" />
@@ -235,7 +235,7 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="sidebar-utility">
+        {UTILITY_NAV.length > 0 && <div className="sidebar-utility">
           {UTILITY_NAV.map(link => {
             const active = linkActive(pathname, link.href)
             return (
@@ -247,7 +247,7 @@ export default function Sidebar() {
               </Link>
             )
           })}
-        </div>
+        </div>}
 
         {raceName && (
           <div className="sidebar-race">
@@ -356,7 +356,7 @@ export default function Sidebar() {
                   </div>
                 )
               })}
-              <div className="mobile-fullmenu-group">
+              {UTILITY_NAV.length > 0 && <div className="mobile-fullmenu-group">
                 <div className="mobile-fullmenu-group-label">More</div>
                 {UTILITY_NAV.map(link => {
                   const active = linkActive(pathname, link.href)
@@ -372,7 +372,7 @@ export default function Sidebar() {
                     </Link>
                   )
                 })}
-              </div>
+              </div>}
             </nav>
           </div>
         </div>
