@@ -1026,3 +1026,14 @@ Read Codex's audit above. Some findings were acted on, some were **intentionally
 
 **Next agent needs to:**
 - Stray file `supabase/migrations/My projects.code-workspace` (VS Code workspace saved in the wrong folder) should be moved/deleted; don't commit `output/` (tattoo art).
+
+## 2026-10-06 — Claude: hub updated to the current plan (user-supplied "Training Hub: Current Plan")
+**Agent:** Claude
+- **Live program (Supabase `exercises`/`workout_days`, edited via REST, no migration):** Upper A: Single Arm Preacher Curl row renamed to **Incline DB Curl** (2×10-12, both arms), **Rotary Torso** added (2×12-15/side). Legs: **Front Foot Elevated Split Squat (barbell)** added before Hip Abduction. Every lift's `notes` now carries its tempo; pull-up test rule on the pulldown; Zercher bar pad/pause; Hip Abduction marked protected; KB bells (halos 26 lb, swings 44 lb) and day subtitles updated. `DEFAULT_PROGRAM` in `program.ts` mirrors it.
+- **Phases:** new `src/lib/phases.ts` (`TRAINING_PHASES`, `phaseOn()`): Consistency 2026-09-25..2026-12-31, Olympic tri build from 2027-01-01. Dashboard "Training week" tile now shows week N of the current phase (was a dead 7-week block from 2026-04-10, stuck on Off-season). Coach context phase: race-based if a race is ≤49 days out, otherwise the calendar phase + its focus. Soccer season now ends at Thanksgiving.
+- **Mobility:** `MOB_DAY_PLAN` in `data.ts` (per-weekday move list, why, minutes) replaces the Wed/Sat/Sun "08+09 only" rule; `/mobility` requires today's moves and marks others optional. `schedule.ts` mobility blocks moved to "After dog walk" with each day's moves (Tue gained one, Sun/Sat/Wed evening ankle blocks removed). Wed run text: easy, ~1 mi, no pace/distance targets.
+- **Nutrition:** protein target stays 200g, ~175-185g accepted (`NUTRITION_BASELINE.proteinAcceptable`); maintenance wording (TDEE 2650, no deficit); Fuel strategy notes updated incl. Chicken & Tofu Chili lunch macros.
+- **Coach prompts** rewritten for Run, Strength (rest/intensity/tempo/deload/backlog), Soccer, Nutrition, Weekly Planner (was still 4:45am gym Mon/Tue/Thu/Fri + Wednesday rest); Mindset wake time 5am.
+- Wind-down already matched the plan; unchanged.
+- **Not changed:** the Season Plan page (AI-generated, stored in `season_plans`); the Progress Tracker prompt still targets slow fat loss to 183-186 lbs / 15% BF, which conflicts with "treat 2,650 as maintenance" — ask the user.
+- Verified: `npx tsc --noEmit` clean; on the dev server the dashboard shows "Wk 2 · Consistency", `/mobility` shows Tuesday's 03·04·08·09, `/fuel`, `/program` and `/log` show the new content.

@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { MOBILITY_EXERCISES, MOB_ALL_IDS, MOB_YOGA_ONLY_IDS, mobIsYogaNight, mobRequiredIds } from '@/lib/data'
+import { MOBILITY_EXERCISES, MOB_ALL_IDS, mobDayPlan } from '@/lib/data'
 import { upsertMobilityLog, getMobilityLog, getMobilityStreak, migrateLocalStorage } from '@/lib/supabase'
 
 function todayKey(): string {
@@ -13,8 +13,10 @@ export default function MobilityPage() {
   const [checkedItems, setCheckedItems] = useState<string[]>([])
   const [streak, setStreak] = useState(0)
   const [loading, setLoading] = useState(true)
-  const isYoga = mobIsYogaNight()
-  const required = mobRequiredIds()
+  // Each day has its own set of moves (MOB_DAY_PLAN); the rest are optional.
+  const dayPlan = mobDayPlan()
+  const required = dayPlan.ids
+  const isYoga = required.length === 2 // Wed/Sat: yoga covers 01-07
 
   useEffect(() => {
     async function load() {
@@ -66,11 +68,11 @@ export default function MobilityPage() {
       <div className="page-header">
         <div>
           <h2>Mobility</h2>
-          <div className="sub">Daily checklist · ~15–18 min</div>
+          <div className="sub">Daily · at home after the dog walk · ~{dayPlan.minutes} min today</div>
         </div>
         <div className="page-header-right">
           {today}<br />
-          {isYoga ? 'Short routine · 08+09 only' : 'Full routine · all 9'}
+          {required.length === MOB_ALL_IDS.length ? 'Full routine · all 9' : `Today: ${required.join(' · ')}`}
         </div>
       </div>
 
@@ -81,16 +83,16 @@ export default function MobilityPage() {
         </div>
         <div>
           <div className="mob-status-title">
-            {isComplete ? 'Mobility done for tonight' : isYoga ? 'Short routine — 08+09 only' : 'Mobility — post-workout'}
+            {isComplete ? 'Mobility done for today' : `Today's mobility · ${required.join(' · ')}`}
           </div>
           <div className="mob-status-sub">
-            {isYoga ? 'Only 08 + 09 tonight (non-gym day) · skip 01–07' : 'All 9 movements · ~15–18 min · post-workout'}
+            {dayPlan.why} · ~{dayPlan.minutes} min
           </div>
         </div>
         <div className="mob-status-right">
           <div className="mob-status-progress">{doneCount}/{required.length}</div>
           <div className="mob-status-streak">
-            {streak > 0 ? `${streak} day${streak === 1 ? '' : 's'} streak 🔥` : 'Start a streak tonight'}
+            {streak > 0 ? `${streak} day${streak === 1 ? '' : 's'} streak 🔥` : 'Start a streak today'}
           </div>
           {checkedItems.length > 0 && (
             <button className="mob-status-reset" onClick={reset}>↻ Reset</button>
@@ -98,18 +100,16 @@ export default function MobilityPage() {
         </div>
       </div>
 
-      {/* Yoga night banner */}
-      {isYoga && (
-        <div className="note" style={{ marginBottom: 16, background: 'var(--mob)', borderColor: 'var(--mob-t)', color: 'var(--mob-t)' }}>
-          Non-gym day (Wed / Sat / Sun) — only exercises 08 and 09 are required: wall ankle stretch and calf stretch. Exercises 01–07 are optional and shown dimmed.
-        </div>
-      )}
+      {/* Today's plan */}
+      <div className="note" style={{ marginBottom: 16, background: 'var(--mob)', borderColor: 'var(--mob-t)', color: 'var(--mob-t)' }}>
+        Today: {required.join(', ')}. The other moves are optional and marked. 08 + 09 are daily and non-negotiable (Achilles/hip root-cause work). Massage gun one side at a time.
+      </div>
 
       {/* Exercise grid */}
       <div className="mob-grid">
         {MOBILITY_EXERCISES.map(ex => {
           const isChecked = checkedItems.includes(ex.id)
-          const isOptional = isYoga && !MOB_YOGA_ONLY_IDS.includes(ex.id)
+          const isOptional = !required.includes(ex.id)
           return (
             <div
               key={ex.id}
@@ -119,7 +119,7 @@ export default function MobilityPage() {
               <div className="mob-card-header">
                 <span className="mob-id">{ex.id}</span>
                 <span className="mob-name">{ex.name}</span>
-                {isOptional && !isChecked && <span className="mob-optional-badge">Optional tonight</span>}
+                {isOptional && !isChecked && <span className="mob-optional-badge">Optional today</span>}
                 <span className="mob-check">{isChecked ? '✓' : '○'}</span>
               </div>
               <div className="mob-focus">{ex.focus}</div>
@@ -150,7 +150,7 @@ export default function MobilityPage() {
             { title: '01–03: Shoulder / swim', body: 'Thoracic extension, lat stretch, and sleeper stretch directly address swim posture and shoulder health. Pool sessions load the shoulder in overhead position — these undo the stress.' },
             { title: "04–05: Hips / everything", body: "World's greatest stretch and 90/90 hip switch hit hip flexors, hamstrings, thoracic rotation, and hip IR/ER. The most bang-for-buck exercises in the routine. Never skip." },
             { title: '06–07: Hip flexors / glutes', body: 'Couch stretch targets the hip flexors that get tight from cycling. Pigeon hits the piriformis and glute, which protects the IT band and lower back. Key for brick sessions.' },
-            { title: '08–09: Achilles / ankles (priority)', body: 'Wall ankle stretch (dorsiflexion) and calf+soleus stretch are done every night — gym days or not. Left Achilles is a chronic issue. Three sets on left side, two on right.' },
+            { title: '08–09: Achilles / ankles (priority)', body: 'Wall ankle stretch (dorsiflexion) and calf+soleus stretch are done every day, no exceptions. Left Achilles is a chronic issue. Three sets on left side, two on right.' },
           ].map((note, i) => (
             <div key={i} className="note">
               <div style={{ fontWeight: 500, marginBottom: 6 }}>{note.title}</div>

@@ -50,45 +50,47 @@ export function sessionLabel(type: string, days: ProgramDay[]): string {
 const ex = (name: string, sets: number, reps: string, rpe: string, rest: number | null, notes: string | null = null): ProgramExercise =>
   ({ name, sets, reps, rpe, rest, notes })
 
-// Built-in copy of the program the migration seeds, used only when the
+// Built-in copy of the current program (Oct 2026 plan), used only when the
 // workout_days table doesn't exist yet or is empty, so /log always has
 // something to show.
 export const DEFAULT_PROGRAM: ProgramDay[] = [
   {
-    id: 'upper_a', name: 'Upper A', subtitle: 'Push-dominant · ~30-35 min', weekday: 1, sortOrder: 10, logStyle: 'sets',
+    id: 'upper_a', name: 'Upper A', subtitle: 'Push-dominant · plan 30-40 min', weekday: 1, sortOrder: 10, logStyle: 'sets',
     exercises: [
-      ex('Incline DB or BB Press', 3, '6-8', '8, 8, 9-10', 90, 'Final set to near/true failure'),
-      ex('Standing DB OHP', 2, '8-10', '8', 60),
-      ex('Chest Supported Row', 2, '8-10', '8', 60),
-      ex('Face Pulls', 2, '15', '8', 45),
-      ex('Single Arm Preacher Curl', 2, '10-12/side', '8', 45),
+      ex('Incline DB or BB Press', 3, '6-8', '8, 8, 9-10', 90, 'Tempo: 2s down, fast up. Final set to RPE 9-10.'),
+      ex('Standing DB OHP', 2, '8-10', '8', 60, 'Tempo: 2s down, fast up'),
+      ex('Chest Supported Row', 2, '8-10', '8', 60, 'DB, bench ~45°. Tempo: 1-2s down, 1s squeeze'),
+      ex('Face Pulls', 2, '15', '8', 45, 'Tempo: 2s down, 1s squeeze'),
+      ex('Incline DB Curl', 2, '10-12', '8', 45, 'Both arms. Tempo: 2-3s down, full stretch'),
+      ex('Rotary Torso', 2, '12-15/side', '8', 45, 'Tempo: controlled'),
     ],
   },
   {
-    id: 'kb_circuit', name: 'KB Circuit', subtitle: 'After swim · ~15-18 min', weekday: 2, sortOrder: 20, logStyle: 'simple',
+    id: 'kb_circuit', name: 'KB Circuit', subtitle: 'After swim · ~15-18 min · bells 26/35/44 lb', weekday: 2, sortOrder: 20, logStyle: 'simple',
     exercises: [
-      ex('KB Halos', 3, '8-10 each direction', '', null, '2-3 rounds'),
-      ex('KB Swings', 10, '15-20', '', null, '10 min EMOM, one set at the top of each minute'),
-      ex('Around the Worlds', 3, '8-10 each direction', '', null, '2-3 rounds'),
+      ex('KB Halos', 3, '8-10/direction', '', null, '2-3 rounds · 26 lb'),
+      ex('KB Swings', 10, '15-20', '', null, '10 min EMOM, 15-20 reps at the top of each minute · 44 lb'),
+      ex('Around the Worlds', 3, '8-10/direction', '', null, '2-3 rounds'),
     ],
   },
   {
-    id: 'upper_b', name: 'Upper B', subtitle: 'Pull-dominant · ~35-40 min', weekday: 4, sortOrder: 30, logStyle: 'sets',
+    id: 'upper_b', name: 'Upper B', subtitle: 'Pull-dominant · plan 30-40 min', weekday: 4, sortOrder: 30, logStyle: 'sets',
     exercises: [
-      ex('Lat Pulldown or Pull-Up', 3, '6-8', '8, 8, 9-10', 60, 'Final set to near/true failure'),
-      ex('Machine Low Row (single arm)', 2, '10-12/side', '8', 60),
-      ex('Flat DB Press', 2, '8-10', '8', 60),
-      ex('Cable Crunch', 3, '12-15', '8-9', 45),
-      ex('Reverse Crunch', 3, '12-15', '8-9', 45),
+      ex('Lat Pulldown or Pull-Up', 3, '6-8', '8, 8, 9-10', 60, 'Tempo: 2-3s down, fast up. Final set to RPE 9-10. Pull-up test pending: test a set first; if under 6 clean reps, do max pull-ups on sets 1-2 and finish set 3 on the pulldown.'),
+      ex('Machine Low Row (single arm)', 2, '10-12/side', '8', 60, 'Tempo: 2s down, 1s squeeze'),
+      ex('Flat DB Press', 2, '8-10', '8', 60, 'Tempo: 2s down, fast up'),
+      ex('Cable Crunch', 3, '12-15', '8-9', 45, 'Tempo: 2s down'),
+      ex('Reverse Crunch', 3, '12-15', '8-9', 45, 'Tempo: 2s down'),
     ],
   },
   {
-    id: 'legs', name: 'Legs', subtitle: 'Combined · ~30 min', weekday: 5, sortOrder: 40, logStyle: 'sets',
+    id: 'legs', name: 'Legs', subtitle: 'Combined · plan 30-40 min', weekday: 5, sortOrder: 40, logStyle: 'sets',
     exercises: [
-      ex('Zercher Squat', 3, '4-6', '8, 8, 9', 90, 'Final set: heaviest load with a clean upright position held. Use a barbell pad.'),
-      ex('Romanian Deadlift', 2, '6-8', '8', 90),
-      ex('Belted Hip Thrust', 2, '8-10', '8-9', 60),
-      ex('Hip Abduction', 2, '15', '7-8', 45, 'Kept for the left hip stability issue'),
+      ex('Zercher Squat', 3, '4-6', '8, 8, 9', 90, 'Use a bar pad. Tempo: 2-3s down, 1s pause in the hole, fast up. Final set RPE 9: heaviest load with a clean upright position.'),
+      ex('Romanian Deadlift', 2, '6-8', '8', 90, 'Tempo: 3s down, fast up'),
+      ex('Belted Hip Thrust', 2, '8-10', '8-9', 60, 'Tempo: 2s down, 1s squeeze'),
+      ex('Front Foot Elevated Split Squat (barbell)', 2, '8-10/side', '8', 60, 'Tempo: 2s down, controlled up'),
+      ex('Hip Abduction', 2, '15', '7-8', 45, 'Protected, do not trim (left hip stability). Tempo: 2s down, 1s squeeze'),
     ],
   },
 ]

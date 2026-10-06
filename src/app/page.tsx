@@ -13,6 +13,7 @@ import ActivityFeed from '@/components/dashboard/ActivityFeed'
 import BodyCompWidget from '@/components/dashboard/BodyCompWidget'
 import RaceCountdown from '@/components/dashboard/RaceCountdown'
 import RecoveryCard from '@/components/dashboard/RecoveryCard'
+import { phaseOn } from '@/lib/phases'
 import ActivityIcon, { iconForBlockClass } from '@/components/dashboard/ActivityIcon'
 import { TrainingSummary } from '@/components/TrainingSummary'
 import GarminSyncButton from '@/components/dashboard/GarminSyncButton'
@@ -150,14 +151,8 @@ export default async function DashboardPage() {
   const timelineBlocks = todaySchedule?.blocks.filter(b => TIMELINE_CLASSES.includes(b.cls)) ?? []
   const primaryBlock = timelineBlocks.find(b => WORKOUT_CLASSES.includes(b.cls)) ?? null
 
-  // Training week (the 7-week block starting 2026-04-10 — once it's over, show
-  // "Off-season" instead of freezing on "Wk 7 · Taper" forever)
-  const planStart = new Date('2026-04-10')
-  const weeksSince = Math.max(1, Math.ceil((now.getTime() - planStart.getTime()) / (7 * 86400000)))
-  const isOffSeason = weeksSince > 7
-  const currentWeek = Math.min(weeksSince, 7)
-  const currentPhase = isOffSeason ? 'Off-season'
-    : currentWeek <= 2 ? 'Re-entry' : currentWeek <= 4 ? 'Build' : currentWeek <= 6 ? 'Sharpening' : 'Taper'
+  // Training week: week N of the current calendar phase (src/lib/phases.ts).
+  const phaseNow = phaseOn(today)
 
   const race = activeRace?.race
 
@@ -307,9 +302,9 @@ export default async function DashboardPage() {
               color: 'var(--muted)',
               marginBottom: 6 }}>Training week</div>
             <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 20,
-              fontWeight: 700, color: 'var(--text)' }}>{isOffSeason ? '—' : `Wk ${currentWeek}`}</div>
+              fontWeight: 700, color: 'var(--text)' }}>{phaseNow ? `Wk ${phaseNow.week}` : '—'}</div>
             <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11,
-              color: 'var(--muted)', marginTop: 2 }}>{currentPhase}</div>
+              color: 'var(--muted)', marginTop: 2 }}>{phaseNow?.phase.name ?? 'Off-season'}</div>
           </div>
           <div className="card">
             <div style={{ fontFamily: 'Figtree, sans-serif', fontSize: 11, fontWeight: 500,

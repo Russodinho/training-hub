@@ -8,9 +8,10 @@
 import { NUTRITION_TARGETS, NUTRITION_BASELINE } from './data'
 import { getTodaySchedule, scheduleWithProgram, plannedBuckets } from './schedule'
 import { getProgramDays } from './program'
+import { phaseOn } from './phases'
 import {
   getSupabaseClient, getRaces, getActiveRace, getDaysToRace, getRaceResult,
-  garminBucket, easternNow, type Race,
+  garminBucket, easternNow, todayStr, type Race,
 } from './supabase'
 
 export interface Workout {
@@ -342,17 +343,28 @@ async function fetchRecovery() {
   }
 }
 
-function derivePhase(daysToRace: number | null): string {
-  if (daysToRace === null) return 'off-season'
-  if (daysToRace <= 7) return 'taper'
-  if (daysToRace <= 21) return 'sharpening'
-  if (daysToRace <= 49) return 'build'
-  return 'base'
+// A race within 7 weeks sets the phase; otherwise the calendar phase from
+// src/lib/phases.ts (e.g. "Consistency (week 2)"), else off-season.
+function derivePhase(daysToRace: number | null, today: string): string {
+  if (daysToRace !== null && daysToRace >= 0) {
+    if (daysToRace <= 7) return 'taper'
+    if (daysToRace <= 21) return 'sharpening'
+    if (daysToRace <= 49) return 'build'
+  }
+  const p = phaseOn(today)
+  if (p) return `${p.phase.name} (week ${p.week}): ${p.phase.focus}`
+  return daysToRace === null ? 'off-season' : 'base'
 }
 
+// Soccer runs Sept through Thanksgiving, then March through June.
 function isSoccerSeason(date: Date): boolean {
   const month = date.getMonth() + 1
-  return (month >= 9 && month <= 11) || (month >= 3 && month <= 6)
+  if (month >= 3 && month <= 6) return true
+  if (month === 9 || month === 10) return true
+  if (month !== 11) return false
+  const firstDow = new Date(date.getFullYear(), 10, 1).getDay()
+  const thanksgiving = 1 + ((4 - firstDow + 7) % 7) + 21
+  return date.getDate() <= thanksgiving
 }
 
 export async function getAthleteContext(): Promise<AthleteContext> {
@@ -387,7 +399,7 @@ export async function getAthleteContext(): Promise<AthleteContext> {
     bodyComp,
     recovery,
     season: {
-      currentPhase: derivePhase(daysToNextRace),
+      currentPhase: derivePhase(daysToNextRace, todayStr()),
       soccerSeasonActive: isSoccerSeason(now),
       weeksToNextRace: daysToNextRace != null ? Math.floor(daysToNextRace / 7) : null,
       daysToNextRace,

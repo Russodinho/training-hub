@@ -81,7 +81,7 @@ export default function FuelPage() {
           <div className="sub">Nutrition targets · supplement stack</div>
         </div>
         <div className="page-header-right">
-          Maintenance target: {NUTRITION_BASELINE.calories} kcal · TDEE ~{NUTRITION_BASELINE.tdee} (full training)<br />
+          Maintenance: {NUTRITION_BASELINE.calories} kcal (weight holds here)<br />
           {liveBio?.weight_lbs ?? NUTRITION_BASELINE.weight} lbs{liveBio?.body_fat_pct != null ? ` · ${liveBio.body_fat_pct}% BF` : ''}
         </div>
       </div>
@@ -126,14 +126,14 @@ export default function FuelPage() {
                   <div className="macro-chip"><span>C</span>{NUTRITION_BASELINE.carbs}g</div>
                   <div className="macro-chip"><span>F</span>{NUTRITION_BASELINE.fat}g</div>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--muted)' }}>Maintenance target — protein stays at 200g+ regardless of day</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>Maintenance target. Protein target {NUTRITION_BASELINE.protein}g; landing ~{NUTRITION_BASELINE.proteinAcceptable}g is fine</div>
               </div>
               <div className="nutrition-day">
                 <div className="nutrition-day-header">
                   <div className="nutrition-day-name">Saturday</div>
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, color: 'var(--bike)', fontWeight: 500 }}>Flex</div>
                 </div>
-                <div style={{ fontSize: 12, color: 'var(--muted)' }}>~1,800 calories clean with one cheat meal (not tracked)</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)' }}>~1,800 calories clean through lunch + one untracked cheat dinner</div>
               </div>
             </div>
           </div>
@@ -142,9 +142,10 @@ export default function FuelPage() {
           <div className="section-hdr"><span className="ptitle">Strategy notes</span></div>
           <div className="fuel-nested-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
             {[
-              { title: '🥩 Protein: 200g every day', body: 'Non-negotiable regardless of day type. Eggs + egg whites + Greek yogurt at breakfast. Chicken at dinner. This number doesn\'t change.' },
-              { title: '🎯 Fixed targets, every day', body: 'No more high/low lever — 2,650 kcal · 200g P · 250g C · 85g F is the target every day except Saturday. Cronometer\'s own fixed targets total 2,565 kcal; the ~85 cal buffer fills naturally from cooking oils, supplements, and rounding.' },
-              { title: '🚴 As training ramps up', body: 'Real TDEE with full training runs ~2,700–2,800. Food stays the same — the slight natural deficit comes from high-activity days, not from cutting food.' },
+              { title: '🥩 Protein: 200g target, ~175–185g is fine', body: "Cronometer target stays at 200g, but landing ~175–185g is a deliberate trim. Don't force it back up. Eggs + egg whites + Greek yogurt at breakfast. Chicken at dinner." },
+              { title: '🎯 Fixed targets, Sun–Fri', body: '2,650 kcal · 250g C · 85g F every day except Saturday. Weight holds at 2,650, so this is maintenance.' },
+              { title: '🍲 Lunch: Chicken & Tofu Chili', body: 'Batch of 5 servings. Per serving incl. 93g cooked rice: ~540–550 kcal · 42–43g P · 70–72g C · 11–12g F.' },
+              { title: '🚴 Recalculate later', body: 'Recalculate calories after 1–2 full weeks of Garmin data on the current schedule. Until then, food stays the same.' },
               { title: '🏊 Race-day fueling', body: 'Oats + banana 2–2.5 hrs pre-race. Nothing heavy within 90 min. Electrolytes throughout. Gel if race > 1.5 hrs. Breakfast is already the race-day template.' },
               { title: '📊 Tracking', body: 'Nutrition and weight/body-fat sync automatically from Cronometer (scripts/cronometer-sync.ts) — no manual upload needed. Goal is 14–16% body fat, sustainable year-round — not a crash cut.' },
             ].map((note, i) => (
