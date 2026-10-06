@@ -1,25 +1,29 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { MOBILITY_EXERCISES, MOB_ALL_IDS, mobDayPlan } from '@/lib/data'
-import { upsertMobilityLog, getMobilityLog, getMobilityStreak, migrateLocalStorage } from '@/lib/supabase'
+import { MOBILITY_EXERCISES, MOB_DAILY_IDS, MOB_COVERAGE, mobDayPlan } from '@/lib/data'
+import { upsertMobilityLog, getMobilityLog, getMobilityStreak, migrateLocalStorage, daysAgoStr } from '@/lib/supabase'
 
-function todayKey(): string {
-  const d = new Date()
-  return d.toISOString().split('T')[0]
-}
+// Evening routine. Tonight's required moves come from MOB_DAY_PLAN (fixed
+// per weekday, matching that day's training); everything else is optional.
+// 08 + 09 alone is the short routine for any night.
+
+// Local date, not UTC: this is done in the evening, and the UTC date has
+// already rolled over to tomorrow after 8pm Eastern.
+const todayKey = () => daysAgoStr(0)
+const shortKey = (date: string) => `hub:mobilityShort:${date}`
 
 export default function MobilityPage() {
   const [checkedItems, setCheckedItems] = useState<string[]>([])
   const [streak, setStreak] = useState(0)
   const [loading, setLoading] = useState(true)
-  // Each day has its own set of moves (MOB_DAY_PLAN); the rest are optional.
-  const dayPlan = mobDayPlan()
-  const required = dayPlan.ids
-  const isYoga = required.length === 2 // Wed/Sat: yoga covers 01-07
+  const [shortRoutine, setShortRoutine] = useState(false)
+  const plan = mobDayPlan()
+  const required = shortRoutine ? MOB_DAILY_IDS : plan.ids
 
   useEffect(() => {
     async function load() {
+      try { setShortRoutine(localStorage.getItem(shortKey(todayKey())) === '1') } catch {}
       await migrateLocalStorage()
       const [log, streakVal] = await Promise.all([
         getMobilityLog(todayKey()),
@@ -37,21 +41,29 @@ export default function MobilityPage() {
       ? checkedItems.filter(x => x !== id)
       : [...checkedItems, id]
     setCheckedItems(next)
-    await upsertMobilityLog(todayKey(), next)
-    const newStreak = await getMobilityStreak()
-    setStreak(newStreak)
-  }, [checkedItems])
+    await upsertMobilityLog(todayKey(), next, required)
+    setStreak(await getMobilityStreak())
+  }, [checkedItems, required])
+
+  const toggleShort = useCallback(async () => {
+    const next = !shortRoutine
+    setShortRoutine(next)
+    try { localStorage.setItem(shortKey(todayKey()), next ? '1' : '0') } catch {}
+    // Re-save so completed_at reflects the new required list.
+    await upsertMobilityLog(todayKey(), checkedItems, next ? MOB_DAILY_IDS : plan.ids)
+  }, [shortRoutine, checkedItems, plan.ids])
 
   const reset = useCallback(async () => {
-    if (!confirm('Reset today\'s mobility checklist?')) return
+    if (!confirm('Reset tonight\'s mobility checklist?')) return
     setCheckedItems([])
-    await upsertMobilityLog(todayKey(), [])
+    await upsertMobilityLog(todayKey(), [], required)
     setStreak(await getMobilityStreak())
-  }, [])
+  }, [required])
 
   const doneCount = required.filter(id => checkedItems.includes(id)).length
   const isComplete = doneCount === required.length
   const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+  const timeLabel = shortRoutine ? '~5 min' : plan.time
 
   if (loading) {
     return (
@@ -68,31 +80,32 @@ export default function MobilityPage() {
       <div className="page-header">
         <div>
           <h2>Mobility</h2>
-          <div className="sub">Daily · at home after the dog walk · ~{dayPlan.minutes} min today</div>
+          <div className="sub">Tonight · {shortRoutine ? 'short routine' : plan.day} · {timeLabel}</div>
         </div>
         <div className="page-header-right">
           {today}<br />
-          {required.length === MOB_ALL_IDS.length ? 'Full routine · all 9' : `Today: ${required.join(' · ')}`}
+          Tonight: {required.join(' · ')}
         </div>
       </div>
 
       {/* Status tile */}
       <div className="mob-status" style={isComplete ? { borderColor: 'var(--lift-t)' } : {}}>
         <div className="mob-status-icon">
-          {isComplete ? '✅' : isYoga ? '🧘' : '🌙'}
+          {isComplete ? '✅' : required.length === 2 ? '🧘' : '🌙'}
         </div>
         <div>
           <div className="mob-status-title">
-            {isComplete ? 'Mobility done for today' : `Today's mobility · ${required.join(' · ')}`}
+            {isComplete ? 'Mobility done for tonight' : `Tonight's mobility · ${required.join(' · ')}`}
           </div>
           <div className="mob-status-sub">
-            {dayPlan.why} · ~{dayPlan.minutes} min
+            {shortRoutine ? 'Short routine: 08 + 09 only' : plan.day} · {timeLabel}
+            {!shortRoutine && plan.optional ? ` · optional: ${plan.optional}` : ''}
           </div>
         </div>
         <div className="mob-status-right">
           <div className="mob-status-progress">{doneCount}/{required.length}</div>
           <div className="mob-status-streak">
-            {streak > 0 ? `${streak} day${streak === 1 ? '' : 's'} streak 🔥` : 'Start a streak today'}
+            {streak > 0 ? `${streak} night${streak === 1 ? '' : 's'} streak 🔥` : 'Start a streak tonight'}
           </div>
           {checkedItems.length > 0 && (
             <button className="mob-status-reset" onClick={reset}>↻ Reset</button>
@@ -100,9 +113,14 @@ export default function MobilityPage() {
         </div>
       </div>
 
-      {/* Today's plan */}
+      {/* Short routine fallback */}
       <div className="note" style={{ marginBottom: 16, background: 'var(--mob)', borderColor: 'var(--mob-t)', color: 'var(--mob-t)' }}>
-        Today: {required.join(', ')}. The other moves are optional and marked. 08 + 09 are daily and non-negotiable (Achilles/hip root-cause work). Massage gun one side at a time.
+        {shortRoutine
+          ? 'Short routine tonight: only 08 + 09 are required. The rest are optional.'
+          : 'Short on time? Any night can drop to the short routine: 08 + 09 only (left side 3 sets, right 2).'}{' '}
+        <button onClick={toggleShort} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit', color: 'inherit', textDecoration: 'underline' }}>
+          {shortRoutine ? `Back to the full list (${plan.ids.length})` : 'Use short routine tonight'}
+        </button>
       </div>
 
       {/* Exercise grid */}
@@ -115,16 +133,18 @@ export default function MobilityPage() {
               key={ex.id}
               className={`mob-card${isChecked ? ' checked' : ''}`}
               onClick={() => toggle(ex.id)}
+              style={isOptional && !isChecked ? { opacity: 0.55 } : undefined}
             >
               <div className="mob-card-header">
                 <span className="mob-id">{ex.id}</span>
                 <span className="mob-name">{ex.name}</span>
-                {isOptional && !isChecked && <span className="mob-optional-badge">Optional today</span>}
+                {ex.badge && <span className="mob-optional-badge">{ex.badge}</span>}
+                {isOptional && !isChecked && <span className="mob-optional-badge">Optional tonight</span>}
                 <span className="mob-check">{isChecked ? '✓' : '○'}</span>
               </div>
               <div className="mob-focus">{ex.focus}</div>
               <div className="mob-meta">
-                {ex.sets} sets · {ex.duration}
+                {ex.dose}
                 {ex.tool ? ` · ${ex.tool}` : ''}
               </div>
               {ex.cues && (
@@ -142,15 +162,29 @@ export default function MobilityPage() {
         })}
       </div>
 
+      {/* Weekly coverage */}
+      <div style={{ marginTop: 24 }}>
+        <div className="section-hdr"><span className="ptitle">Weekly coverage</span></div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
+          {MOB_COVERAGE.map(c => (
+            <div key={c.area} className="note">
+              <div style={{ fontWeight: 500, marginBottom: 4 }}>{c.area}</div>
+              {c.when}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Why this routine */}
       <div style={{ marginTop: 24 }}>
         <div className="section-hdr"><span className="ptitle">Why these exercises</span></div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
           {[
-            { title: '01–03: Shoulder / swim', body: 'Thoracic extension, lat stretch, and sleeper stretch directly address swim posture and shoulder health. Pool sessions load the shoulder in overhead position — these undo the stress.' },
-            { title: "04–05: Hips / everything", body: "World's greatest stretch and 90/90 hip switch hit hip flexors, hamstrings, thoracic rotation, and hip IR/ER. The most bang-for-buck exercises in the routine. Never skip." },
-            { title: '06–07: Hip flexors / glutes', body: 'Couch stretch targets the hip flexors that get tight from cycling. Pigeon hits the piriformis and glute, which protects the IT band and lower back. Key for brick sessions.' },
-            { title: '08–09: Achilles / ankles (priority)', body: 'Wall ankle stretch (dorsiflexion) and calf+soleus stretch are done every day, no exceptions. Left Achilles is a chronic issue. Three sets on left side, two on right.' },
+            { title: '01–03: Shoulders / swim / upper days', body: "Thoracic extension and the lat stretch undo the pressing and pulling from Upper A and B. The cross-body stretch follows Tuesday's swim. It replaced the sleeper stretch because research shows bigger internal-rotation gains and it's less irritating to the front of the shoulder." },
+            { title: '04–05: Hips / everything', body: "World's greatest stretch and 90/90 cover hip flexors, hamstrings, thoracic rotation and hip rotation. Highest value per minute." },
+            { title: '06–07, 10: Hips / soccer + cycling', body: 'The couch stretch covers hip flexors tight from soccer sprinting, cycling and sitting on commute days. Pigeon covers glutes and piriformis. The adductor rock-back covers the groin, the most common soccer strain area, and is done every soccer night.' },
+            { title: '08–09: Achilles / ankles (priority)', body: 'Every night, gym day or not. Left Achilles is a chronic issue: 3 sets left, 2 right.' },
+            { title: '11: Achilles loading', body: "Stretching alone doesn't fix chronic tendon problems. Progressive slow calf raises have the best evidence. See a PT if it doesn't improve." },
           ].map((note, i) => (
             <div key={i} className="note">
               <div style={{ fontWeight: 500, marginBottom: 6 }}>{note.title}</div>

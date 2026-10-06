@@ -25,119 +25,101 @@ export interface MobilityExercise {
   name: string
   focus: string
   tool?: string
-  sets: number
-  duration: string
+  dose: string
   cues?: string
   massageGun?: string
+  badge?: string // e.g. 'Strength' for the one non-stretch
 }
 
+// Evening routine; each night matches that day's training (MOB_DAY_PLAN).
 export const MOBILITY_EXERCISES: MobilityExercise[] = [
   {
-    id: '01',
-    name: 'Thoracic Extension',
-    focus: 'Thoracic spine · posture · swim position',
-    tool: 'Foam roller',
-    sets: 2,
-    duration: '60 sec',
-    cues: `Roller at mid-back. Arms crossed or behind head. Extend over roller — don't force it. Move up/down the thoracic spine. Keep glutes on floor.`,
+    id: '01', name: 'Thoracic Extension', focus: 'Thoracic spine · posture · swim position', tool: 'Foam roller',
+    dose: '2 sets × 60s',
+    cues: "Roller at mid-back. Arms crossed or behind head. Extend over the roller, don't force it. Move up and down the thoracic spine. Glutes stay on the floor.",
     massageGun: 'Upper back (traps) before or after',
   },
   {
-    id: '02',
-    name: 'Doorway / Overhead Lat Stretch',
-    focus: 'Lats · shoulder · swim catch position',
-    tool: 'Doorway or wall',
-    sets: 2,
-    duration: '45 sec each side',
-    cues: 'Arm overhead, hand on doorframe. Lean away and forward — feel the lat pull. Or: wall lat stretch — both arms, hips back.',
-    massageGun: 'Lats (side of torso, below armpit) 60 sec each side',
+    id: '02', name: 'Doorway / Overhead Lat Stretch', focus: 'Lats · shoulder · swim catch position', tool: 'Doorway or wall',
+    dose: '2 sets × 45s each side',
+    cues: 'Arm overhead, hand on the doorframe. Lean away and forward until you feel the lat. Or wall lat stretch: both arms on the wall, hips back.',
+    massageGun: 'Lats (side of torso below armpit) 60s each side',
   },
   {
-    id: '03',
-    name: 'Sleeper Stretch',
-    focus: 'Posterior shoulder capsule · swim health',
-    sets: 2,
-    duration: '45 sec each side',
-    cues: 'Lie on side, shoulder at 90°. Use other hand to gently push forearm toward floor. Feel stretch in back of shoulder. No pain — gentle pressure only.',
-    massageGun: 'Posterior shoulder / rear delt before stretching',
+    id: '03', name: 'Cross-Body Shoulder Stretch', focus: 'Back of shoulder · swim health',
+    dose: '2 sets × 45s each side',
+    cues: "Arm across the chest at shoulder height. The other hand pulls at the elbow. Keep the shoulder blade down and back, don't shrug.",
+    massageGun: 'Rear delt / back of shoulder before stretching',
   },
   {
-    id: '04',
-    name: "World's Greatest Stretch",
-    focus: 'Hip flexors · thoracic rotation · hamstrings · glutes',
-    sets: 2,
-    duration: '60 sec each side',
-    cues: 'Lunge position. Front foot flat. Opposite hand to ground. Rotate top arm to ceiling — follow with eyes. Hold each rotation 2–3 sec. Move slowly.',
+    id: '04', name: "World's Greatest Stretch", focus: 'Hip flexors · thoracic rotation · hamstrings · glutes',
+    dose: '2 sets × 60s each side',
+    cues: 'Lunge position, front foot flat. Opposite hand to the ground. Rotate the top arm to the ceiling, eyes follow. Hold each rotation 2-3s. Move slowly.',
   },
   {
-    id: '05',
-    name: '90/90 Hip Switch',
-    focus: 'Hips — internal + external rotation',
-    sets: 2,
-    duration: '60 sec per position',
-    cues: 'Sit with both knees at 90°. Hold each side 30–60 sec. Switch sides. Keep spine tall. Option: active rotation switching back and forth.',
-    massageGun: 'Glutes / piriformis (sit on attachment) 60–90 sec each side',
+    id: '05', name: '90/90 Hip Switch', focus: 'Hip internal + external rotation',
+    dose: '2 sets × 60s per position',
+    cues: 'Sit with both knees at 90 degrees. Hold each side 30-60s, then switch. Spine tall. Option: actively switch back and forth.',
+    massageGun: 'Glutes / piriformis 60-90s each side',
   },
   {
-    id: '06',
-    name: 'Couch Stretch',
-    focus: 'Hip flexors · quads',
-    sets: 2,
-    duration: '60 sec each side',
-    cues: `Back knee on ground, shin up wall or couch. Front foot forward. Drive hips forward and squeeze glute. Tall spine — don't arch low back.`,
-    massageGun: 'Quad / hip flexor before stretching — 60–90 sec each side',
+    id: '06', name: 'Couch Stretch', focus: 'Hip flexors · quads', tool: 'Wall or couch',
+    dose: '2 sets × 60s each side',
+    cues: "Back knee on the ground, shin up the wall or couch, front foot forward. Drive hips forward and squeeze the glute. Tall spine, don't arch the low back.",
+    massageGun: 'Quads / hip flexors 60-90s each side',
   },
   {
-    id: '07',
-    name: 'Pigeon Pose / Figure Four',
-    focus: 'Piriformis · glute · IT band upstream',
-    sets: 2,
-    duration: '60 sec each side',
-    cues: 'Full pigeon: front shin parallel (or angled). Fold forward for deeper stretch. Figure four option: supine, ankle over opposite knee, pull toward chest.',
-    massageGun: 'Glutes + IT band 90 sec each side',
+    id: '07', name: 'Pigeon Pose / Figure Four', focus: 'Piriformis · glutes · outer hip',
+    dose: '2 sets × 60s each side',
+    cues: 'Pigeon: front shin parallel or angled, fold forward to go deeper. Figure four: lie on your back, ankle over the opposite knee, pull toward the chest.',
+    massageGun: 'Glutes + IT band 90s each side',
   },
   {
-    id: '08',
-    name: 'Wall Ankle Stretch',
-    focus: 'Ankles — dorsiflexion · left Achilles',
-    tool: 'Wall',
-    sets: 3,
-    duration: '45 sec each side · left priority',
-    cues: 'Toes on wall, heel on floor. Drive knee toward wall. Start close (2–3"), work back as range improves. Left side gets an extra set — Achilles priority.',
-    massageGun: 'Achilles + calf before stretching — especially left',
+    id: '08', name: 'Wall Ankle Stretch', focus: 'Ankle dorsiflexion · left Achilles', tool: 'Wall',
+    dose: '45s holds · 3 sets left / 2 sets right',
+    cues: "Toes on the wall, heel down. Drive the knee toward the wall. Start 2-3 inches away and move back as range improves. If the pain is where the tendon attaches to the heel bone, don't push the end range.",
+    massageGun: 'Achilles + calf, especially left',
   },
   {
-    id: '09',
-    name: 'Calf + Soleus Stretch',
-    focus: 'Calves — both heads · Achilles health',
-    tool: 'Wall',
-    sets: 2,
-    duration: '45 sec per variation each side',
-    cues: 'Straight leg: standard wall calf stretch. Bent knee: same position but knee slightly bent — hits soleus and deeper Achilles. Both variations every session.',
-    massageGun: 'Full calf + Achilles 60–90 sec each side',
+    id: '09', name: 'Calf + Soleus Stretch', focus: 'Calves (both heads) · Achilles', tool: 'Wall',
+    dose: '45s per variation each side · 3 sets left / 2 sets right',
+    cues: 'Straight leg: standard wall calf stretch. Bent knee: same position with the knee slightly bent to hit the soleus. Do both variations every session.',
+    massageGun: 'Full calf + Achilles 60-90s each side',
+  },
+  {
+    id: '10', name: 'Adductor Rock-Back', focus: 'Groin / adductors (soccer)',
+    dose: '2 sets × 8-10 slow reps each side',
+    cues: 'On hands and knees, one leg straight out to the side, foot flat. Sit the hips back toward the heels with a flat back, pause 2s, return.',
+    massageGun: 'Inner thigh 60s each side',
+  },
+  {
+    id: '11', name: 'Single-Leg Calf Raise', focus: 'Left Achilles tendon loading', tool: 'Floor, not off a step; add a dumbbell when easy',
+    dose: '3 sets × 8-12 · left first', badge: 'Strength',
+    cues: "3s up, 3s down. Mild discomfort up to 3/10 that settles by the next morning is OK. If it's worse the next morning, reduce the load.",
   },
 ]
 
-export const MOB_ALL_IDS = ['01', '02', '03', '04', '05', '06', '07', '08', '09']
-// 08 + 09 are daily and non-negotiable (Achilles/hip root-cause work).
+export const MOB_ALL_IDS = MOBILITY_EXERCISES.map(e => e.id)
+// 08 + 09 are required every night (left Achilles), and on their own are
+// the short routine for any night.
 export const MOB_DAILY_IDS = ['08', '09']
 
 export interface MobilityDayPlan {
-  ids: string[]
-  why: string
-  minutes: number // total hold time
+  day: string // what the night follows
+  ids: string[] // required tonight, in order
+  optional?: string // extra note, e.g. Saturday's optional 06
+  time: string
 }
 
-// Which moves each day, keyed by getDay() (0 = Sunday). Done at home after
-// the dog walk; massage gun one side at a time.
+// Required moves per night, keyed by getDay() (0 = Sunday).
 export const MOB_DAY_PLAN: Record<number, MobilityDayPlan> = {
-  0: { ids: ['05', '06', '08', '09'], why: 'Hip coverage on the one day with no lift or yoga, after 80 min soccer', minutes: 19 },
-  1: { ids: ['01', '02', '03', '08', '09'], why: 'Upper push day; soccer tonight', minutes: 19 },
-  2: { ids: ['03', '04', '08', '09'], why: 'Swim shoulders + KB swing hips/T-spine', minutes: 18 },
-  3: { ids: ['08', '09'], why: 'Yoga covers 01-07', minutes: 11 },
-  4: { ids: ['01', '02', '03', '08', '09'], why: 'Upper pull day', minutes: 19 },
-  5: { ids: ['04', '05', '06', '07', '08', '09'], why: 'Legs day, full lower set', minutes: 27 },
-  6: { ids: ['08', '09'], why: 'Yoga covers 01-07', minutes: 11 },
+  0: { day: 'Soccer 80 min', ids: ['05', '06', '10', '08', '09'], time: '~10 min' },
+  1: { day: 'Upper A (push) + soccer 100 min', ids: ['01', '02', '05', '06', '10', '08', '09', '11'], time: '~14 min + calf raises' },
+  2: { day: 'Swim + KB swings + soccer 40 min', ids: ['01', '02', '03', '04', '10', '08', '09'], time: '~14 min' },
+  3: { day: 'Run AM + yoga PM', ids: ['08', '09'], time: '~5 min (yoga covers the rest)' },
+  4: { day: 'Upper B (pull), lightest day', ids: ['01', '02', '05', '06', '07', '08', '09', '11'], time: '~14 min + calf raises' },
+  5: { day: 'Legs', ids: ['04', '06', '07', '10', '08', '09'], time: '~12 min' },
+  6: { day: 'Brick + yoga', ids: ['08', '09'], optional: '06 too if yoga skipped hip flexors', time: '~5-8 min' },
 }
 
 export function mobDayPlan(date?: Date): MobilityDayPlan {
@@ -147,6 +129,18 @@ export function mobDayPlan(date?: Date): MobilityDayPlan {
 export function mobRequiredIds(date?: Date): string[] {
   return mobDayPlan(date).ids
 }
+
+export const MOB_COVERAGE: { area: string; when: string }[] = [
+  { area: 'Thoracic / lats (01, 02)', when: 'Mon, Tue, Thu, plus Wed/Sat yoga' },
+  { area: 'Back of shoulder (03)', when: 'Tue, after swim' },
+  { area: 'Hip rotation (05)', when: 'Mon, Thu, Sun' },
+  { area: 'Hip flexors / quads (06)', when: 'Mon, Thu, Fri, Sun, plus Sat optional' },
+  { area: 'Glutes / piriformis (07)', when: 'Thu, Fri' },
+  { area: 'Groin (10)', when: 'Sun, Mon, Tue (every soccer day), Fri' },
+  { area: 'Full chain (04)', when: 'Tue, Fri' },
+  { area: 'Ankle / Achilles (08, 09)', when: 'Every night' },
+  { area: 'Achilles loading (11)', when: 'Mon, Thu' },
+]
 
 export interface NutritionDay {
   day: string

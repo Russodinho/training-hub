@@ -121,8 +121,10 @@ export async function getMobilityLog(date: string): Promise<MobilityLog | null> 
   return data
 }
 
-export async function upsertMobilityLog(date: string, items: string[]): Promise<void> {
-  const isComplete = items.length >= 9
+// `required` = that night's required moves (see MOB_DAY_PLAN in data.ts);
+// completed_at is set once they're all checked.
+export async function upsertMobilityLog(date: string, items: string[], required: string[] = ['08', '09']): Promise<void> {
+  const isComplete = required.every(id => items.includes(id))
   await getSupabase().from('mobility_log').upsert({
     date,
     items,
@@ -130,6 +132,9 @@ export async function upsertMobilityLog(date: string, items: string[]): Promise<
   }, { onConflict: 'date' })
 }
 
+// Consecutive nights (ending tonight or last night) with 08 + 09 done: the
+// two moves required every night, which on their own are also the
+// short routine. Tonight not done yet doesn't break the streak.
 export async function getMobilityStreak(): Promise<number> {
   const { data } = await getSupabase()
     .from('mobility_log')
@@ -138,28 +143,16 @@ export async function getMobilityStreak(): Promise<number> {
     .limit(90)
   if (!data) return 0
 
+  const done = new Set(
+    data.filter(e => ['08', '09'].every(id => (e.items || []).includes(id))).map(e => e.date as string)
+  )
+  const day = easternNow()
+  const key = () => `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`
+  if (!done.has(key())) day.setDate(day.getDate() - 1)
   let streak = 0
-  const today = easternNow(); today.setHours(0, 0, 0, 0)
-  const d = new Date(today)
-
-  for (const entry of data) {
-    const entryDate = new Date(entry.date)
-    entryDate.setHours(0, 0, 0, 0)
-    const diff = Math.round((d.getTime() - entryDate.getTime()) / 86400000)
-    if (diff > 1) break
-    if (diff === 0 || diff === 1) {
-      const items: string[] = entry.items || []
-      // Yoga night check (Wed=3, Sat=6)
-      const dow = entryDate.getDay()
-      const required = (dow === 3 || dow === 6) ? 2 : 9
-      if (items.length >= required) {
-        streak++
-        d.setDate(d.getDate() - 1)
-      } else {
-        if (diff === 0) { d.setDate(d.getDate() - 1); continue }
-        break
-      }
-    }
+  while (done.has(key())) {
+    streak++
+    day.setDate(day.getDate() - 1)
   }
   return streak
 }
