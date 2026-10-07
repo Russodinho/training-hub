@@ -1053,3 +1053,10 @@ Read Codex's audit above. Some findings were acted on, some were **intentionally
 - Coach prompts: Nutrition (full cut plan + meal template + supplements) and Progress Tracker (cut math, check-in rule) rewritten; target weight 185 now from `NUTRITION_BASELINE`.
 - Nutrition panels' empty state no longer tells the user to upload a CSV (that upload was removed 2026-09-10); points at the Cronometer sync. `onFuelPage` prop is now unused by both panels.
 - **Found, not fixed (needs the user):** `nutrition_actuals` last row is 2026-09-10 and `biometrics` last row is 2026-09-08. `cronometer-sync.ps1` has never had a Task Scheduler entry, so nothing has synced for ~4 weeks; the cut's check-ins depend on it. Also the sync is insert-only, so partial days imported as 0 kcal (2026-09-06, 09-09, 09-10) are never corrected by a re-run.
+
+**Update (Claude, 2026-10-06) — Cronometer sync fixed and scheduled:**
+- Cause of the gap: `cronometer-sync.ps1` had only ever been run by hand (twice, 2026-09-10); `crono` itself still logs in and exports fine.
+- `scripts/cronometer-sync.ts`: skips days with 0 kcal (Cronometer exports unlogged days as all-zero rows), upserts the last `REFRESH_DAYS` (7) so partially-logged days get corrected, older dates still insert-only. Deleted the 30 existing all-zero `nutrition_actuals` rows (Aug 2 - Sep 10; every macro was 0).
+- Backfilled: nutrition and weight now current through 2026-10-06 (Sep 9/10 now real values). Remaining gaps are days with nothing logged in Cronometer.
+- New Task Scheduler entry **CronometerDailySync** (daily 7:00 AM and 9:30 PM, runs `cronometer-sync.ps1` hidden; start-when-available). Triggered once manually: exit 0, log shows the refresh. Remove with `Unregister-ScheduledTask CronometerDailySync`.
+- Data note for the user: Cronometer body fat jumps 21% -> 16% between 2026-09-29 and 09-30, and weight repeats identical values on several days (e.g. 197.5 on Oct 1/5/6), likely the scale/Cronometer import, not the sync.

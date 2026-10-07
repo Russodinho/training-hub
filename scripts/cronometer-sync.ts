@@ -4,10 +4,10 @@
 // web UI, since Cronometer has no public API) and backfills it into
 // Supabase.
 //
-// Deliberately INSERT-if-missing / skip-if-present, not upsert: this is a
-// backfill tool, not a live sync — it should never overwrite a date that's
-// already there (manual edits, earlier imports) just because a re-run
-// found it again. Both target tables (nutrition_actuals, biometrics)
+// Dates older than REFRESH_DAYS are INSERT-if-missing / skip-if-present, so
+// a re-run never overwrites older manual edits or imports; the last
+// REFRESH_DAYS are upserted so partially-logged days get corrected. Runs
+// daily via the CronometerDailySync scheduled task (cronometer-sync.ps1). Both target tables (nutrition_actuals, biometrics)
 // already have a unique constraint on `date` — confirmed by the existing
 // /api/nutrition/upload and /api/biometrics/upload routes, which upsert
 // onConflict: 'date'. We rely on that same constraint here: a plain
@@ -38,6 +38,17 @@ import { createServiceClient } from '../src/lib/supabase'
 
 const LOG_FILE = path.join(process.cwd(), 'cronometer-sync.log')
 const RANGE = '365d'
+// Dates within this many days of today are re-written on every run
+// (upsert), so a day synced before it was fully logged gets corrected by the
+// next run. Older dates stay insert-if-missing, so manual edits survive.
+const REFRESH_DAYS = 7
+
+function localDateStr(daysAgo = 0): string {
+  const d = new Date()
+  d.setDate(d.getDate() - daysAgo)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+const refreshFrom = localDateStr(REFRESH_DAYS)
 
 interface NutritionRow {
   date: string
@@ -70,16 +81,22 @@ function runCronoExport<T>(type: 'nutrition' | 'biometrics', range: string): T[]
   return JSON.parse(output) as T[]
 }
 
-// Returns true if inserted, false if it already existed (skipped).
-async function insertIfMissing(
+// Recent dates (>= refreshFrom) are upserted; older ones only inserted if
+// missing. Returns 'written' or 'skipped' (older date already present).
+async function writeRow(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sb: any,
   table: string,
-  row: Record<string, unknown>,
-): Promise<boolean> {
+  row: Record<string, unknown> & { date: string },
+): Promise<'written' | 'skipped'> {
+  if (row.date >= refreshFrom) {
+    const { error } = await sb.from(table).upsert(row, { onConflict: 'date' })
+    if (error) throw new Error(`${table} upsert failed for date ${row.date}: ${error.message}`)
+    return 'written'
+  }
   const { error } = await sb.from(table).insert(row)
-  if (!error) return true
-  if (error.code === '23505') return false // date already exists — expected, not a failure
+  if (!error) return 'written'
+  if (error.code === '23505') return 'skipped' // date already exists — expected, not a failure
   throw new Error(`${table} insert failed for date ${row.date}: ${error.message}`)
 }
 
@@ -90,7 +107,10 @@ async function syncNutrition(sb: ReturnType<typeof createServiceClient>): Promis
 
   for (const row of rows) {
     if (!row.date) continue
-    const wasInserted = await insertIfMissing(sb, 'nutrition_actuals', {
+    // Cronometer exports every day in the range; a day with nothing logged
+    // comes back as all zeros. Storing those made charts read "ate 0 kcal".
+    if (!row.calories) { skipped++; continue }
+    const result = await writeRow(sb, 'nutrition_actuals', {
       date: row.date,
       calories: row.calories ?? null,
       protein: row.protein ?? null,
@@ -99,7 +119,7 @@ async function syncNutrition(sb: ReturnType<typeof createServiceClient>): Promis
       fiber: row['Fiber (g)'] ?? null,
       raw_data: row,
     })
-    if (wasInserted) inserted++
+    if (result === 'written') inserted++
     else skipped++
   }
 
@@ -129,14 +149,14 @@ async function syncBiometrics(sb: ReturnType<typeof createServiceClient>): Promi
     const lean_mass_lbs = weight_lbs && body_fat_pct ? Math.round(weight_lbs * (1 - body_fat_pct / 100) * 10) / 10 : null
     const fat_mass_lbs = weight_lbs && body_fat_pct ? Math.round(weight_lbs * (body_fat_pct / 100) * 10) / 10 : null
 
-    const wasInserted = await insertIfMissing(sb, 'biometrics', {
+    const result = await writeRow(sb, 'biometrics', {
       date,
       weight_lbs,
       body_fat_pct,
       lean_mass_lbs,
       fat_mass_lbs,
     })
-    if (wasInserted) inserted++
+    if (result === 'written') inserted++
     else skipped++
   }
 
@@ -156,10 +176,10 @@ async function main() {
 
   try {
     const nutrition = await syncNutrition(sb)
-    log(`nutrition: inserted ${nutrition.inserted}, skipped ${nutrition.skipped} (already present)`)
+    log(`nutrition: written ${nutrition.inserted} (last ${REFRESH_DAYS} days refreshed), skipped ${nutrition.skipped} (already present or nothing logged)`)
 
     const biometrics = await syncBiometrics(sb)
-    log(`biometrics: inserted ${biometrics.inserted}, skipped ${biometrics.skipped} (already present)`)
+    log(`biometrics: written ${biometrics.inserted} (last ${REFRESH_DAYS} days refreshed), skipped ${biometrics.skipped} (already present)`)
 
     log('Sync complete.')
   } catch (err) {
