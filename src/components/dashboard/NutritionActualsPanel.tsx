@@ -120,9 +120,7 @@ export default function NutritionActualsPanel({ onFuelPage = false }: { onFuelPa
           <div className="empty-icon">🥗</div>
           <div className="empty-title">No data in this range</div>
           <div>
-            {onFuelPage
-              ? 'Upload a Cronometer daily summary CSV above to see your actuals.'
-              : <>Upload a Cronometer daily summary CSV on the <a href="/fuel" className="empty-cta" style={{ display: 'inline' }}>Fuel page</a>.</>}
+            Nothing synced from Cronometer for this range yet. Run the Cronometer sync (scripts/cronometer-sync.ps1).
           </div>
         </div>
       ) : (

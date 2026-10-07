@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import { NUTRITION_TARGETS } from '@/lib/data'
+import { nutritionTargetFor } from '@/lib/data'
 import { daysAgoStr } from '@/lib/supabase'
 
 type DayRange = 7 | 30 | 60 | 90
@@ -23,12 +23,10 @@ interface MacroStat {
   total: number
 }
 
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
-function targetForDate(dateStr: string) {
-  const dayName = DAY_NAMES[new Date(dateStr + 'T12:00:00').getDay()]
-  return NUTRITION_TARGETS.find(t => t.day === dayName) ?? { calories: 2299, protein: 185, carbs: 224, fat: 77 }
-}
+// The target in effect on that date (cut targets from CUT_START,
+// maintenance before), so older days aren't graded against the cut.
+const targetForDate = nutritionTargetFor
 
 function getSupabase() {
   return createClient(
@@ -121,9 +119,7 @@ export default function MacroAccuracyPanel({ onFuelPage = false }: { onFuelPage?
           <div className="empty-icon">🎯</div>
           <div className="empty-title">No data in this range</div>
           <div>
-            {onFuelPage
-              ? 'Upload a Cronometer CSV above to see your macro accuracy.'
-              : <>Upload Cronometer CSV on the <a href="/fuel" className="empty-cta" style={{ display: 'inline' }}>Fuel page</a>.</>}
+            Nothing synced from Cronometer for this range yet. Run the Cronometer sync (scripts/cronometer-sync.ps1).
           </div>
         </div>
       ) : (

@@ -5,7 +5,7 @@
 // the field-by-field mapping to real tables and the honest gaps (some
 // fields are structurally untracked right now and stay null/false).
 
-import { NUTRITION_TARGETS, NUTRITION_BASELINE } from './data'
+import { NUTRITION_BASELINE, nutritionTargetFor } from './data'
 import { getTodaySchedule, scheduleWithProgram, plannedBuckets } from './schedule'
 import { getProgramDays } from './program'
 import { phaseOn } from './phases'
@@ -115,7 +115,6 @@ export interface AthleteContext {
   }
 }
 
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 function weekBounds(now: Date): { start: string; end: string } {
   const start = new Date(now)
@@ -251,20 +250,17 @@ async function fetchGarmin() {
 
 async function fetchNutrition() {
   const sb = getSupabaseClient()
-  const now = easternNow()
-  const todayStr = now.toISOString().split('T')[0]
-  const since = new Date(now); since.setDate(since.getDate() - 7)
+  const today = todayStr()
+  const sinceDate = new Date(today + 'T12:00:00'); sinceDate.setDate(sinceDate.getDate() - 7)
+  const since = sinceDate.toISOString().split('T')[0]
 
   const [{ data: todayRow }, { data: weekRows }] = await Promise.all([
-    sb.from('nutrition_actuals').select('calories, protein, carbs, fat').eq('date', todayStr).maybeSingle(),
-    sb.from('nutrition_actuals').select('date, calories, protein').gte('date', since.toISOString().split('T')[0]),
+    sb.from('nutrition_actuals').select('calories, protein, carbs, fat').eq('date', today).maybeSingle(),
+    sb.from('nutrition_actuals').select('date, calories, protein').gte('date', since),
   ])
 
-  const dayName = DAY_NAMES[now.getDay()]
-  const target = NUTRITION_TARGETS.find(t => t.day === dayName) ?? {
-    calories: NUTRITION_BASELINE.calories, protein: NUTRITION_BASELINE.protein,
-    carbs: NUTRITION_BASELINE.carbs, fat: NUTRITION_BASELINE.fat,
-  }
+  // Targets depend on the date (cut from CUT_START, maintenance before).
+  const target = nutritionTargetFor(today)
 
   const rows = weekRows ?? []
   const cals = rows.map(r => r.calories).filter((c): c is number => c != null)
@@ -272,8 +268,14 @@ async function fetchNutrition() {
   const weeklyAvgCalories = cals.length ? Math.round(cals.reduce((a, b) => a + b, 0) / cals.length) : null
   const weeklyAvgProtein = prots.length ? Math.round(prots.reduce((a, b) => a + b, 0) / prots.length) : null
 
-  const withinTarget = cals.filter(c => Math.abs(c - target.calories) / target.calories <= 0.1).length
-  const adherenceScore = cals.length ? Math.round((withinTarget / cals.length) * 100) : null
+  // Each day against its own target; days with no target (old untracked
+  // Saturdays) are left out.
+  const graded = rows.filter(r => r.calories != null && nutritionTargetFor(r.date).calories > 0)
+  const withinTarget = graded.filter(r => {
+    const t = nutritionTargetFor(r.date).calories
+    return Math.abs((r.calories as number) - t) / t <= 0.1
+  }).length
+  const adherenceScore = graded.length ? Math.round((withinTarget / graded.length) * 100) : null
 
   return {
     todayCalories: todayRow?.calories ?? null,
@@ -290,10 +292,9 @@ async function fetchNutrition() {
   }
 }
 
-// Static configured goals, not measurements — same category as
-// NUTRITION_BASELINE's existing goalBf constant, just not yet exported
-// there. 185 is the midpoint of the 183-186 lb target range.
-const TARGET_WEIGHT_LBS = 185
+// Static configured goals, not measurements. Long-term weight target from
+// the Oct 2026 cut plan.
+const TARGET_WEIGHT_LBS = NUTRITION_BASELINE.targetWeight
 const TARGET_BODY_FAT_PCT = 15
 
 async function fetchBodyComp() {

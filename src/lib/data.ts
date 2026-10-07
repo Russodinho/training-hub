@@ -152,32 +152,65 @@ export interface NutritionDay {
   notes: string
 }
 
-const PROTEIN_NOTE = 'Maintenance target. Cronometer protein target is 200g; landing ~175-185g is fine (deliberate trim)'
+// Moderate cut, Oct 6 - Dec 31 2026: flat daily targets (same food every
+// day), set in Cronometer. Cronometer warns "target totals don't match"
+// (macros = 2,233 kcal); ignore it, the gap is ~40g/day of fiber and logged
+// days land ~2,150. Saturday: same breakfast + lunch, cheat dinner capped at
+// ~800-1,000 kcal and logged with a rough estimate, ~2,600 total. Saturday's
+// macros are the weekday ones; only its calories differ.
+export const CUT_START = '2026-10-06'
+const CUT_NOTE = 'Moderate cut · same food every day'
 
 export const NUTRITION_TARGETS: NutritionDay[] = [
-  { day: 'Monday',    activity: 'Upper A + Soccer',   calories: 2650, protein: 200, carbs: 250, fat: 85, notes: PROTEIN_NOTE },
-  { day: 'Tuesday',   activity: 'Swim + KB + Soccer', calories: 2650, protein: 200, carbs: 250, fat: 85, notes: PROTEIN_NOTE },
-  { day: 'Wednesday', activity: 'Run + Yoga',         calories: 2650, protein: 200, carbs: 250, fat: 85, notes: PROTEIN_NOTE },
-  { day: 'Thursday',  activity: 'Upper B',            calories: 2650, protein: 200, carbs: 250, fat: 85, notes: PROTEIN_NOTE },
-  { day: 'Friday',    activity: 'Legs',               calories: 2650, protein: 200, carbs: 250, fat: 85, notes: PROTEIN_NOTE },
-  { day: 'Saturday',  activity: 'Brick + Yoga',       calories: 0,    protein: 0,   carbs: 0,   fat: 0,  notes: '~1,800 clean through breakfast and lunch + cheat dinner (not tracked)' },
-  { day: 'Sunday',    activity: 'Soccer',             calories: 2650, protein: 200, carbs: 250, fat: 85, notes: PROTEIN_NOTE },
+  { day: 'Monday',    activity: 'Upper A + Soccer',   calories: 2150, protein: 180, carbs: 250, fat: 57, notes: CUT_NOTE },
+  { day: 'Tuesday',   activity: 'Swim + KB + Soccer', calories: 2150, protein: 180, carbs: 250, fat: 57, notes: CUT_NOTE },
+  { day: 'Wednesday', activity: 'Run + Yoga',         calories: 2150, protein: 180, carbs: 250, fat: 57, notes: CUT_NOTE },
+  { day: 'Thursday',  activity: 'Upper B',            calories: 2150, protein: 180, carbs: 250, fat: 57, notes: CUT_NOTE },
+  { day: 'Friday',    activity: 'Legs',               calories: 2150, protein: 180, carbs: 250, fat: 57, notes: CUT_NOTE },
+  { day: 'Saturday',  activity: 'Brick + Yoga',       calories: 2600, protein: 180, carbs: 250, fat: 57, notes: 'Same breakfast + lunch; cheat dinner ~800-1,000 kcal, logged as a rough estimate' },
+  { day: 'Sunday',    activity: 'Soccer',             calories: 2150, protein: 180, carbs: 250, fat: 57, notes: CUT_NOTE },
 ]
 
-// Maintenance: weight holds at 2,650 kcal on the current schedule, so it's
-// treated as maintenance (recalculate after 1-2 full weeks of Garmin data on
-// this schedule). Protein target stays 200g in Cronometer, but landing
-// ~175-185g is an accepted, deliberate trim, so don't push it back up.
+// Maintenance targets in effect before CUT_START (Saturday was untracked),
+// so charts don't grade older days against the cut.
+const PRE_CUT_TARGET = { calories: 2650, protein: 200, carbs: 250, fat: 85 }
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+// The target that applied on a given YYYY-MM-DD.
+export function nutritionTargetFor(date: string): { calories: number; protein: number; carbs: number; fat: number } {
+  const dow = new Date(date + 'T12:00:00').getDay()
+  if (date < CUT_START) return dow === 6 ? { calories: 0, protein: 0, carbs: 0, fat: 0 } : PRE_CUT_TARGET
+  const t = NUTRITION_TARGETS.find(d => d.day === DAY_NAMES[dow])!
+  return { calories: t.calories, protein: t.protein, carbs: t.carbs, fat: t.fat }
+}
+
 export const NUTRITION_BASELINE = {
-  calories: 2650,
-  baseCalories: 2650,
-  protein: 200,
+  calories: 2150,
+  saturdayCalories: 2600,
+  protein: 180,
   carbs: 250,
-  fat: 85,
-  proteinAcceptable: '175–185',
-  tdee: 2650,
-  deficit: 0,
-  lossPerWeek: 0,
-  weight: 195, // static fallback only — the Fuel page shows live weight from Supabase `biometrics` when available
+  fat: 57,
+  sodium: '~3,000 mg (3,000–4,000 on soccer days)',
+  waterOz: 80,
+  maintenance: 2550, // Garmin 4-week average burn
+  weeklyAvgCalories: 2215,
+  lossPerWeek: 0.65,
+  startWeight: 197.5, // Oct 6 2026
+  targetWeight: 185,
+  weight: 197.5, // static fallback only — the Fuel page shows live weight from Supabase `biometrics` when available
   goalBf: '14–16%',
 }
+
+// Every 3 weeks from CUT_START, judged on the 7-day average weight.
+export const CUT_CHECK_IN = [
+  { when: 'Losing <0.5 lb/week', action: 'Drop to ~2,050 (cut oats to 30g dry, about −110)' },
+  { when: 'Losing 0.5–1 lb/week', action: 'No change' },
+  { when: 'Losing >1 lb/week', action: 'Go up to ~2,240 (avocado oil back to 3 tsp, +80)' },
+]
+
+export const MEAL_TEMPLATE = [
+  { meal: 'Breakfast', kcal: '~1,015', items: 'Quaker quick oats 60g dry (1.5 servings), honey 42g, 3 eggs, Wegmans egg whites 60g, blueberries 75g, Fairlife 2% milk 2 cups, medium banana, ketchup 1 tbsp' },
+  { meal: 'Lunch', kcal: '~669', items: 'Chicken & Tofu Chili Meal Prep, 1 serving (~753g incl. 93g rice)' },
+  { meal: 'Dinner', kcal: '~390', items: 'Lean protein ~5–6 oz (pork tenderloin or chicken breast), cannellini beans 100g, vegetable 100g, avocado oil 1 tsp, garlic' },
+  { meal: 'Supplements', kcal: '~83', items: 'Mostly the collagen' },
+]
