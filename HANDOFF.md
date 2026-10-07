@@ -1060,3 +1060,9 @@ Read Codex's audit above. Some findings were acted on, some were **intentionally
 - Backfilled: nutrition and weight now current through 2026-10-06 (Sep 9/10 now real values). Remaining gaps are days with nothing logged in Cronometer.
 - New Task Scheduler entry **CronometerDailySync** (daily 7:00 AM and 9:30 PM, runs `cronometer-sync.ps1` hidden; start-when-available). Triggered once manually: exit 0, log shows the refresh. Remove with `Unregister-ScheduledTask CronometerDailySync`.
 - Data note for the user: Cronometer body fat jumps 21% -> 16% between 2026-09-29 and 09-30, and weight repeats identical values on several days (e.g. 197.5 on Oct 1/5/6), likely the scale/Cronometer import, not the sync.
+
+**Update (Claude, 2026-10-06) — console windows flashing:**
+- Cause: **GarminSyncPoller** runs every 1 min (PT1M) via `garmin_sync_poller_run.bat` in the user's home folder; launching a `.bat` opens a cmd window, and PowerShell's `-WindowStyle Hidden` only hides after the window has appeared. GarminDailySync (5 AM / 12 PM) and CronometerDailySync flashed the same way.
+- All three tasks now run `conhost.exe --headless powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "<repo>/<script>.ps1"` (working dir = repo). The two `.bat` files in the home folder are no longer used by any task (left in place).
+- Trade-off: `conhost --headless` does not pass the script's exit code through, so Task Scheduler always shows 0. Failures are in the scripts' own logs (`garmin_sync_poller.log`, the Garmin daily log, `cronometer-sync.log`).
+- Verified: CronometerDailySync triggered manually under the new action completed a full sync (log written); GarminSyncPoller kept firing every minute afterwards.
